@@ -708,6 +708,9 @@ body::before {
       <button class="sb-btn" onclick="sw('fininvest')" id="sb-fininvest">
         <span>◎</span><span class="tooltip">FinInvest</span>
       </button>
+      <button class="sb-btn" onclick="sw('travel')" id="sb-travel">
+        <span>✈</span><span class="tooltip">Voyages</span>
+      </button>
     </nav>
     <div class="sb-bottom">
       <button class="sb-btn" onclick="openExt('orlog')" title="OrLog">
@@ -769,7 +772,18 @@ body::before {
             <div class="day-sub" id="day-sub">—</div>
           </div>
           <div class="pane">
-            <!-- Bilan semaine -->
+            <!-- Bannière DCA -->
+            <div id="dca-banner" style="display:none;background:linear-gradient(135deg,rgba(124,106,247,0.15),rgba(78,205,196,0.08));border:1px solid rgba(124,106,247,0.3);border-radius:var(--r-lg);padding:14px 16px;margin-bottom:14px;align-items:center;gap:12px;">
+              <div style="font-size:22px;">💹</div>
+              <div style="flex:1;">
+                <div style="font-size:13px;font-weight:600;color:var(--t1);margin-bottom:2px;">DCA du mois à effectuer</div>
+                <div style="font-size:11px;color:var(--t2);">Rappel mensuel — investir ${fi&&fi.dca?fi.dca:500} € sur ton PEA</div>
+              </div>
+              <div style="display:flex;gap:8px;">
+                <button onclick="sw('fininvest')" style="background:var(--acc-dim);border:1px solid rgba(124,106,247,0.25);color:var(--acc2);padding:7px 12px;border-radius:var(--r);cursor:pointer;font-size:12px;font-family:var(--ff);">Voir plan</button>
+                <button onclick="markDcaDone()" style="background:var(--green-dim);border:1px solid rgba(77,187,122,0.25);color:var(--green);padding:7px 12px;border-radius:var(--r);cursor:pointer;font-size:12px;font-family:var(--ff);">✓ Fait</button>
+              </div>
+            </div>
             <div class="gcard" id="weekly-summary"></div>
             <!-- Stats row -->
             <div class="stat-row" id="stat-row"></div>
@@ -873,11 +887,54 @@ body::before {
 
       <!-- ⑤ FININVEST -->
       <div class="view" id="view-fininvest">
-        <div class="pane" style="display:flex;align-items:center;justify-content:center;height:100%;">
-          <div style="text-align:center;">
-            <div style="font-size:40px;margin-bottom:16px;opacity:0.3;">💹</div>
-            <div style="font-size:16px;color:var(--t2);margin-bottom:8px;">FinInvest</div>
-            <div style="font-size:12px;color:var(--t3);">Intégration complète en v2</div>
+        <div style="display:flex;height:100%;overflow:hidden;">
+          <!-- Config colonne gauche -->
+          <div style="width:340px;min-width:300px;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;">
+            <div style="padding:16px 20px 12px;border-bottom:1px solid var(--border);flex-shrink:0;">
+              <div style="font-family:var(--ff-d);font-size:16px;font-weight:600;margin-bottom:2px;">Configuration</div>
+              <div style="font-size:11px;color:var(--t3);">Allocation cible & bandes</div>
+            </div>
+            <div style="flex:1;overflow-y:auto;padding:16px;" id="fi-config-pane"></div>
+          </div>
+          <!-- Analyse colonne droite -->
+          <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
+            <div style="padding:16px 20px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+              <div>
+                <div style="font-family:var(--ff-d);font-size:16px;font-weight:600;margin-bottom:2px;">Analyse & Plan DCA</div>
+                <div style="font-size:11px;color:var(--t3);" id="fi-total-label">—</div>
+              </div>
+              <button class="tb-btn" onclick="runFiAnalysis()">Analyser</button>
+            </div>
+            <div style="flex:1;overflow-y:auto;padding:16px;" id="fi-result-pane">
+              <div style="text-align:center;padding:60px 20px;color:var(--t3);font-size:13px;">Saisir les valeurs et cliquer Analyser</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ⑥ VOYAGES -->
+      <div class="view" id="view-travel">
+        <div style="display:flex;height:100%;overflow:hidden;">
+          <!-- Liste voyages -->
+          <div style="width:300px;min-width:260px;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;">
+            <div style="padding:14px 16px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+              <div style="font-size:13px;font-weight:600;">Voyages</div>
+              <button class="task-add-btn" onclick="openTravelSheet()">+</button>
+            </div>
+            <div style="flex:1;overflow-y:auto;padding:10px 12px;" id="travel-list"></div>
+          </div>
+          <!-- Détail voyage sélectionné -->
+          <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
+            <div style="padding:14px 20px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+              <div style="font-size:13px;font-weight:600;" id="travel-detail-title">Sélectionner un voyage</div>
+              <button class="tb-btn" id="travel-add-doc-btn" onclick="openDocSheet()" style="display:none;">+ Réservation</button>
+            </div>
+            <div style="flex:1;overflow-y:auto;padding:16px;" id="travel-detail-pane">
+              <div style="text-align:center;padding:60px 20px;color:var(--t3);font-size:13px;">
+                <div style="font-size:32px;margin-bottom:12px;opacity:0.3;">✈</div>
+                <div>Sélectionner un voyage ou en créer un</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -983,6 +1040,78 @@ body::before {
   </div>
 </div>
 
+<!-- FinInvest settings -->
+<div class="overlay" id="ov-fi-settings">
+  <div class="sheet" style="max-width:500px;">
+    <button class="sheet-close" onclick="closeOv('ov-fi-settings')">×</button>
+    <div class="sheet-title">Paramètres FinInvest</div>
+    <div class="fg"><label>DCA mensuel total (€)</label><input type="number" id="fi-dca-input" placeholder="500" inputmode="numeric"></div>
+    <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--t3);margin:16px 0 10px;">Montants fixes mensuels</div>
+    <div id="fi-fixed-inputs"></div>
+    <div class="sheet-actions">
+      <button class="btn-secondary" onclick="closeOv('ov-fi-settings')">Annuler</button>
+      <button class="btn-primary" style="flex:2;margin-top:0;" onclick="saveFiSettings()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Voyage sheet -->
+<div class="overlay" id="ov-travel">
+  <div class="sheet" style="max-width:480px;">
+    <button class="sheet-close" onclick="closeOv('ov-travel')">×</button>
+    <div class="sheet-title" id="travel-sheet-title">Nouveau voyage</div>
+    <div class="fg"><label>Destination</label><input type="text" id="tv-dest" placeholder="ex. Tokyo, Lisbonne..."></div>
+    <div class="form-row">
+      <div class="fg"><label>Date de départ</label><input type="date" id="tv-start"></div>
+      <div class="fg"><label>Date de retour</label><input type="date" id="tv-end"></div>
+    </div>
+    <div class="fg"><label>Statut</label>
+      <select id="tv-status">
+        <option value="planifié">Planifié</option>
+        <option value="réservé">Réservé</option>
+        <option value="passé">Passé</option>
+      </select>
+    </div>
+    <div class="fg"><label>Note</label><input type="text" id="tv-note" placeholder="Optionnel..."></div>
+    <div class="sheet-actions" id="travel-sheet-btns">
+      <button class="btn-secondary" onclick="closeOv('ov-travel')">Annuler</button>
+      <button class="btn-primary" style="flex:2;margin-top:0;" onclick="saveTravel()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Document/réservation sheet -->
+<div class="overlay" id="ov-doc">
+  <div class="sheet" style="max-width:480px;">
+    <button class="sheet-close" onclick="closeOv('ov-doc')">×</button>
+    <div class="sheet-title" id="doc-sheet-title">Nouvelle réservation</div>
+    <div class="fg"><label>Type</label>
+      <div class="type-row">
+        <button class="type-btn active" data-dt="vol" onclick="selDocType(this)">✈ Vol</button>
+        <button class="type-btn" data-dt="hotel" onclick="selDocType(this)">🏨 Hôtel</button>
+        <button class="type-btn" data-dt="transport" onclick="selDocType(this)">🚆 Transport</button>
+        <button class="type-btn" data-dt="autre" onclick="selDocType(this)">📋 Autre</button>
+      </div>
+    </div>
+    <div class="fg"><label>Description</label><input type="text" id="doc-title" placeholder="ex. Vol Paris → Tokyo, Hôtel Shinjuku..."></div>
+    <div class="form-row">
+      <div class="fg"><label>Date limite réservation</label><input type="date" id="doc-deadline"></div>
+      <div class="fg"><label>Statut</label>
+        <select id="doc-status">
+          <option value="à faire">À faire</option>
+          <option value="réservé">Réservé</option>
+          <option value="confirmé">Confirmé</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg"><label>Prix estimé (€)</label><input type="number" id="doc-price" placeholder="Optionnel" inputmode="numeric"></div>
+    <div class="sheet-actions" id="doc-sheet-btns">
+      <button class="btn-secondary" onclick="closeOv('ov-doc')">Annuler</button>
+      <button class="btn-primary" style="flex:2;margin-top:0;" onclick="saveDoc()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
@@ -1066,7 +1195,7 @@ function diffDays(s) {
 // ═══════════════════════════════════════
 const PAGE_TITLES = {
   dash:'Dashboard', tasks:'Tâches', library:'Bibliothèque',
-  career:'Carrière', fininvest:'FinInvest'
+  career:'Carrière', fininvest:'FinInvest', travel:'Voyages'
 };
 function sw(v) {
   document.querySelectorAll('.view').forEach(e=>e.classList.remove('active'));
@@ -1079,15 +1208,558 @@ function sw(v) {
   const now=new Date();
   document.getElementById('page-sub').textContent =
     now.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
-  if(v==='dash')     renderDash();
-  if(v==='tasks')    renderTasks();
-  if(v==='library')  renderLibrary();
-  if(v==='career')   renderCareerView();
+  if(v==='dash')       renderDash();
+  if(v==='tasks')      renderTasks();
+  if(v==='library')    renderLibrary();
+  if(v==='career')     renderCareerView();
+  if(v==='fininvest')  renderFinInvest();
+  if(v==='travel')     renderTravel();
 }
 function openExt(k) {
   const u=LINKS[k];
   if(u) window.open(u,'_blank');
   else showToast('URL non configurée');
+}
+
+// ═══════════════════════════════════════
+//  DCA BANNER — rappel du 5 du mois
+// ═══════════════════════════════════════
+function checkDcaBanner() {
+  const today = new Date();
+  const day = today.getDate();
+  const key = 'sos_dca_done_' + today.getFullYear() + '_' + (today.getMonth()+1);
+  const done = localStorage.getItem(key);
+  const banner = document.getElementById('dca-banner');
+  if(!banner) return;
+  // Afficher du 5 au 10 du mois si pas encore marqué fait
+  if(day >= 5 && day <= 10 && !done) {
+    banner.style.display = 'flex';
+  } else {
+    banner.style.display = 'none';
+  }
+}
+function markDcaDone() {
+  const today = new Date();
+  const key = 'sos_dca_done_' + today.getFullYear() + '_' + (today.getMonth()+1);
+  localStorage.setItem(key, '1');
+  document.getElementById('dca-banner').style.display = 'none';
+  showToast('DCA du mois marqué comme effectué ✓');
+  renderDash(); // refresh bilan semaine
+}
+function isDcaPending() {
+  const today = new Date();
+  const day = today.getDate();
+  const key = 'sos_dca_done_' + today.getFullYear() + '_' + (today.getMonth()+1);
+  return day >= 5 && day <= 10 && !localStorage.getItem(key);
+}
+
+// ═══════════════════════════════════════
+//  FININVEST
+// ═══════════════════════════════════════
+const FI_ASSETS = ['SP500','Euro600','SmallCap','Emerging','Gold','Bitcoin','Defense','USTech'];
+const FI_DEFAULTS = {
+  dca: 500,
+  targets:  {SP500:50,Euro600:20,SmallCap:12,Emerging:8,Gold:5,Bitcoin:4,Defense:1,USTech:0},
+  mins:     {SP500:47,Euro600:17,SmallCap:10,Emerging:5,Gold:2,Bitcoin:2,Defense:0,USTech:0},
+  maxs:     {SP500:53,Euro600:23,SmallCap:14,Emerging:11,Gold:7,Bitcoin:6,Defense:3,USTech:100},
+  fixed:    {Gold:50,Bitcoin:25,Defense:25},
+  values:   {SP500:0,Euro600:0,SmallCap:0,Emerging:0,Gold:0,Bitcoin:0,Defense:0,USTech:0},
+  extra:    {scpi:0,pe:0,etf_ai:0,etf_quantum:0,nvidia:0}
+};
+let fi = {};
+
+function loadFi() {
+  try {
+    const d = localStorage.getItem('sos_fi');
+    fi = d ? JSON.parse(d) : JSON.parse(JSON.stringify(FI_DEFAULTS));
+  } catch(e) { fi = JSON.parse(JSON.stringify(FI_DEFAULTS)); }
+  // Assurer toutes les clés
+  if(!fi.dca) fi.dca = 500;
+  if(!fi.fixed) fi.fixed = {...FI_DEFAULTS.fixed};
+  if(!fi.extra) fi.extra = {...FI_DEFAULTS.extra};
+}
+function saveFi() {
+  // Lire les valeurs depuis l'UI config
+  FI_ASSETS.forEach(a => {
+    const vEl = document.getElementById('fi-val-'+a);
+    const tEl = document.getElementById('fi-tgt-'+a);
+    const mnEl = document.getElementById('fi-min-'+a);
+    const mxEl = document.getElementById('fi-max-'+a);
+    if(vEl) fi.values[a] = parseFloat(vEl.value)||0;
+    if(tEl) fi.targets[a] = parseFloat(tEl.value)||0;
+    if(mnEl) fi.mins[a] = parseFloat(mnEl.value)||0;
+    if(mxEl) fi.maxs[a] = parseFloat(mxEl.value)||0;
+  });
+  try { localStorage.setItem('sos_fi', JSON.stringify(fi)); } catch(e) {}
+}
+
+function renderFinInvest() {
+  loadFi();
+  renderFiConfig();
+  runFiAnalysis();
+}
+
+function renderFiConfig() {
+  const el = document.getElementById('fi-config-pane');
+  const totalVal = FI_ASSETS.reduce((s,a) => s+(fi.values[a]||0), 0);
+  document.getElementById('fi-total-label').textContent =
+    totalVal > 0 ? `Total portefeuille : ${totalVal.toLocaleString('fr-FR')} €` : 'Saisir les valeurs ci-contre';
+
+  let html = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <div style="font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:0.08em;">DCA mensuel</div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <input type="number" id="fi-dca-live" value="${fi.dca}" style="width:80px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:5px 8px;font-size:13px;color:var(--t1);font-family:var(--ff);" onchange="fi.dca=parseFloat(this.value)||500;saveFi()">
+        <span style="font-size:12px;color:var(--t2);">€</span>
+        <button onclick="openFiSettings()" style="background:var(--glass);border:1px solid var(--border);color:var(--t2);padding:5px 8px;border-radius:var(--r);cursor:pointer;font-size:11px;font-family:var(--ff);">⚙ Fixed</button>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 60px 44px 44px 44px;gap:4px;margin-bottom:6px;">
+      <div style="font-size:9px;color:var(--t4);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;">Actif</div>
+      <div style="font-size:9px;color:var(--t4);text-align:right;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;">Valeur €</div>
+      <div style="font-size:9px;color:var(--t4);text-align:center;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;">Cible</div>
+      <div style="font-size:9px;color:var(--t4);text-align:center;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;">Min</div>
+      <div style="font-size:9px;color:var(--t4);text-align:center;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;">Max</div>
+    </div>`;
+
+  FI_ASSETS.forEach(a => {
+    html += `<div style="display:grid;grid-template-columns:1fr 60px 44px 44px 44px;gap:4px;margin-bottom:5px;align-items:center;">
+      <div style="font-size:12px;font-weight:500;color:var(--t1);">${a}</div>
+      <input type="number" id="fi-val-${a}" value="${fi.values[a]||0}" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:5px 6px;font-size:11px;color:var(--t1);font-family:var(--ff);text-align:right;" onchange="saveFi()">
+      <input type="number" id="fi-tgt-${a}" value="${fi.targets[a]||0}" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:5px 4px;font-size:11px;color:var(--acc2);font-family:var(--ff);text-align:center;" onchange="saveFi()">
+      <input type="number" id="fi-min-${a}" value="${fi.mins[a]||0}" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:5px 4px;font-size:11px;color:var(--t2);font-family:var(--ff);text-align:center;" onchange="saveFi()">
+      <input type="number" id="fi-max-${a}" value="${fi.maxs[a]||0}" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:5px 4px;font-size:11px;color:var(--t2);font-family:var(--ff);text-align:center;" onchange="saveFi()">
+    </div>`;
+  });
+
+  html += `<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border);">
+    <div style="font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">Bloc illiquide & tech hors DCA</div>
+    ${[['scpi','SCPI'],['pe','Private Equity'],['etf_ai','ETF IA'],['etf_quantum','ETF Quantum'],['nvidia','Nvidia']].map(([k,l])=>`
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;">
+      <div style="flex:1;font-size:12px;color:var(--t2);">${l}</div>
+      <input type="number" id="fi-extra-${k}" value="${fi.extra[k]||0}" style="width:100px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:5px 8px;font-size:12px;color:var(--t1);font-family:var(--ff);text-align:right;" onchange="fi.extra['${k}']=parseFloat(this.value)||0;saveFi()">
+      <span style="font-size:11px;color:var(--t3);">€</span>
+    </div>`).join('')}
+  </div>`;
+
+  el.innerHTML = html;
+}
+
+function openFiSettings() {
+  loadFi();
+  document.getElementById('fi-dca-input').value = fi.dca || 500;
+  const fixedEl = document.getElementById('fi-fixed-inputs');
+  fixedEl.innerHTML = FI_ASSETS.filter(a => fi.fixed[a] !== undefined || ['Gold','Bitcoin','Defense'].includes(a)).map(a => `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+      <div style="flex:1;font-size:13px;color:var(--t1);">${a}</div>
+      <input type="number" id="fi-fix-${a}" value="${fi.fixed[a]||0}" style="width:80px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:6px 8px;font-size:12px;color:var(--t1);font-family:var(--ff);text-align:right;" placeholder="0">
+      <span style="font-size:11px;color:var(--t3);">€/mois</span>
+    </div>`).join('');
+  openOv('ov-fi-settings');
+}
+function saveFiSettings() {
+  fi.dca = parseFloat(document.getElementById('fi-dca-input').value) || 500;
+  FI_ASSETS.forEach(a => {
+    const el = document.getElementById('fi-fix-'+a);
+    if(el) {
+      const v = parseFloat(el.value)||0;
+      if(v > 0) fi.fixed[a] = v;
+      else delete fi.fixed[a];
+    }
+  });
+  try { localStorage.setItem('sos_fi', JSON.stringify(fi)); } catch(e) {}
+  closeOv('ov-fi-settings');
+  renderFinInvest();
+  showToast('Paramètres sauvegardés');
+}
+
+function runFiAnalysis() {
+  saveFi();
+  loadFi();
+  const el = document.getElementById('fi-result-pane');
+  const values = {...fi.values};
+  const total = Object.values(values).reduce((s,v)=>s+v,0);
+  if(total === 0) {
+    el.innerHTML = `<div style="text-align:center;padding:40px 20px;color:var(--t3);font-size:13px;">Saisir les valeurs de portefeuille à gauche</div>`;
+    return;
+  }
+
+  document.getElementById('fi-total-label').textContent = `Total portefeuille liquide : ${total.toLocaleString('fr-FR')} €`;
+
+  // Vérification somme targets
+  const sumTargets = FI_ASSETS.reduce((s,a)=>s+(fi.targets[a]||0),0);
+  const targetWarning = Math.abs(sumTargets - 100) > 0.5;
+
+  // Calcul allocations et statuts
+  const allocs = {};
+  const statuts = {};
+  FI_ASSETS.forEach(a => {
+    allocs[a] = total > 0 ? (values[a]/total*100) : 0;
+    const lo = fi.mins[a]||0, hi = fi.maxs[a]||100;
+    statuts[a] = allocs[a] < lo ? 'under' : allocs[a] > hi ? 'over' : 'ok';
+  });
+
+  // Score équilibre
+  const score = Math.max(0, 100 - FI_ASSETS.reduce((s,a)=>s+Math.abs(allocs[a]-(fi.targets[a]||0)),0));
+
+  // Plan DCA
+  const plan = computeDcaPlan(values, total);
+
+  // Patrimoine global
+  const extraTotal = Object.values(fi.extra).reduce((s,v)=>s+(v||0),0);
+  const liqqTotal = total + (fi.extra.etf_ai||0) + (fi.extra.etf_quantum||0) + (fi.extra.nvidia||0);
+  const grandTotal = liqqTotal + (fi.extra.scpi||0) + (fi.extra.pe||0);
+
+  let html = '';
+
+  // Warning targets
+  if(targetWarning) {
+    html += `<div style="background:var(--amber-dim);border:1px solid rgba(240,176,80,0.2);border-radius:var(--r);padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--amber);">⚠ Somme des cibles : ${sumTargets.toFixed(1)}% — doit être égale à 100%</div>`;
+  }
+
+  // Score + mode
+  const modeLabel = FI_ASSETS.some(a=>statuts[a]==='under') ? 'Mode Correction' : 'Mode Croisière';
+  const modeColor = modeLabel==='Mode Correction' ? 'var(--amber)' : 'var(--green)';
+  html += `<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+    <div style="background:var(--glass);border:1px solid var(--border);border-radius:var(--r-lg);padding:12px 20px;text-align:center;min-width:90px;">
+      <div style="font-family:var(--ff-d);font-size:30px;font-weight:600;color:${score>=80?'var(--green)':score>=60?'var(--amber)':'var(--rose)'};">${Math.round(score)}</div>
+      <div style="font-size:10px;color:var(--t3);margin-top:2px;">Score /100</div>
+    </div>
+    <div style="flex:1;">
+      <div style="font-size:13px;font-weight:600;color:${modeColor};margin-bottom:4px;">${modeLabel}</div>
+      <div style="font-size:11px;color:var(--t3);">DCA ce mois : ${fi.dca} €</div>
+      ${isDcaPending()?`<div style="font-size:11px;color:var(--rose);margin-top:3px;font-weight:500;">🔔 DCA du mois non effectué</div>`:''}
+    </div>
+  </div>`;
+
+  // Barres d'allocation
+  html += `<div style="margin-bottom:18px;">`;
+  FI_ASSETS.forEach(a => {
+    const pct = allocs[a];
+    const tgt = fi.targets[a]||0;
+    const st = statuts[a];
+    const color = st==='under'?'var(--amber)':st==='over'?'var(--rose)':'var(--acc)';
+    const label = st==='under'?'Sous':'Sur'==='over'?'Sur':'OK';
+    const statusLabel = st==='under'?'Sous':st==='over'?'Sur':'OK';
+    const statusColor = st==='under'?'var(--amber)':st==='over'?'var(--rose)':'var(--green)';
+    html += `<div style="margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px;">
+        <span style="font-weight:500;color:var(--t1);">${a}</span>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <span style="color:var(--t3);">cible ${tgt}%</span>
+          <span style="font-weight:600;color:${statusColor};">${pct.toFixed(1)}% ${statusLabel}</span>
+        </div>
+      </div>
+      <div style="height:5px;background:var(--bg4);border-radius:99px;position:relative;overflow:visible;">
+        <div style="height:100%;width:${Math.min(pct,100)}%;background:${color};border-radius:99px;transition:width 0.4s;"></div>
+        <div style="position:absolute;top:-2px;left:${Math.min(tgt,100)}%;width:2px;height:9px;background:var(--t3);border-radius:1px;transform:translateX(-50%);"></div>
+      </div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  // Plan DCA
+  html += `<div style="background:var(--glass);border:1px solid var(--border);border-radius:var(--r-lg);padding:14px;margin-bottom:14px;">
+    <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--t3);margin-bottom:12px;">Plan DCA — ${modeLabel}</div>
+    ${FI_ASSETS.filter(a=>plan[a]>0).map(a=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.03);">
+      <div style="flex:1;font-size:12px;font-weight:500;color:var(--t1);">${a}</div>
+      <div style="font-family:var(--ff-d);font-size:14px;font-weight:600;color:var(--acc2);">${Math.round(plan[a])} €</div>
+      ${fi.fixed[a]?`<span style="font-size:10px;color:var(--t3);">dont ${fi.fixed[a]}€ fixe</span>`:''}
+    </div>`).join('')}
+    <div style="display:flex;justify-content:space-between;padding-top:8px;font-size:11px;color:var(--t2);font-weight:600;">
+      <span>Total investi</span>
+      <span>${Object.values(plan).reduce((s,v)=>s+v,0).toFixed(0)} € / ${fi.dca} €</span>
+    </div>
+  </div>`;
+
+  // Patrimoine global
+  if(grandTotal > 0) {
+    const liqPct = Math.round(liqqTotal/grandTotal*100);
+    const scpiPct = Math.round((fi.extra.scpi||0)/grandTotal*100);
+    const pePct = Math.round((fi.extra.pe||0)/grandTotal*100);
+    html += `<div style="background:var(--glass);border:1px solid var(--border);border-radius:var(--r-lg);padding:14px;">
+      <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--t3);margin-bottom:12px;">Allocation globale — ${grandTotal.toLocaleString('fr-FR')} €</div>
+      ${[[`Liquide (PEA + tech)`,liqqTotal,liqPct,'var(--acc)'],['SCPI',(fi.extra.scpi||0),scpiPct,'var(--cyan)'],['Private Equity',(fi.extra.pe||0),pePct,'var(--warm)']].filter(r=>r[1]>0).map(([l,v,p,c])=>`
+      <div style="margin-bottom:10px;">
+        <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px;"><span style="color:var(--t2);">${l}</span><span style="font-weight:600;color:${c};">${p}% — ${v.toLocaleString('fr-FR')} €</span></div>
+        <div style="height:4px;background:var(--bg4);border-radius:99px;overflow:hidden;"><div style="height:100%;width:${p}%;background:${c};border-radius:99px;"></div></div>
+      </div>`).join('')}
+    </div>`;
+  }
+
+  el.innerHTML = html;
+}
+
+function computeDcaPlan(values, total) {
+  const targets = fi.targets;
+  const mins = fi.mins;
+  const maxs = fi.maxs;
+  const fixed = fi.fixed;
+  const dca = fi.dca || 500;
+
+  // Identifier under/overweights
+  const underweights = {}, overweights = new Set();
+  FI_ASSETS.forEach(a => {
+    const alloc = total > 0 ? values[a]/total*100 : 0;
+    const lo = mins[a]||0, hi = maxs[a]||100;
+    if(alloc < lo) underweights[a] = lo - alloc;
+    else if(alloc > hi) overweights.add(a);
+  });
+
+  // Montants fixes — seulement si pas en surpondération
+  const fixedTotal = FI_ASSETS.reduce((s,a) => {
+    if(overweights.has(a)) return s; // BUG CORRIGÉ : skip si overweight
+    return s + (fixed[a]||0);
+  }, 0);
+  const remaining = Math.max(0, dca - fixedTotal);
+
+  const variable = {};
+  FI_ASSETS.forEach(a => variable[a] = 0);
+
+  if(Object.keys(underweights).length > 0) {
+    // Mode correction : répartir le remaining sur les underweights
+    const sumUnder = Object.values(underweights).reduce((s,v)=>s+v,0);
+    Object.keys(underweights).forEach(a => {
+      variable[a] = remaining * (underweights[a]/sumUnder);
+    });
+  } else {
+    // Mode croisière : proportionnel aux targets hors overweights
+    const totalTarget = FI_ASSETS.filter(a=>!overweights.has(a)).reduce((s,a)=>s+(targets[a]||0),0);
+    FI_ASSETS.forEach(a => {
+      if(!overweights.has(a) && totalTarget > 0) {
+        variable[a] = remaining * ((targets[a]||0)/totalTarget);
+      }
+    });
+  }
+
+  const result = {};
+  FI_ASSETS.forEach(a => {
+    const fixedAmt = overweights.has(a) ? 0 : (fixed[a]||0);
+    result[a] = (variable[a]||0) + fixedAmt;
+  });
+  return result;
+}
+
+// ═══════════════════════════════════════
+//  VOYAGES
+// ═══════════════════════════════════════
+let travels = [];
+let selectedTravel = -1;
+let editingTravel = -1;
+let editingDoc = -1;
+let curDocType = 'vol';
+
+function loadTravels() {
+  try { const d=localStorage.getItem('sos_travels'); travels=d?JSON.parse(d):[]; } catch(e){travels=[];}
+}
+function saveTravels() {
+  try { localStorage.setItem('sos_travels', JSON.stringify(travels)); } catch(e){}
+}
+
+function renderTravel() {
+  loadTravels();
+  renderTravelList();
+  if(selectedTravel >= 0 && selectedTravel < travels.length) renderTravelDetail(selectedTravel);
+  else {
+    document.getElementById('travel-detail-title').textContent = 'Sélectionner un voyage';
+    document.getElementById('travel-add-doc-btn').style.display = 'none';
+    document.getElementById('travel-detail-pane').innerHTML = `<div style="text-align:center;padding:60px 20px;color:var(--t3);font-size:13px;"><div style="font-size:32px;margin-bottom:12px;opacity:0.3;">✈</div><div>Sélectionner un voyage ou en créer un</div></div>`;
+  }
+}
+
+function renderTravelList() {
+  const el = document.getElementById('travel-list');
+  const today = todayStr();
+  if(!travels.length) {
+    el.innerHTML = `<div class="empty" style="padding:30px 10px;"><div class="empty-icon">✈</div><div>Aucun voyage</div><button class="empty-add" onclick="openTravelSheet()">+ Ajouter</button></div>`;
+    return;
+  }
+  const sorted = travels.slice().sort((a,b)=>a.start.localeCompare(b.start));
+  const upcoming = sorted.filter(t=>t.end>=today);
+  const past = sorted.filter(t=>t.end<today);
+  let html = '';
+  if(upcoming.length) {
+    html += `<div style="font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--t3);padding:4px 6px 8px;">À venir</div>`;
+    html += upcoming.map(t => travelCard(t, travels.indexOf(t))).join('');
+  }
+  if(past.length) {
+    html += `<div style="font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--t4);padding:12px 6px 8px;">Passés</div>`;
+    html += past.map(t => travelCard(t, travels.indexOf(t))).join('');
+  }
+  el.innerHTML = html;
+}
+function travelCard(t, idx) {
+  const isSelected = idx === selectedTravel;
+  const d = diffDays(t.start);
+  const today = todayStr();
+  const isActive = t.start <= today && t.end >= today;
+  const countdown = d > 0 ? `J-${d}` : isActive ? 'En cours' : '';
+  const statusColors = {planifié:'var(--t3)',réservé:'var(--cyan)',passé:'var(--t4)'};
+  const pendingDocs = (t.docs||[]).filter(d=>d.status==='à faire').length;
+  return `<div onclick="selectTravel(${idx})" style="padding:10px 12px;border-radius:var(--r-lg);margin-bottom:4px;cursor:pointer;background:${isSelected?'var(--acc-dim)':'var(--glass)'};border:1px solid ${isSelected?'rgba(124,106,247,0.25)':'var(--border)'};transition:all 0.12s;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+      <div style="font-size:13px;font-weight:600;color:var(--t1);">${t.dest}</div>
+      ${countdown?`<span style="font-size:10px;font-weight:600;color:${d<=7&&d>0?'var(--rose)':d<=30&&d>0?'var(--amber)':'var(--green)'};background:${d<=7&&d>0?'var(--rose-dim)':d<=30&&d>0?'var(--amber-dim)':'var(--green-dim)'};padding:2px 8px;border-radius:99px;">${countdown}</span>`:''}
+    </div>
+    <div style="font-size:11px;color:var(--t3);">${fmtShort(t.start)} → ${fmtShort(t.end)}</div>
+    <div style="display:flex;align-items:center;gap:6px;margin-top:5px;">
+      <span style="font-size:10px;color:${statusColors[t.status]||'var(--t3)'};">${t.status}</span>
+      ${pendingDocs>0?`<span style="font-size:10px;color:var(--rose);background:var(--rose-dim);padding:1px 6px;border-radius:99px;">${pendingDocs} à réserver</span>`:''}
+    </div>
+  </div>`;
+}
+function selectTravel(idx) {
+  selectedTravel = idx;
+  renderTravelList();
+  renderTravelDetail(idx);
+}
+function renderTravelDetail(idx) {
+  const t = travels[idx];
+  document.getElementById('travel-detail-title').textContent = t.dest;
+  document.getElementById('travel-add-doc-btn').style.display = 'flex';
+  const el = document.getElementById('travel-detail-pane');
+  const d = diffDays(t.start);
+  const today = todayStr();
+  const isActive = t.start <= today && t.end >= today;
+  const nights = Math.round((parseLocal(t.end)-parseLocal(t.start))/86400000);
+  const docs = t.docs || [];
+  const todo = docs.filter(d=>d.status==='à faire');
+  const done = docs.filter(d=>d.status!=='à faire');
+
+  let html = `
+    <div style="background:var(--glass);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;margin-bottom:14px;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;">
+        <div>
+          <div style="font-family:var(--ff-d);font-size:20px;font-weight:600;color:var(--t1);margin-bottom:4px;">${t.dest}</div>
+          <div style="font-size:12px;color:var(--t3);">${fmtFull(t.start)} → ${fmtFull(t.end)} · ${nights} nuit${nights>1?'s':''}</div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button onclick="openTravelSheet(${idx})" style="background:var(--glass);border:1px solid var(--border);color:var(--t2);padding:6px 10px;border-radius:var(--r);cursor:pointer;font-size:11px;font-family:var(--ff);">Modifier</button>
+          <button onclick="deleteTravel(${idx})" style="background:var(--rose-dim);border:1px solid rgba(224,90,122,0.2);color:var(--rose);padding:6px 10px;border-radius:var(--r);cursor:pointer;font-size:11px;font-family:var(--ff);">Supprimer</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;">
+        ${d>0?`<span style="font-size:12px;font-weight:600;color:${d<=7?'var(--rose)':d<=30?'var(--amber)':'var(--green)'};background:${d<=7?'var(--rose-dim)':d<=30?'var(--amber-dim)':'var(--green-dim)'};padding:4px 12px;border-radius:99px;">J-${d}</span>`:''}
+        ${isActive?`<span class="badge badge-green">En cours</span>`:''}
+        <span style="font-size:12px;color:var(--t3);">${t.status}</span>
+      </div>
+      ${t.note?`<div style="font-size:12px;color:var(--t2);margin-top:10px;padding-top:10px;border-top:1px solid var(--border);">${t.note}</div>`:''}
+    </div>`;
+
+  // Documents à réserver
+  if(todo.length) {
+    html += `<div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--rose);margin-bottom:8px;">À réserver (${todo.length})</div>`;
+    html += todo.map(doc => docCard(doc, idx, docs.indexOf(doc))).join('');
+  }
+  if(done.length) {
+    html += `<div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--t3);margin:${todo.length?12:0}px 0 8px;">Réservé / Confirmé (${done.length})</div>`;
+    html += done.map(doc => docCard(doc, idx, docs.indexOf(doc))).join('');
+  }
+  if(!docs.length) {
+    html += `<div style="text-align:center;padding:30px 20px;color:var(--t3);font-size:12px;border:1px dashed var(--border);border-radius:var(--r-lg);">Aucune réservation — <span style="color:var(--acc2);cursor:pointer;" onclick="openDocSheet()">+ ajouter</span></div>`;
+  }
+
+  el.innerHTML = html;
+}
+function docCard(doc, tIdx, dIdx) {
+  const icons = {vol:'✈',hotel:'🏨',transport:'🚆',autre:'📋'};
+  const statusColors = {'à faire':'var(--rose)','réservé':'var(--amber)','confirmé':'var(--green)'};
+  const deadlineInfo = doc.deadline ? (() => {const d=diffDays(doc.deadline);return d>=0?`deadline J-${d}`:`deadline dépassée`;})() : '';
+  return `<div style="background:var(--glass);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer;" onclick="openDocSheet(${tIdx},${dIdx})">
+    <div style="font-size:18px;">${icons[doc.type]||'📋'}</div>
+    <div style="flex:1;min-width:0;">
+      <div style="font-size:13px;font-weight:500;color:var(--t1);margin-bottom:3px;">${doc.title}</div>
+      <div style="font-size:11px;color:var(--t3);">${deadlineInfo}${doc.price?` · ${doc.price} €`:''}</div>
+    </div>
+    <span style="font-size:11px;font-weight:500;color:${statusColors[doc.status]||'var(--t3)'};white-space:nowrap;">${doc.status}</span>
+  </div>`;
+}
+function openTravelSheet(idx) {
+  editingTravel = idx !== undefined ? idx : -1;
+  const t = idx !== undefined ? travels[idx] : null;
+  document.getElementById('travel-sheet-title').textContent = t ? 'Modifier le voyage' : 'Nouveau voyage';
+  document.getElementById('tv-dest').value = t ? t.dest : '';
+  document.getElementById('tv-start').value = t ? t.start : todayStr();
+  document.getElementById('tv-end').value = t ? t.end : '';
+  document.getElementById('tv-status').value = t ? t.status : 'planifié';
+  document.getElementById('tv-note').value = t ? (t.note||'') : '';
+  const btns = document.getElementById('travel-sheet-btns');
+  btns.innerHTML = t
+    ? `<button class="btn-danger" onclick="deleteTravel(${idx})">Supprimer</button><button class="btn-secondary" onclick="closeOv('ov-travel')">Annuler</button><button class="btn-primary" style="flex:2;margin-top:0;" onclick="saveTravel()">Enregistrer</button>`
+    : `<button class="btn-secondary" onclick="closeOv('ov-travel')">Annuler</button><button class="btn-primary" style="flex:2;margin-top:0;" onclick="saveTravel()">Enregistrer</button>`;
+  openOv('ov-travel');
+}
+function saveTravel() {
+  const dest = document.getElementById('tv-dest').value.trim();
+  const start = document.getElementById('tv-start').value;
+  const end = document.getElementById('tv-end').value;
+  if(!dest||!start||!end) { showToast('Destination et dates requises'); return; }
+  const t = {
+    id: editingTravel>=0 ? travels[editingTravel].id : Date.now(),
+    dest, start, end,
+    status: document.getElementById('tv-status').value,
+    note: document.getElementById('tv-note').value.trim(),
+    docs: editingTravel>=0 ? (travels[editingTravel].docs||[]) : []
+  };
+  if(editingTravel>=0) travels[editingTravel]=t;
+  else { travels.push(t); selectedTravel=travels.length-1; }
+  saveTravels(); closeOv('ov-travel'); renderTravel();
+  showToast(editingTravel>=0?'Voyage mis à jour':'Voyage ajouté');
+}
+function deleteTravel(idx) {
+  if(!confirm('Supprimer ce voyage ?')) return;
+  travels.splice(idx,1); selectedTravel=-1;
+  saveTravels(); closeOv('ov-travel'); renderTravel(); showToast('Voyage supprimé');
+}
+function openDocSheet(tIdx, dIdx) {
+  if(tIdx === undefined) tIdx = selectedTravel;
+  editingDoc = dIdx !== undefined ? dIdx : -1;
+  const doc = dIdx !== undefined ? (travels[tIdx].docs||[])[dIdx] : null;
+  document.getElementById('doc-sheet-title').textContent = doc ? 'Modifier la réservation' : 'Nouvelle réservation';
+  document.getElementById('doc-title').value = doc ? doc.title : '';
+  document.getElementById('doc-deadline').value = doc ? (doc.deadline||'') : '';
+  document.getElementById('doc-status').value = doc ? doc.status : 'à faire';
+  document.getElementById('doc-price').value = doc ? (doc.price||'') : '';
+  curDocType = doc ? doc.type : 'vol';
+  document.querySelectorAll('#ov-doc .type-btn').forEach(b=>b.classList.toggle('active',b.dataset.dt===curDocType));
+  const btns = document.getElementById('doc-sheet-btns');
+  btns.innerHTML = doc
+    ? `<button class="btn-danger" onclick="deleteDoc(${tIdx},${dIdx})">Supprimer</button><button class="btn-secondary" onclick="closeOv('ov-doc')">Annuler</button><button class="btn-primary" style="flex:2;margin-top:0;" onclick="saveDoc(${tIdx})">Enregistrer</button>`
+    : `<button class="btn-secondary" onclick="closeOv('ov-doc')">Annuler</button><button class="btn-primary" style="flex:2;margin-top:0;" onclick="saveDoc(${tIdx})">Enregistrer</button>`;
+  openOv('ov-doc');
+}
+function selDocType(btn) {
+  document.querySelectorAll('#ov-doc .type-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active'); curDocType=btn.dataset.dt;
+}
+function saveDoc(tIdx) {
+  if(tIdx === undefined) tIdx = selectedTravel;
+  const title = document.getElementById('doc-title').value.trim();
+  if(!title) { showToast('Description requise'); return; }
+  const doc = {
+    type: curDocType, title,
+    deadline: document.getElementById('doc-deadline').value,
+    status: document.getElementById('doc-status').value,
+    price: parseFloat(document.getElementById('doc-price').value)||null
+  };
+  if(!travels[tIdx].docs) travels[tIdx].docs = [];
+  if(editingDoc>=0) travels[tIdx].docs[editingDoc]=doc;
+  else travels[tIdx].docs.push(doc);
+  saveTravels(); closeOv('ov-doc'); renderTravelDetail(tIdx); renderTravelList();
+  showToast(editingDoc>=0?'Mis à jour':'Réservation ajoutée');
+}
+function deleteDoc(tIdx, dIdx) {
+  if(!confirm('Supprimer ?')) return;
+  travels[tIdx].docs.splice(dIdx,1);
+  saveTravels(); closeOv('ov-doc'); renderTravelDetail(tIdx); renderTravelList(); showToast('Supprimé');
+}
+
+// Prochain voyage pour le dashboard
+function nextTravelForDash() {
+  loadTravels();
+  const today = todayStr();
+  return travels.filter(t=>t.end>=today).sort((a,b)=>a.start.localeCompare(b.start))[0]||null;
 }
 
 // ═══════════════════════════════════════
@@ -1185,6 +1857,7 @@ function renderWeeklySummary() {
   const urgentCount = tasks.filter(t=>!t.done&&t.priority==='high').length;
   const nextReminder = [...events.filter(e=>e.type==='rappel'&&e.date>=todayStr())].sort((a,b)=>a.date.localeCompare(b.date))[0];
   const dayName = new Date().toLocaleDateString('fr-FR',{weekday:'long'});
+  const nextTravel = nextTravelForDash();
   el.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
       <div style="font-family:var(--ff-d);font-size:15px;font-weight:600;color:var(--t1);">Semaine en cours</div>
@@ -1211,7 +1884,15 @@ function renderWeeklySummary() {
     ${nextReminder ? `<div style="margin-top:10px;padding:8px 12px;background:var(--amber-dim);border-radius:var(--r);border:1px solid rgba(240,176,80,0.2);display:flex;align-items:center;gap:8px;font-size:12px;">
       <span>🔔</span><span style="color:var(--t1);flex:1;">${nextReminder.title}</span>
       <span style="color:var(--amber);font-weight:600;">${diffDays(nextReminder.date)===0?"Aujourd'hui":diffDays(nextReminder.date)===1?'Demain':'J-'+diffDays(nextReminder.date)}</span>
-    </div>` : ''}`;
+    </div>` : ''}
+    ${nextTravel ? `<div style="margin-top:8px;padding:8px 12px;background:var(--glass);border-radius:var(--r);border:1px solid var(--border);display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;" onclick="sw('travel')">
+      <span>✈</span><span style="color:var(--t1);flex:1;">${nextTravel.dest}</span>
+      <span style="color:var(--cyan);font-weight:600;">${diffDays(nextTravel.start)>0?'J-'+diffDays(nextTravel.start):'En cours'}</span>
+    </div>` : ''}
+    ${isDcaPending()?`<div style="margin-top:8px;padding:8px 12px;background:var(--acc-dim);border-radius:var(--r);border:1px solid rgba(124,106,247,0.2);display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;" onclick="sw('fininvest')">
+      <span>💹</span><span style="color:var(--acc2);flex:1;font-weight:500;">DCA du mois à effectuer</span>
+      <span style="color:var(--t3);font-size:10px;">→</span>
+    </div>`:''}`;
 }
 
 function weekMonday() {
@@ -1892,10 +2573,13 @@ function showToast(msg){const el=document.getElementById('toast');el.textContent
 //  INIT
 // ═══════════════════════════════════════
 load();
+loadFi();
+loadTravels();
 calInit();
 const now=new Date();
 document.getElementById('page-sub').textContent=now.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
 renderDash();
+checkDcaBanner();
 if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw-surgeonos.js').catch(()=>{});
 </script>
 </body>
