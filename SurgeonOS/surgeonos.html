@@ -1,0 +1,1554 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SurgeonOS">
+<meta name="theme-color" content="#141210">
+<title>SurgeonOS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* Base */
+  --bg0: #0f0d0b;
+  --bg1: #161410;
+  --bg2: #1e1b16;
+  --bg3: #272319;
+  --bg4: #312d22;
+  --bg5: #3d382a;
+
+  /* Text */
+  --t1: #f0ebe2;
+  --t2: #a89d8a;
+  --t3: #6b6154;
+  --t4: #3d3830;
+
+  /* Accent warm */
+  --acc: #c87c3a;
+  --acc-l: #e89a58;
+  --acc-dim: rgba(200,124,58,0.15);
+  --acc-dim2: rgba(200,124,58,0.08);
+
+  /* Semantic */
+  --green: #5a9e4a;
+  --green-l: #7abf6a;
+  --green-bg: rgba(90,158,74,0.12);
+  --blue: #4a8fc4;
+  --blue-bg: rgba(74,143,196,0.12);
+  --amber: #c49a3a;
+  --amber-bg: rgba(196,154,58,0.12);
+  --red: #c45050;
+  --red-bg: rgba(196,80,80,0.12);
+  --purple: #9070d0;
+  --purple-bg: rgba(144,112,208,0.12);
+
+  /* Layout */
+  --r: 10px;
+  --r-lg: 16px;
+  --r-xl: 22px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bot: env(safe-area-inset-bottom, 0px);
+
+  /* Typography */
+  --ff-display: 'Fraunces', Georgia, serif;
+  --ff-body: 'DM Sans', -apple-system, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  height: 100%; overflow: hidden;
+  background: var(--bg0);
+  color: var(--t1);
+  font-family: var(--ff-body);
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── TOPBAR ── */
+#app { display: flex; flex-direction: column; height: 100%; padding-top: var(--safe-top); }
+
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  background: var(--bg0);
+  flex-shrink: 0;
+  position: relative;
+}
+.topbar::after {
+  content: '';
+  position: absolute; bottom: 0; left: 20px; right: 20px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--acc-dim), transparent);
+}
+.topbar-brand {
+  display: flex; align-items: baseline; gap: 8px;
+}
+.topbar-name {
+  font-family: var(--ff-display);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: var(--t1);
+}
+.topbar-name span { color: var(--acc); }
+.topbar-sub {
+  font-size: 11px;
+  color: var(--t3);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 300;
+}
+.topbar-actions { display: flex; align-items: center; gap: 8px; }
+.icon-btn {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: var(--bg3);
+  border: 1px solid rgba(255,255,255,0.06);
+  color: var(--t2);
+  font-size: 15px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s, color 0.15s;
+}
+.icon-btn:active { background: var(--bg4); color: var(--t1); }
+
+/* ── SCROLL AREA ── */
+.views { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 84px; }
+.view { display: none; padding: 20px; }
+.view.active { display: block; }
+
+/* ── BOTTOM NAV ── */
+.bottomnav {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  display: flex;
+  background: rgba(15,13,11,0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255,255,255,0.05);
+  padding-bottom: var(--safe-bot);
+  z-index: 100;
+}
+.bnav-item {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; padding: 9px 4px 7px;
+  font-size: 10px; color: var(--t3);
+  cursor: pointer; gap: 3px;
+  border: none; background: none;
+  font-family: var(--ff-body);
+  letter-spacing: 0.02em;
+  transition: color 0.15s;
+}
+.bnav-item.active { color: var(--acc); }
+.bnav-icon { font-size: 19px; line-height: 1; }
+
+/* ── SECTION HEADER ── */
+.sh {
+  display: flex; align-items: baseline; justify-content: space-between;
+  margin-bottom: 14px;
+}
+.sh-title {
+  font-family: var(--ff-display);
+  font-size: 18px; font-weight: 500;
+  color: var(--t1); letter-spacing: -0.3px;
+}
+.sh-action {
+  font-size: 12px; color: var(--acc);
+  background: none; border: none;
+  cursor: pointer; font-family: var(--ff-body);
+  padding: 0;
+}
+
+/* ── CARDS ── */
+.card {
+  background: var(--bg2);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: var(--r-lg);
+  padding: 16px;
+  margin-bottom: 12px;
+}
+.card-sm {
+  background: var(--bg2);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: var(--r);
+  padding: 12px 14px;
+}
+.card-accent {
+  background: var(--acc-dim2);
+  border: 1px solid rgba(200,124,58,0.2);
+  border-radius: var(--r-lg);
+  padding: 16px;
+  margin-bottom: 12px;
+}
+.label {
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--t3);
+  margin-bottom: 6px;
+}
+.big-num {
+  font-family: var(--ff-display);
+  font-size: 38px; font-weight: 700;
+  letter-spacing: -2px;
+  line-height: 1;
+  color: var(--t1);
+}
+.big-num span { font-size: 16px; font-weight: 300; color: var(--t2); letter-spacing: 0; margin-left: 2px; }
+
+/* ── BADGES ── */
+.badge {
+  display: inline-flex; align-items: center;
+  padding: 3px 9px; border-radius: 99px;
+  font-size: 11px; font-weight: 500;
+}
+.badge-green  { background: var(--green-bg); color: var(--green-l); }
+.badge-blue   { background: var(--blue-bg); color: var(--blue); }
+.badge-amber  { background: var(--amber-bg); color: var(--amber); }
+.badge-red    { background: var(--red-bg); color: var(--red); }
+.badge-purple { background: var(--purple-bg); color: var(--purple); }
+.badge-ghost  { background: rgba(255,255,255,0.05); color: var(--t2); }
+
+/* ── WEEK STRIP ── */
+.week-strip {
+  display: grid; grid-template-columns: repeat(7, 1fr);
+  gap: 4px; margin-bottom: 20px;
+}
+.week-day {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 5px; padding: 10px 4px;
+  border-radius: var(--r);
+  cursor: pointer; background: none; border: none;
+  font-family: var(--ff-body); color: var(--t2);
+  transition: background 0.15s;
+  position: relative;
+}
+.week-day:active { background: var(--bg3); }
+.week-day.today {
+  background: var(--acc-dim);
+  border: 1px solid rgba(200,124,58,0.25);
+}
+.week-day.today .wd-num { color: var(--acc); }
+.week-day.today .wd-name { color: var(--acc); opacity: 0.7; }
+.wd-name { font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em; }
+.wd-num {
+  font-family: var(--ff-display);
+  font-size: 18px; font-weight: 500; line-height: 1;
+}
+.wd-dots { display: flex; gap: 2px; min-height: 6px; }
+.wd-dot { width: 4px; height: 4px; border-radius: 50%; }
+.wd-dot.bloc   { background: var(--acc); }
+.wd-dot.garde  { background: var(--red); }
+.wd-dot.consult { background: var(--blue); }
+.wd-dot.other  { background: var(--t3); }
+
+/* ── TIMELINE ── */
+.timeline { display: flex; flex-direction: column; gap: 1px; }
+.tl-item {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+.tl-item:last-child { border-bottom: none; }
+.tl-dot-wrap {
+  display: flex; flex-direction: column; align-items: center;
+  padding-top: 4px; flex-shrink: 0; width: 14px;
+}
+.tl-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  flex-shrink: 0;
+}
+.tl-line {
+  width: 1px; flex: 1; min-height: 16px;
+  background: rgba(255,255,255,0.05);
+  margin-top: 4px;
+}
+.tl-content { flex: 1; }
+.tl-title { font-size: 14px; font-weight: 500; color: var(--t1); margin-bottom: 2px; }
+.tl-sub { font-size: 12px; color: var(--t2); }
+.tl-time { font-size: 11px; color: var(--t3); white-space: nowrap; padding-top: 3px; }
+
+/* ── STAT GRID ── */
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.stat-card {
+  background: var(--bg2);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: var(--r-lg);
+  padding: 14px 16px;
+}
+
+/* ── QUICK LINKS ── */
+.quicklinks {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 8px; margin-bottom: 20px;
+}
+.ql-btn {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 6px; padding: 12px 6px;
+  background: var(--bg2);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: var(--r-lg);
+  cursor: pointer; color: var(--t2);
+  font-size: 10px; font-family: var(--ff-body);
+  text-transform: uppercase; letter-spacing: 0.06em;
+  text-decoration: none;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.ql-btn:active { background: var(--bg3); color: var(--t1); }
+.ql-icon { font-size: 20px; }
+
+/* ── DAY MODAL ── */
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 200; display: none;
+  align-items: flex-end; justify-content: center;
+  padding-bottom: var(--safe-bot);
+  backdrop-filter: blur(4px);
+}
+.overlay.show { display: flex; }
+.sheet {
+  background: var(--bg2);
+  border-radius: 22px 22px 0 0;
+  width: 100%; max-width: 640px;
+  max-height: 88vh;
+  overflow-y: auto; -webkit-overflow-scrolling: touch;
+  padding: 8px 20px 24px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+.sheet-handle {
+  width: 36px; height: 4px;
+  background: var(--bg5);
+  border-radius: 99px;
+  margin: 10px auto 18px;
+}
+.sheet-title {
+  font-family: var(--ff-display);
+  font-size: 20px; font-weight: 500;
+  color: var(--t1); margin-bottom: 16px;
+  letter-spacing: -0.3px;
+}
+
+/* ── FORM ── */
+.fg { margin-bottom: 14px; }
+.fg label {
+  display: block; font-size: 10px; font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--t3); margin-bottom: 6px;
+}
+.fg input, .fg select, .fg textarea {
+  width: 100%; padding: 11px 13px;
+  font-size: 14px; font-family: var(--ff-body);
+  background: var(--bg3);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: var(--r);
+  color: var(--t1);
+  -webkit-appearance: none; appearance: none;
+  transition: border-color 0.15s;
+}
+.fg input:focus, .fg select:focus, .fg textarea:focus {
+  outline: none;
+  border-color: rgba(200,124,58,0.4);
+}
+.fg textarea { resize: vertical; min-height: 72px; line-height: 1.5; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.btn-primary {
+  width: 100%; padding: 14px;
+  font-size: 14px; font-weight: 500;
+  font-family: var(--ff-body);
+  background: var(--acc);
+  color: #fff; border: none;
+  border-radius: var(--r-lg);
+  cursor: pointer; margin-top: 6px;
+  letter-spacing: 0.02em;
+  transition: opacity 0.15s;
+}
+.btn-primary:active { opacity: 0.82; }
+.btn-secondary {
+  padding: 10px 16px;
+  font-size: 13px; font-family: var(--ff-body);
+  background: var(--bg3);
+  color: var(--t1);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--r);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-secondary:active { background: var(--bg4); }
+.btn-danger {
+  padding: 10px 16px; font-size: 13px;
+  font-family: var(--ff-body);
+  background: var(--red-bg);
+  color: var(--red);
+  border: 1px solid rgba(196,80,80,0.2);
+  border-radius: var(--r); cursor: pointer;
+}
+
+/* ── CAREER MODULE ── */
+.career-tabs {
+  display: flex; gap: 3px;
+  background: var(--bg2); border-radius: var(--r);
+  padding: 3px; margin-bottom: 18px;
+  border: 1px solid rgba(255,255,255,0.04);
+}
+.ctab {
+  flex: 1; padding: 8px 4px;
+  font-size: 12px; font-weight: 500;
+  border: none; background: none;
+  cursor: pointer; color: var(--t3);
+  border-radius: 7px;
+  font-family: var(--ff-body);
+  text-align: center;
+  transition: background 0.15s, color 0.15s;
+}
+.ctab.active {
+  background: var(--bg4); color: var(--t1);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+.cpanel { display: none; }
+.cpanel.active { display: block; }
+
+/* Skill items */
+.skill-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  cursor: pointer;
+}
+.skill-item:last-child { border-bottom: none; }
+.skill-left { flex: 1; min-width: 0; }
+.skill-name { font-size: 14px; font-weight: 500; color: var(--t1); margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.skill-cat { font-size: 11px; color: var(--t3); }
+.skill-level {
+  display: flex; gap: 4px; align-items: center; flex-shrink: 0;
+}
+.level-pip {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--bg4);
+  transition: background 0.2s;
+}
+.level-pip.filled { background: var(--acc); }
+.level-labels { display: flex; gap: 4px; }
+
+/* Level selector */
+.level-select-row {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+  margin: 12px 0;
+}
+.lsel-btn {
+  padding: 10px 4px; font-size: 12px; font-weight: 500;
+  border-radius: var(--r); background: var(--bg3);
+  border: 1px solid rgba(255,255,255,0.06);
+  color: var(--t2); cursor: pointer; font-family: var(--ff-body);
+  text-align: center; transition: all 0.15s;
+}
+.lsel-btn.active {
+  background: var(--acc-dim);
+  border-color: rgba(200,124,58,0.3);
+  color: var(--acc-l);
+}
+
+/* Objectives */
+.obj-item {
+  padding: 14px;
+  background: var(--bg3);
+  border-radius: var(--r-lg);
+  border: 1px solid rgba(255,255,255,0.05);
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.obj-item:active { border-color: rgba(200,124,58,0.2); }
+.obj-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.obj-title { font-size: 14px; font-weight: 500; color: var(--t1); }
+.obj-horizon { font-size: 11px; color: var(--t3); }
+.obj-progress-wrap { height: 4px; background: var(--bg4); border-radius: 99px; overflow: hidden; margin-bottom: 6px; }
+.obj-progress { height: 100%; border-radius: 99px; background: var(--acc); transition: width 0.3s; }
+.obj-footer { display: flex; justify-content: space-between; font-size: 11px; color: var(--t3); }
+
+/* Publications */
+.pub-item {
+  padding: 12px 14px;
+  background: var(--bg3);
+  border-radius: var(--r);
+  border: 1px solid rgba(255,255,255,0.05);
+  margin-bottom: 8px;
+  cursor: pointer;
+}
+.pub-title { font-size: 13px; font-weight: 500; color: var(--t1); margin-bottom: 4px; }
+.pub-meta { font-size: 11px; color: var(--t3); }
+
+/* ── PROGRESS BAR ── */
+.prog-wrap { height: 4px; background: var(--bg4); border-radius: 99px; overflow: hidden; }
+.prog-bar  { height: 100%; border-radius: 99px; }
+
+/* ── EMPTY STATE ── */
+.empty {
+  text-align: center; padding: 40px 20px;
+  color: var(--t3); font-size: 13px;
+}
+.empty-icon { font-size: 28px; margin-bottom: 10px; opacity: 0.5; }
+.empty-add {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-top: 14px; padding: 9px 18px;
+  background: var(--acc-dim); color: var(--acc-l);
+  border: 1px solid rgba(200,124,58,0.2);
+  border-radius: 99px; font-size: 13px;
+  cursor: pointer; font-family: var(--ff-body);
+  border-width: 1px; border-style: solid;
+}
+
+/* ── TOAST ── */
+.toast {
+  position: fixed;
+  bottom: calc(84px + var(--safe-bot) + 12px);
+  left: 50%; transform: translateX(-50%);
+  background: var(--bg4);
+  color: var(--t1);
+  border: 1px solid rgba(255,255,255,0.08);
+  padding: 10px 20px;
+  border-radius: 99px; font-size: 13px;
+  white-space: nowrap; z-index: 400;
+  display: none; font-weight: 400;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+
+/* ── DIVIDER ── */
+.divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+  margin: 16px 0;
+}
+
+/* ── PILL TABS ── */
+.pill-tabs { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+.pill {
+  padding: 5px 13px; font-size: 12px; font-weight: 500;
+  border-radius: 99px;
+  border: 1px solid rgba(255,255,255,0.07);
+  background: none; color: var(--t3);
+  cursor: pointer; font-family: var(--ff-body);
+  transition: all 0.15s;
+}
+.pill.active {
+  background: var(--acc-dim);
+  border-color: rgba(200,124,58,0.25);
+  color: var(--acc-l);
+}
+
+/* ── HORIZON TAG ── */
+.horizon-6  { color: var(--green); background: var(--green-bg); }
+.horizon-12 { color: var(--blue); background: var(--blue-bg); }
+.horizon-60 { color: var(--purple); background: var(--purple-bg); }
+
+/* ── CV SECTION ── */
+.cv-block {
+  background: var(--bg3);
+  border-radius: var(--r-lg);
+  padding: 14px;
+  margin-bottom: 10px;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+.cv-block-title {
+  font-size: 11px; font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--t3); margin-bottom: 10px;
+}
+.cv-row {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  font-size: 13px;
+}
+.cv-row:last-child { border-bottom: none; padding-bottom: 0; }
+.cv-year { color: var(--t3); font-size: 11px; white-space: nowrap; padding-top: 1px; min-width: 36px; }
+.cv-text { color: var(--t1); flex: 1; line-height: 1.4; }
+
+/* ── ANIMATION ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.view.active > * { animation: fadeUp 0.22s ease both; }
+.view.active > *:nth-child(2) { animation-delay: 0.04s; }
+.view.active > *:nth-child(3) { animation-delay: 0.08s; }
+.view.active > *:nth-child(4) { animation-delay: 0.12s; }
+.view.active > *:nth-child(5) { animation-delay: 0.16s; }
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-brand">
+      <div class="topbar-name">Surgeon<span>OS</span></div>
+      <div class="topbar-sub" id="topbar-date">—</div>
+    </div>
+    <div class="topbar-actions">
+      <button class="icon-btn" onclick="openAddEventSheet()" title="Ajouter événement">＋</button>
+    </div>
+  </div>
+
+  <!-- VIEWS -->
+  <div class="views">
+
+    <!-- ① DASHBOARD -->
+    <div class="view active" id="view-dash">
+
+      <!-- Stats rapides -->
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="label">Cette semaine</div>
+          <div class="big-num" id="stat-week">—<span>blocs</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Prochain bloc</div>
+          <div style="font-size:13px;font-weight:500;color:var(--t1);margin-top:6px;" id="stat-next">—</div>
+          <div style="font-size:11px;color:var(--t3);margin-top:3px;" id="stat-next-date"></div>
+        </div>
+      </div>
+
+      <!-- Week strip -->
+      <div class="sh">
+        <div class="sh-title" id="week-label">Semaine</div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button class="sh-action" onclick="navWeek(-1)">‹</button>
+          <button class="sh-action" onclick="navWeek(0)" style="color:var(--t3);">Auj.</button>
+          <button class="sh-action" onclick="navWeek(1)">›</button>
+        </div>
+      </div>
+      <div class="week-strip" id="week-strip"></div>
+
+      <!-- Timeline du jour -->
+      <div class="sh">
+        <div class="sh-title" id="day-label">Aujourd'hui</div>
+        <button class="sh-action" onclick="openAddEventSheet()">+ Ajouter</button>
+      </div>
+      <div class="card" style="padding:8px 14px;">
+        <div class="timeline" id="day-timeline"></div>
+      </div>
+
+      <!-- Quick links -->
+      <div class="divider"></div>
+      <div class="sh"><div class="sh-title">Accès rapide</div></div>
+      <div class="quicklinks">
+        <a class="ql-btn" id="ql-orlog" href="#" onclick="openExternal('orlog')">
+          <span class="ql-icon">📋</span>OrLog
+        </a>
+        <a class="ql-btn" id="ql-ortopos" href="#" onclick="openExternal('ortopos')">
+          <span class="ql-icon">📖</span>OrTopos
+        </a>
+        <a class="ql-btn" id="ql-finary" href="#" onclick="openExternal('finary')">
+          <span class="ql-icon">📊</span>Finary
+        </a>
+        <a class="ql-btn" onclick="sw('fininvest')">
+          <span class="ql-icon">💹</span>FinInvest
+        </a>
+      </div>
+
+    </div>
+
+    <!-- ② CARRIÈRE -->
+    <div class="view" id="view-career">
+
+      <div class="career-tabs">
+        <button class="ctab active" onclick="switchCareerTab('skills',this)">Compétences</button>
+        <button class="ctab" onclick="switchCareerTab('goals',this)">Objectifs</button>
+        <button class="ctab" onclick="switchCareerTab('pubs',this)">Publications</button>
+        <button class="ctab" onclick="switchCareerTab('cv',this)">CV</button>
+      </div>
+
+      <!-- COMPÉTENCES -->
+      <div class="cpanel active" id="cp-skills">
+        <div class="sh">
+          <div class="sh-title">Compétences</div>
+          <button class="sh-action" onclick="openSkillSheet()">+ Ajouter</button>
+        </div>
+        <div class="pill-tabs" id="skill-filters">
+          <button class="pill active" onclick="filterSkills('all',this)">Toutes</button>
+        </div>
+        <div class="card" style="padding:8px 14px;">
+          <div id="skills-list"></div>
+        </div>
+      </div>
+
+      <!-- OBJECTIFS -->
+      <div class="cpanel" id="cp-goals">
+        <div class="sh">
+          <div class="sh-title">Objectifs</div>
+          <button class="sh-action" onclick="openGoalSheet()">+ Ajouter</button>
+        </div>
+        <div class="pill-tabs">
+          <button class="pill active" onclick="filterGoals('all',this)">Tous</button>
+          <button class="pill" onclick="filterGoals('6',this)">6 mois</button>
+          <button class="pill" onclick="filterGoals('12',this)">1 an</button>
+          <button class="pill" onclick="filterGoals('60',this)">5 ans</button>
+        </div>
+        <div id="goals-list"></div>
+      </div>
+
+      <!-- PUBLICATIONS -->
+      <div class="cpanel" id="cp-pubs">
+        <div class="sh">
+          <div class="sh-title">Publications & comm.</div>
+          <button class="sh-action" onclick="openPubSheet()">+ Ajouter</button>
+        </div>
+        <div class="pill-tabs">
+          <button class="pill active" onclick="filterPubs('all',this)">Tout</button>
+          <button class="pill" onclick="filterPubs('Article',this)">Articles</button>
+          <button class="pill" onclick="filterPubs('Communication',this)">Comms</button>
+          <button class="pill" onclick="filterPubs('DU',this)">DU / DESC</button>
+          <button class="pill" onclick="filterPubs('Formation',this)">Formations</button>
+        </div>
+        <div id="pubs-list"></div>
+      </div>
+
+      <!-- CV VIVANT -->
+      <div class="cpanel" id="cp-cv">
+        <div class="sh">
+          <div class="sh-title">CV vivant</div>
+          <button class="sh-action" onclick="exportCV()">Exporter</button>
+        </div>
+        <div id="cv-content"></div>
+      </div>
+
+    </div>
+
+    <!-- ③ FININVEST (placeholder v1) -->
+    <div class="view" id="view-fininvest">
+      <div class="sh"><div class="sh-title">FinInvest</div></div>
+      <div class="card" style="text-align:center;padding:40px 20px;">
+        <div style="font-size:28px;margin-bottom:12px;opacity:0.4;">💹</div>
+        <div style="font-size:14px;color:var(--t2);margin-bottom:6px;">Module FinInvest</div>
+        <div style="font-size:12px;color:var(--t3);">Intégration complète en v2</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottomnav">
+    <button class="bnav-item active" onclick="sw('dash')" id="bn-dash">
+      <span class="bnav-icon">⊡</span><span>Semaine</span>
+    </button>
+    <button class="bnav-item" onclick="sw('career')" id="bn-career">
+      <span class="bnav-icon">◈</span><span>Carrière</span>
+    </button>
+    <button class="bnav-item" onclick="sw('fininvest')" id="bn-fininvest">
+      <span class="bnav-icon">◎</span><span>FinInvest</span>
+    </button>
+  </nav>
+
+</div>
+
+<!-- ── OVERLAYS ── -->
+
+<!-- Add Event Sheet -->
+<div class="overlay" id="event-overlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" id="event-sheet-title">Nouvel événement</div>
+    <div class="fg">
+      <label>Type</label>
+      <select id="ev-type" onchange="updateEvTypeUI()">
+        <option value="bloc">Bloc opératoire</option>
+        <option value="consult">Consultation</option>
+        <option value="garde">Garde</option>
+        <option value="formation">Formation / Congrès</option>
+        <option value="autre">Autre</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label>Date</label>
+      <input type="date" id="ev-date">
+    </div>
+    <div class="form-row">
+      <div class="fg">
+        <label>Heure début</label>
+        <input type="time" id="ev-start" value="08:00">
+      </div>
+      <div class="fg">
+        <label>Heure fin</label>
+        <input type="time" id="ev-end" value="12:00">
+      </div>
+    </div>
+    <div class="fg" id="ev-title-wrap">
+      <label>Titre / description</label>
+      <input type="text" id="ev-title" placeholder="ex. PTG D — Dr Martin">
+    </div>
+    <div class="fg">
+      <label>Note</label>
+      <input type="text" id="ev-note" placeholder="Optionnel...">
+    </div>
+    <div style="display:flex;gap:10px;margin-top:4px;">
+      <button class="btn-secondary" style="flex:1;" onclick="closeOverlay('event-overlay')">Annuler</button>
+      <button class="btn-primary" style="flex:2;margin-top:0;" onclick="saveEvent()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Day detail sheet -->
+<div class="overlay" id="day-overlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" id="day-sheet-title">—</div>
+    <div id="day-sheet-events"></div>
+    <button class="btn-primary" onclick="openAddEventFromDay()" style="margin-top:8px;">+ Ajouter un événement</button>
+  </div>
+</div>
+
+<!-- Skill sheet -->
+<div class="overlay" id="skill-overlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" id="skill-sheet-title">Nouvelle compétence</div>
+    <div class="fg">
+      <label>Nom de la technique / compétence</label>
+      <input type="text" id="sk-name" placeholder="ex. PTG cimentée, Voie de Hardinge...">
+    </div>
+    <div class="fg">
+      <label>Catégorie (libre)</label>
+      <input type="text" id="sk-cat" placeholder="ex. Genou, Hanche, Trauma, Arthroscopie...">
+    </div>
+    <div class="fg">
+      <label>Niveau</label>
+      <div class="level-select-row">
+        <button class="lsel-btn" data-level="1" onclick="selectLevel(1)">Observé</button>
+        <button class="lsel-btn" data-level="2" onclick="selectLevel(2)">Assisté</button>
+        <button class="lsel-btn" data-level="3" onclick="selectLevel(3)">Réalisé</button>
+        <button class="lsel-btn" data-level="4" onclick="selectLevel(4)">Autonome</button>
+      </div>
+    </div>
+    <div class="fg">
+      <label>Note</label>
+      <input type="text" id="sk-note" placeholder="Optionnel...">
+    </div>
+    <div style="display:flex;gap:10px;margin-top:4px;" id="skill-sheet-btns">
+      <button class="btn-secondary" style="flex:1;" onclick="closeOverlay('skill-overlay')">Annuler</button>
+      <button class="btn-primary" style="flex:2;margin-top:0;" onclick="saveSkill()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Goal sheet -->
+<div class="overlay" id="goal-overlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" id="goal-sheet-title">Nouvel objectif</div>
+    <div class="fg">
+      <label>Objectif</label>
+      <input type="text" id="gl-title" placeholder="ex. Autonomie PTG, Poste d'Assistant...">
+    </div>
+    <div class="fg">
+      <label>Horizon</label>
+      <select id="gl-horizon">
+        <option value="6">6 mois</option>
+        <option value="12">1 an</option>
+        <option value="60">5 ans</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label>Progression (0–100%)</label>
+      <input type="range" id="gl-progress" min="0" max="100" value="0" style="width:100%;accent-color:var(--acc);" oninput="document.getElementById('gl-prog-val').textContent=this.value+'%'">
+      <div style="text-align:right;font-size:12px;color:var(--t3);margin-top:4px;" id="gl-prog-val">0%</div>
+    </div>
+    <div class="fg">
+      <label>Note</label>
+      <textarea id="gl-note" placeholder="Détails, étapes, contexte..."></textarea>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:4px;" id="goal-sheet-btns">
+      <button class="btn-secondary" style="flex:1;" onclick="closeOverlay('goal-overlay')">Annuler</button>
+      <button class="btn-primary" style="flex:2;margin-top:0;" onclick="saveGoal()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Pub sheet -->
+<div class="overlay" id="pub-overlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" id="pub-sheet-title">Nouvelle entrée</div>
+    <div class="fg">
+      <label>Type</label>
+      <select id="pb-type">
+        <option>Article</option>
+        <option>Communication</option>
+        <option>DU</option>
+        <option>DESC</option>
+        <option>Formation</option>
+        <option>Prix / Distinction</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label>Titre</label>
+      <input type="text" id="pb-title" placeholder="Titre de la publication, communication...">
+    </div>
+    <div class="form-row">
+      <div class="fg">
+        <label>Année</label>
+        <input type="number" id="pb-year" placeholder="2025" inputmode="numeric">
+      </div>
+      <div class="fg">
+        <label>Statut</label>
+        <select id="pb-status">
+          <option>En cours</option>
+          <option>Soumis</option>
+          <option>Accepté</option>
+          <option>Publié</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg">
+      <label>Revue / Lieu / Détails</label>
+      <input type="text" id="pb-journal" placeholder="ex. OTSR, Congrès SoFCOT...">
+    </div>
+    <div style="display:flex;gap:10px;margin-top:4px;" id="pub-sheet-btns">
+      <button class="btn-secondary" style="flex:1;" onclick="closeOverlay('pub-overlay')">Annuler</button>
+      <button class="btn-primary" style="flex:2;margin-top:0;" onclick="savePub()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── STATE ──
+let events = [], skills = [], goals = [], pubs = [];
+let currentWeekOffset = 0;
+let selectedDay = null;
+let editingSkillIdx = -1, editingGoalIdx = -1, editingPubIdx = -1;
+let selectedSkillLevel = 0;
+let skillCatFilter = 'all', goalHorizonFilter = 'all', pubTypeFilter = 'all';
+
+const LINKS = {
+  orlog:   'https://rousseltom13-bit.github.io/Logbook-Chirurgie/',
+  ortopos: 'https://spontaneous-jalebi-c3c0e5.netlify.app/', 
+  finary:  'https://app.finary.com'
+};
+
+const EV_COLORS = {
+  bloc:      '#c87c3a',
+  consult:   '#4a8fc4',
+  garde:     '#c45050',
+  formation: '#9070d0',
+  autre:     '#6b6154'
+};
+
+const LEVEL_LABELS = ['', 'Observé', 'Assisté', 'Réalisé', 'Autonome'];
+const HORIZON_LABELS = { '6': '6 mois', '12': '1 an', '60': '5 ans' };
+
+// ── PERSISTENCE ──
+function save() {
+  try { localStorage.setItem('sos_events',  JSON.stringify(events));  } catch(e) {}
+  try { localStorage.setItem('sos_skills',  JSON.stringify(skills));  } catch(e) {}
+  try { localStorage.setItem('sos_goals',   JSON.stringify(goals));   } catch(e) {}
+  try { localStorage.setItem('sos_pubs',    JSON.stringify(pubs));    } catch(e) {}
+}
+function load() {
+  try { const d = localStorage.getItem('sos_events');  if(d) events  = JSON.parse(d); } catch(e) {}
+  try { const d = localStorage.getItem('sos_skills');  if(d) skills  = JSON.parse(d); } catch(e) {}
+  try { const d = localStorage.getItem('sos_goals');   if(d) goals   = JSON.parse(d); } catch(e) {}
+  try { const d = localStorage.getItem('sos_pubs');    if(d) pubs    = JSON.parse(d); } catch(e) {}
+}
+
+// ── DATE UTILS (no UTC bugs) ──
+function localDateStr(d) {
+  return d.getFullYear() + '-' +
+    String(d.getMonth() + 1).padStart(2, '0') + '-' +
+    String(d.getDate()).padStart(2, '0');
+}
+function todayStr() { return localDateStr(new Date()); }
+function parseLocal(s) {
+  const [y, m, d] = s.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+function fmtDate(s, opts) {
+  return parseLocal(s).toLocaleDateString('fr-FR', opts || { day: 'numeric', month: 'long' });
+}
+function fmtDateShort(s) {
+  return parseLocal(s).toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
+}
+function weekStart(offset) {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const dow = today.getDay() === 0 ? 6 : today.getDay() - 1; // lundi = 0
+  const mon = new Date(today); mon.setDate(today.getDate() - dow + offset * 7);
+  return mon;
+}
+function diffDays(s) {
+  const t = new Date(); t.setHours(0,0,0,0);
+  const d = parseLocal(s); d.setHours(0,0,0,0);
+  return Math.round((d - t) / 86400000);
+}
+
+// ── ORLOG INTEGRATION ──
+function loadOrLogSummary() {
+  try {
+    const raw = localStorage.getItem('orlog_blocs_summary');
+    return raw ? JSON.parse(raw) : [];
+  } catch(e) { return []; }
+}
+function getEventsForDate(ds) {
+  const own = events.filter(e => e.date === ds);
+  const orlog = loadOrLogSummary()
+    .filter(b => b.date === ds)
+    .map(b => ({
+      date: b.date, type: 'bloc',
+      title: b.interv || 'Bloc opératoire',
+      note: b.patient ? b.patient + (b.side ? ' · ' + b.side : '') : '',
+      start: '', end: '',
+      fromOrLog: true,
+      done: b.done,
+      statut: b.statut
+    }));
+  return [...orlog, ...own].sort((a, b) => (a.start || '').localeCompare(b.start || ''));
+}
+
+// ── NAVIGATION ──
+function sw(v) {
+  document.querySelectorAll('.view').forEach(e => e.classList.remove('active'));
+  document.querySelectorAll('.bnav-item').forEach(e => e.classList.remove('active'));
+  const vEl = document.getElementById('view-' + v);
+  const bEl = document.getElementById('bn-' + v);
+  if (vEl) vEl.classList.add('active');
+  if (bEl) bEl.classList.add('active');
+  if (v === 'dash')     renderDash();
+  if (v === 'career')   renderCareer();
+}
+function openExternal(key) {
+  const url = LINKS[key];
+  if (url) window.open(url, '_blank');
+  else showToast('URL non configurée — voir LINKS dans le code');
+}
+
+// ── TOPBAR ──
+function initTopbar() {
+  const now = new Date();
+  const label = now.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+  document.getElementById('topbar-date').textContent = label.charAt(0).toUpperCase() + label.slice(1);
+}
+
+// ── DASHBOARD ──
+function renderDash() {
+  renderWeekStats();
+  renderWeekStrip();
+  renderDayTimeline(selectedDay || todayStr());
+}
+
+function renderWeekStats() {
+  const mon = weekStart(currentWeekOffset);
+  const days = Array.from({length:7}, (_, i) => {
+    const d = new Date(mon); d.setDate(mon.getDate() + i);
+    return localDateStr(d);
+  });
+  const orlog = loadOrLogSummary();
+  const weekBlocs = days.reduce((n, ds) => {
+    const fromOrLog = orlog.filter(b => b.date === ds).length;
+    const fromOwn   = events.filter(e => e.date === ds && e.type === 'bloc').length;
+    return n + fromOrLog + fromOwn;
+  }, 0);
+  document.getElementById('stat-week').innerHTML = weekBlocs + '<span>blocs</span>';
+
+  // Prochain bloc
+  const allItems = [...orlog, ...events.filter(e => e.type === 'bloc')]
+    .filter(b => b.date >= todayStr())
+    .sort((a, b) => a.date.localeCompare(b.date));
+  if (allItems.length) {
+    const next = allItems[0];
+    document.getElementById('stat-next').textContent = (next.interv || next.title || 'Bloc').substring(0, 22);
+    const d = diffDays(next.date);
+    document.getElementById('stat-next-date').textContent =
+      d === 0 ? "Aujourd'hui" : d === 1 ? 'Demain' : fmtDateShort(next.date);
+  } else {
+    document.getElementById('stat-next').textContent = 'Aucun prévu';
+    document.getElementById('stat-next-date').textContent = '';
+  }
+}
+
+function renderWeekStrip() {
+  const mon = weekStart(currentWeekOffset);
+  const today = todayStr();
+  const DAY_NAMES = ['L','M','M','J','V','S','D'];
+  let html = '';
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(mon); d.setDate(mon.getDate() + i);
+    const ds = localDateStr(d);
+    const isToday = ds === today;
+    const evts = getEventsForDate(ds);
+    const dots = evts.slice(0, 3).map(e => `<div class="wd-dot ${e.type}"></div>`).join('');
+    html += `<button class="week-day${isToday ? ' today' : ''}" onclick="selectDayFn('${ds}')">
+      <span class="wd-name">${DAY_NAMES[i]}</span>
+      <span class="wd-num">${d.getDate()}</span>
+      <div class="wd-dots">${dots}</div>
+    </button>`;
+  }
+  document.getElementById('week-strip').innerHTML = html;
+
+  // Week label
+  const end = new Date(mon); end.setDate(mon.getDate() + 6);
+  const monLabel = mon.toLocaleDateString('fr-FR', {day:'numeric', month:'short'});
+  const endLabel = end.toLocaleDateString('fr-FR', {day:'numeric', month:'short'});
+  document.getElementById('week-label').textContent = `${monLabel} — ${endLabel}`;
+}
+
+function selectDayFn(ds) {
+  selectedDay = ds;
+  renderDayTimeline(ds);
+  const d = parseLocal(ds);
+  const isToday = ds === todayStr();
+  document.getElementById('day-label').textContent =
+    isToday ? "Aujourd'hui" :
+    d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+}
+
+function renderDayTimeline(ds) {
+  const evts = getEventsForDate(ds);
+  const el = document.getElementById('day-timeline');
+  if (!evts.length) {
+    el.innerHTML = `<div style="padding:20px 0;text-align:center;color:var(--t3);font-size:13px;">Aucun événement</div>`;
+    return;
+  }
+  el.innerHTML = evts.map((e, i) => {
+    const color = EV_COLORS[e.type] || EV_COLORS.autre;
+    const timeStr = e.start ? e.start + (e.end ? '–' + e.end : '') : '';
+    const isLast = i === evts.length - 1;
+    const doneBadge = e.fromOrLog && e.done
+      ? `<span class="badge badge-green" style="font-size:10px;margin-left:6px;">✓</span>` : '';
+    const orlogBadge = e.fromOrLog
+      ? `<span class="badge badge-ghost" style="font-size:10px;margin-left:4px;">OrLog</span>` : '';
+    return `<div class="tl-item">
+      <div class="tl-dot-wrap">
+        <div class="tl-dot" style="background:${color}"></div>
+        ${!isLast ? '<div class="tl-line"></div>' : ''}
+      </div>
+      <div class="tl-content">
+        <div class="tl-title">${e.title || e.interv || '—'}${doneBadge}${orlogBadge}</div>
+        ${e.note ? `<div class="tl-sub">${e.note}</div>` : ''}
+      </div>
+      ${timeStr ? `<div class="tl-time">${timeStr}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function navWeek(dir) {
+  if (dir === 0) { currentWeekOffset = 0; selectedDay = todayStr(); }
+  else currentWeekOffset += dir;
+  renderDash();
+}
+
+// ── ADD EVENT ──
+let editingEventIdx = -1;
+function openAddEventSheet(ds) {
+  editingEventIdx = -1;
+  document.getElementById('event-sheet-title').textContent = 'Nouvel événement';
+  document.getElementById('ev-date').value = ds || selectedDay || todayStr();
+  document.getElementById('ev-type').value = 'bloc';
+  document.getElementById('ev-start').value = '08:00';
+  document.getElementById('ev-end').value = '12:00';
+  document.getElementById('ev-title').value = '';
+  document.getElementById('ev-note').value = '';
+  openOverlay('event-overlay');
+}
+function openAddEventFromDay() {
+  closeOverlay('day-overlay');
+  openAddEventSheet(selectedDay);
+}
+function saveEvent() {
+  const ev = {
+    date:  document.getElementById('ev-date').value,
+    type:  document.getElementById('ev-type').value,
+    title: document.getElementById('ev-title').value.trim(),
+    start: document.getElementById('ev-start').value,
+    end:   document.getElementById('ev-end').value,
+    note:  document.getElementById('ev-note').value.trim(),
+    id:    editingEventIdx >= 0 ? events[editingEventIdx].id : Date.now()
+  };
+  if (!ev.date) { showToast('Date requise'); return; }
+  if (editingEventIdx >= 0) events[editingEventIdx] = ev;
+  else events.push(ev);
+  save();
+  closeOverlay('event-overlay');
+  selectedDay = ev.date;
+  renderDash();
+  showToast('Événement enregistré');
+}
+function deleteEvent(idx) {
+  if (!confirm('Supprimer cet événement ?')) return;
+  events.splice(idx, 1);
+  save(); closeOverlay('day-overlay');
+  renderDash(); showToast('Supprimé');
+}
+
+// ── CAREER ──
+function renderCareer() {
+  renderSkills();
+  renderGoals();
+  renderPubs();
+  renderCV();
+}
+function switchCareerTab(tab, btn) {
+  document.querySelectorAll('.ctab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.cpanel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('cp-' + tab).classList.add('active');
+}
+
+// ── SKILLS ──
+function renderSkills() {
+  const cats = [...new Set(skills.map(s => s.cat).filter(Boolean))];
+  const filterEl = document.getElementById('skill-filters');
+  filterEl.innerHTML = `<button class="pill${skillCatFilter==='all'?' active':''}" onclick="filterSkills('all',this)">Toutes</button>` +
+    cats.map(c => `<button class="pill${skillCatFilter===c?' active':''}" onclick="filterSkills('${c}',this)">${c}</button>`).join('');
+
+  const filtered = skillCatFilter === 'all' ? skills : skills.filter(s => s.cat === skillCatFilter);
+  const el = document.getElementById('skills-list');
+  if (!filtered.length) {
+    el.innerHTML = `<div class="empty">
+      <div class="empty-icon">🩺</div>
+      <div>Aucune compétence enregistrée</div>
+      <button class="empty-add" onclick="openSkillSheet()">+ Ajouter une compétence</button>
+    </div>`; return;
+  }
+  el.innerHTML = filtered.map((s, i) => {
+    const idx = skills.indexOf(s);
+    const pips = [1,2,3,4].map(n =>
+      `<div class="level-pip${s.level >= n ? ' filled' : ''}"></div>`
+    ).join('');
+    return `<div class="skill-item" onclick="openSkillSheet(${idx})">
+      <div class="skill-left">
+        <div class="skill-name">${s.name}</div>
+        <div class="skill-cat">${s.cat || '—'} · ${LEVEL_LABELS[s.level] || '—'}</div>
+      </div>
+      <div class="skill-level">${pips}</div>
+    </div>`;
+  }).join('');
+}
+function filterSkills(cat, btn) {
+  skillCatFilter = cat;
+  document.querySelectorAll('#skill-filters .pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderSkills();
+}
+function openSkillSheet(idx) {
+  editingSkillIdx = idx !== undefined ? idx : -1;
+  selectedSkillLevel = 0;
+  const s = idx !== undefined ? skills[idx] : null;
+  document.getElementById('skill-sheet-title').textContent = s ? 'Modifier la compétence' : 'Nouvelle compétence';
+  document.getElementById('sk-name').value = s ? s.name : '';
+  document.getElementById('sk-cat').value = s ? (s.cat || '') : '';
+  document.getElementById('sk-note').value = s ? (s.note || '') : '';
+  selectedSkillLevel = s ? s.level : 0;
+  updateLevelBtns(selectedSkillLevel);
+  const btns = document.getElementById('skill-sheet-btns');
+  btns.innerHTML = s
+    ? `<button class="btn-danger" style="flex:1;" onclick="deleteSkill(${idx})">Supprimer</button>
+       <button class="btn-primary" style="flex:2;margin-top:0;" onclick="saveSkill()">Enregistrer</button>`
+    : `<button class="btn-secondary" style="flex:1;" onclick="closeOverlay('skill-overlay')">Annuler</button>
+       <button class="btn-primary" style="flex:2;margin-top:0;" onclick="saveSkill()">Enregistrer</button>`;
+  openOverlay('skill-overlay');
+}
+function selectLevel(n) {
+  selectedSkillLevel = n;
+  updateLevelBtns(n);
+}
+function updateLevelBtns(n) {
+  document.querySelectorAll('.lsel-btn').forEach(b => {
+    b.classList.toggle('active', parseInt(b.dataset.level) === n);
+  });
+}
+function saveSkill() {
+  const name = document.getElementById('sk-name').value.trim();
+  if (!name) { showToast('Nom requis'); return; }
+  const sk = {
+    name, cat: document.getElementById('sk-cat').value.trim(),
+    level: selectedSkillLevel,
+    note: document.getElementById('sk-note').value.trim(),
+    updatedAt: todayStr()
+  };
+  if (editingSkillIdx >= 0) skills[editingSkillIdx] = sk;
+  else skills.push(sk);
+  save(); closeOverlay('skill-overlay'); renderSkills();
+  showToast(editingSkillIdx >= 0 ? 'Compétence mise à jour' : 'Compétence ajoutée');
+}
+function deleteSkill(idx) {
+  if (!confirm('Supprimer cette compétence ?')) return;
+  skills.splice(idx, 1);
+  save(); closeOverlay('skill-overlay'); renderSkills(); showToast('Supprimée');
+}
+
+// ── GOALS ──
+function renderGoals() {
+  const filtered = goalHorizonFilter === 'all' ? goals : goals.filter(g => g.horizon === goalHorizonFilter);
+  const el = document.getElementById('goals-list');
+  if (!filtered.length) {
+    el.innerHTML = `<div class="empty">
+      <div class="empty-icon">🎯</div>
+      <div>Aucun objectif défini</div>
+      <button class="empty-add" onclick="openGoalSheet()">+ Ajouter un objectif</button>
+    </div>`; return;
+  }
+  // Trier par horizon puis par progression décroissante
+  const order = {'6':0,'12':1,'60':2};
+  const sorted = filtered.slice().sort((a,b) => (order[a.horizon]||0) - (order[b.horizon]||0));
+  el.innerHTML = sorted.map(g => {
+    const idx = goals.indexOf(g);
+    const hClass = `horizon-${g.horizon}`;
+    const pct = g.progress || 0;
+    return `<div class="obj-item" onclick="openGoalSheet(${idx})">
+      <div class="obj-header">
+        <div class="obj-title">${g.title}</div>
+        <span class="badge ${hClass}" style="font-size:10px;">${HORIZON_LABELS[g.horizon] || ''}</span>
+      </div>
+      <div class="obj-progress-wrap"><div class="obj-progress" style="width:${pct}%"></div></div>
+      <div class="obj-footer">
+        <span>${pct}% atteint</span>
+        ${g.note ? `<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:55%;">${g.note}</span>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+function filterGoals(h, btn) {
+  goalHorizonFilter = h;
+  document.querySelectorAll('#cp-goals .pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderGoals();
+}
+function openGoalSheet(idx) {
+  editingGoalIdx = idx !== undefined ? idx : -1;
+  const g = idx !== undefined ? goals[idx] : null;
+  document.getElementById('goal-sheet-title').textContent = g ? 'Modifier l\'objectif' : 'Nouvel objectif';
+  document.getElementById('gl-title').value    = g ? g.title : '';
+  document.getElementById('gl-horizon').value  = g ? g.horizon : '12';
+  document.getElementById('gl-progress').value = g ? (g.progress || 0) : 0;
+  document.getElementById('gl-prog-val').textContent = (g ? (g.progress || 0) : 0) + '%';
+  document.getElementById('gl-note').value     = g ? (g.note || '') : '';
+  const btns = document.getElementById('goal-sheet-btns');
+  btns.innerHTML = g
+    ? `<button class="btn-danger" style="flex:1;" onclick="deleteGoal(${idx})">Supprimer</button>
+       <button class="btn-primary" style="flex:2;margin-top:0;" onclick="saveGoal()">Enregistrer</button>`
+    : `<button class="btn-secondary" style="flex:1;" onclick="closeOverlay('goal-overlay')">Annuler</button>
+       <button class="btn-primary" style="flex:2;margin-top:0;" onclick="saveGoal()">Enregistrer</button>`;
+  openOverlay('goal-overlay');
+}
+function saveGoal() {
+  const title = document.getElementById('gl-title').value.trim();
+  if (!title) { showToast('Titre requis'); return; }
+  const gl = {
+    title,
+    horizon:  document.getElementById('gl-horizon').value,
+    progress: parseInt(document.getElementById('gl-progress').value),
+    note:     document.getElementById('gl-note').value.trim(),
+    updatedAt: todayStr()
+  };
+  if (editingGoalIdx >= 0) goals[editingGoalIdx] = gl;
+  else goals.push(gl);
+  save(); closeOverlay('goal-overlay'); renderGoals();
+  showToast(editingGoalIdx >= 0 ? 'Objectif mis à jour' : 'Objectif ajouté');
+}
+function deleteGoal(idx) {
+  if (!confirm('Supprimer cet objectif ?')) return;
+  goals.splice(idx, 1);
+  save(); closeOverlay('goal-overlay'); renderGoals(); showToast('Supprimé');
+}
+
+// ── PUBS ──
+function renderPubs() {
+  const filtered = pubTypeFilter === 'all' ? pubs : pubs.filter(p => p.type === pubTypeFilter);
+  const el = document.getElementById('pubs-list');
+  if (!filtered.length) {
+    el.innerHTML = `<div class="empty">
+      <div class="empty-icon">📝</div>
+      <div>Aucune publication / communication</div>
+      <button class="empty-add" onclick="openPubSheet()">+ Ajouter</button>
+    </div>`; return;
+  }
+  const sorted = filtered.slice().sort((a,b) => (b.year||0) - (a.year||0));
+  el.innerHTML = sorted.map(p => {
+    const idx = pubs.indexOf(p);
+    const statusBadge = p.status === 'Publié' ? 'badge-green' :
+                        p.status === 'Accepté' ? 'badge-blue' :
+                        p.status === 'Soumis'  ? 'badge-amber' : 'badge-ghost';
+    return `<div class="pub-item" onclick="openPubSheet(${idx})">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:4px;">
+        <div class="pub-title" style="flex:1;">${p.title}</div>
+        <span class="badge ${statusBadge}" style="flex-shrink:0;">${p.status}</span>
+      </div>
+      <div class="pub-meta">${p.type}${p.year ? ' · ' + p.year : ''}${p.journal ? ' · ' + p.journal : ''}</div>
+    </div>`;
+  }).join('');
+}
+function filterPubs(type, btn) {
+  pubTypeFilter = type;
+  document.querySelectorAll('#cp-pubs .pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderPubs();
+}
+function openPubSheet(idx) {
+  editingPubIdx = idx !== undefined ? idx : -1;
+  const p = idx !== undefined ? pubs[idx] : null;
+  document.getElementById('pub-sheet-title').textContent = p ? 'Modifier l\'entrée' : 'Nouvelle entrée';
+  document.getElementById('pb-type').value    = p ? p.type : 'Article';
+  document.getElementById('pb-title').value   = p ? p.title : '';
+  document.getElementById('pb-year').value    = p ? (p.year || '') : new Date().getFullYear();
+  document.getElementById('pb-status').value  = p ? p.status : 'En cours';
+  document.getElementById('pb-journal').value = p ? (p.journal || '') : '';
+  const btns = document.getElementById('pub-sheet-btns');
+  btns.innerHTML = p
+    ? `<button class="btn-danger" style="flex:1;" onclick="deletePub(${idx})">Supprimer</button>
+       <button class="btn-primary" style="flex:2;margin-top:0;" onclick="savePub()">Enregistrer</button>`
+    : `<button class="btn-secondary" style="flex:1;" onclick="closeOverlay('pub-overlay')">Annuler</button>
+       <button class="btn-primary" style="flex:2;margin-top:0;" onclick="savePub()">Enregistrer</button>`;
+  openOverlay('pub-overlay');
+}
+function savePub() {
+  const title = document.getElementById('pb-title').value.trim();
+  if (!title) { showToast('Titre requis'); return; }
+  const pb = {
+    type:    document.getElementById('pb-type').value,
+    title,
+    year:    parseInt(document.getElementById('pb-year').value) || null,
+    status:  document.getElementById('pb-status').value,
+    journal: document.getElementById('pb-journal').value.trim()
+  };
+  if (editingPubIdx >= 0) pubs[editingPubIdx] = pb;
+  else pubs.push(pb);
+  save(); closeOverlay('pub-overlay'); renderPubs();
+  showToast(editingPubIdx >= 0 ? 'Mis à jour' : 'Ajouté');
+}
+function deletePub(idx) {
+  if (!confirm('Supprimer ?')) return;
+  pubs.splice(idx, 1);
+  save(); closeOverlay('pub-overlay'); renderPubs(); showToast('Supprimé');
+}
+
+// ── CV VIVANT ──
+function renderCV() {
+  const el = document.getElementById('cv-content');
+  let html = '';
+
+  // Poste
+  html += `<div class="cv-block">
+    <div class="cv-block-title">Poste actuel</div>
+    <div style="font-size:14px;color:var(--t1);">Docteur Junior en Orthopédie-Traumatologie</div>
+    <div style="font-size:12px;color:var(--t3);margin-top:4px;">Transition vers poste d'Assistant — 2026</div>
+  </div>`;
+
+  // Compétences par niveau
+  const autonomes = skills.filter(s => s.level === 4);
+  const realises  = skills.filter(s => s.level === 3);
+  if (autonomes.length || realises.length) {
+    html += `<div class="cv-block"><div class="cv-block-title">Compétences chirurgicales</div>`;
+    if (autonomes.length) {
+      html += `<div style="font-size:11px;color:var(--t3);margin-bottom:6px;margin-top:4px;">Autonome</div>`;
+      html += autonomes.map(s => `<div class="cv-row"><div class="cv-year"></div><div class="cv-text">${s.name}${s.cat ? ' <span style="color:var(--t3);">· ' + s.cat + '</span>' : ''}</div></div>`).join('');
+    }
+    if (realises.length) {
+      html += `<div style="font-size:11px;color:var(--t3);margin-bottom:6px;margin-top:10px;">Réalisé supervisé</div>`;
+      html += realises.map(s => `<div class="cv-row"><div class="cv-year"></div><div class="cv-text">${s.name}${s.cat ? ' <span style="color:var(--t3);">· ' + s.cat + '</span>' : ''}</div></div>`).join('');
+    }
+    html += `</div>`;
+  }
+
+  // Publications acceptées / publiées
+  const pubsOk = pubs.filter(p => p.status === 'Publié' || p.status === 'Accepté')
+    .sort((a,b) => (b.year||0) - (a.year||0));
+  if (pubsOk.length) {
+    html += `<div class="cv-block"><div class="cv-block-title">Publications & communications</div>`;
+    html += pubsOk.map(p =>
+      `<div class="cv-row">
+        <div class="cv-year">${p.year || '—'}</div>
+        <div class="cv-text">${p.title}${p.journal ? ' <span style="color:var(--t3);">· ' + p.journal + '</span>' : ''}</div>
+      </div>`
+    ).join('');
+    html += `</div>`;
+  }
+
+  // DU / DESC
+  const dus = pubs.filter(p => p.type === 'DU' || p.type === 'DESC');
+  if (dus.length) {
+    html += `<div class="cv-block"><div class="cv-block-title">Formations complémentaires</div>`;
+    html += dus.map(p =>
+      `<div class="cv-row">
+        <div class="cv-year">${p.year || '—'}</div>
+        <div class="cv-text">${p.title}${p.status ? ' <span style="color:var(--t3);">· ' + p.status + '</span>' : ''}</div>
+      </div>`
+    ).join('');
+    html += `</div>`;
+  }
+
+  if (!html.includes('cv-block" style') && skills.length === 0 && pubs.length === 0) {
+    html += `<div class="empty"><div class="empty-icon">📄</div><div>Remplis les compétences et publications pour générer ton CV</div></div>`;
+  }
+
+  el.innerHTML = html;
+}
+
+function exportCV() {
+  // Génère un texte simple exportable
+  let txt = 'CURRICULUM VITAE — SurgeonOS\n';
+  txt += '================================\n\n';
+  txt += 'Docteur Junior en Orthopédie-Traumatologie\n';
+  txt += 'Transition vers poste d\'Assistant — 2026\n\n';
+  const autonomes = skills.filter(s => s.level === 4);
+  const realises  = skills.filter(s => s.level === 3);
+  if (autonomes.length) {
+    txt += 'COMPÉTENCES — AUTONOME\n';
+    autonomes.forEach(s => { txt += `  • ${s.name}${s.cat ? ' (' + s.cat + ')' : ''}\n`; });
+    txt += '\n';
+  }
+  if (realises.length) {
+    txt += 'COMPÉTENCES — RÉALISÉ SUPERVISÉ\n';
+    realises.forEach(s => { txt += `  • ${s.name}${s.cat ? ' (' + s.cat + ')' : ''}\n`; });
+    txt += '\n';
+  }
+  const pubsOk = pubs.filter(p => p.status === 'Publié' || p.status === 'Accepté').sort((a,b)=>(b.year||0)-(a.year||0));
+  if (pubsOk.length) {
+    txt += 'PUBLICATIONS & COMMUNICATIONS\n';
+    pubsOk.forEach(p => { txt += `  ${p.year || '—'} — ${p.title}${p.journal ? ' (' + p.journal + ')' : ''}\n`; });
+    txt += '\n';
+  }
+  const blob = new Blob([txt], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'cv-surgeonos-' + todayStr() + '.txt';
+  a.click();
+  showToast('CV exporté');
+}
+
+// ── OVERLAYS ──
+function openOverlay(id) { document.getElementById(id).classList.add('show'); }
+function closeOverlay(id) { document.getElementById(id).classList.remove('show'); }
+
+// Close on backdrop tap
+document.querySelectorAll('.overlay').forEach(el => {
+  el.addEventListener('click', e => { if (e.target === el) closeOverlay(el.id); });
+});
+
+// ── TOAST ──
+let toastTimer;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.style.display = 'block';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.style.display = 'none'; }, 2400);
+}
+
+// ── INIT ──
+load();
+initTopbar();
+selectedDay = todayStr();
+renderDash();
+
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw-surgeonos.js').catch(() => {});
+</script>
+</body>
+</html>
