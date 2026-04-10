@@ -6,6 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="SurgeonOS">
 <meta name="theme-color" content="#080810">
+<link rel="manifest" href="manifest.json">
 <title>SurgeonOS</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&display=swap" rel="stylesheet">
@@ -768,6 +769,8 @@ body::before {
             <div class="day-sub" id="day-sub">—</div>
           </div>
           <div class="pane">
+            <!-- Bilan semaine -->
+            <div class="gcard" id="weekly-summary"></div>
             <!-- Stats row -->
             <div class="stat-row" id="stat-row"></div>
             <!-- Quick links -->
@@ -782,8 +785,28 @@ body::before {
             </div>
             <!-- Timeline -->
             <div class="gcard">
-              <div class="gcard-title" id="timeline-label">Aujourd'hui</div>
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                <div class="gcard-title" style="margin-bottom:0;" id="timeline-label">Aujourd'hui</div>
+                <button onclick="openQuickAdd()" style="background:var(--acc-dim);border:1px solid rgba(124,106,247,0.2);color:var(--acc2);padding:4px 10px;border-radius:var(--r);font-size:11px;cursor:pointer;font-family:var(--ff);">+ Événement</button>
+              </div>
               <div id="day-timeline"></div>
+            </div>
+            <!-- Tâches urgentes du jour -->
+            <div class="gcard" id="urgent-tasks-card">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                <div class="gcard-title" style="margin-bottom:0;">Tâches prioritaires</div>
+                <button onclick="sw('tasks')" style="background:none;border:none;color:var(--t3);font-size:11px;cursor:pointer;font-family:var(--ff);">Voir toutes →</button>
+              </div>
+              <div id="urgent-tasks-list"></div>
+            </div>
+            <!-- Note rapide -->
+            <div class="gcard">
+              <div class="gcard-title">Note rapide</div>
+              <div style="display:flex;gap:8px;align-items:flex-start;">
+                <textarea id="quick-note-input" placeholder="Capture une idée, un pense-bête..." style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:9px 12px;font-size:12px;font-family:var(--ff);color:var(--t1);resize:none;min-height:60px;line-height:1.5;" onkeydown="if(event.key==='Enter'&&event.metaKey)saveQuickNote()"></textarea>
+                <button onclick="saveQuickNote()" style="background:var(--acc-dim);border:1px solid rgba(124,106,247,0.2);color:var(--acc2);padding:9px 12px;border-radius:var(--r);font-size:12px;cursor:pointer;font-family:var(--ff);white-space:nowrap;align-self:flex-end;">⌘↵ Sauver</button>
+              </div>
+              <div id="quick-notes-list" style="margin-top:10px;"></div>
             </div>
             <!-- Upcoming reminders -->
             <div class="gcard" id="reminders-card">
@@ -1143,9 +1166,59 @@ function selectDay(ds) {
 // ═══════════════════════════════════════
 function renderDash() {
   renderCal();
+  renderWeeklySummary();
   renderStats();
   renderDayPanel();
+  renderUrgentTasks();
+  renderQuickNotes();
   renderUpcomingReminders();
+}
+
+function renderWeeklySummary() {
+  const el = document.getElementById('weekly-summary');
+  const mon = weekMonday();
+  const days = Array.from({length:7}, (_,i) => { const d=new Date(mon); d.setDate(mon.getDate()+i); return localStr(d); });
+  const orlog = loadOrLog();
+  const weekBlocs = days.reduce((n,ds) => n + orlog.filter(b=>b.date===ds&&b.done).length + events.filter(e=>e.date===ds&&e.type==='bloc').length, 0);
+  const weekPlanned = days.reduce((n,ds) => n + orlog.filter(b=>b.date===ds&&!b.done).length, 0);
+  const doneTasks = tasks.filter(t=>t.done).length;
+  const urgentCount = tasks.filter(t=>!t.done&&t.priority==='high').length;
+  const nextReminder = [...events.filter(e=>e.type==='rappel'&&e.date>=todayStr())].sort((a,b)=>a.date.localeCompare(b.date))[0];
+  const dayName = new Date().toLocaleDateString('fr-FR',{weekday:'long'});
+  el.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div style="font-family:var(--ff-d);font-size:15px;font-weight:600;color:var(--t1);">Semaine en cours</div>
+      <span style="font-size:11px;color:var(--t3);">${dayName.charAt(0).toUpperCase()+dayName.slice(1)}</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+      <div style="text-align:center;padding:10px 6px;background:var(--acc-dim);border-radius:var(--r);border:1px solid rgba(124,106,247,0.15);">
+        <div style="font-family:var(--ff-d);font-size:22px;font-weight:600;color:var(--acc2);">${weekBlocs}</div>
+        <div style="font-size:10px;color:var(--t3);margin-top:3px;">Blocs réalisés</div>
+      </div>
+      <div style="text-align:center;padding:10px 6px;background:var(--glass);border-radius:var(--r);border:1px solid var(--border);">
+        <div style="font-family:var(--ff-d);font-size:22px;font-weight:600;color:var(--cyan);">${weekPlanned}</div>
+        <div style="font-size:10px;color:var(--t3);margin-top:3px;">Blocs prévus</div>
+      </div>
+      <div style="text-align:center;padding:10px 6px;background:${urgentCount>0?'var(--rose-dim)':'var(--glass)'};border-radius:var(--r);border:1px solid ${urgentCount>0?'rgba(224,90,122,0.2)':'var(--border)'};">
+        <div style="font-family:var(--ff-d);font-size:22px;font-weight:600;color:${urgentCount>0?'var(--rose)':'var(--t2)'};">${urgentCount}</div>
+        <div style="font-size:10px;color:var(--t3);margin-top:3px;">Tâches urgentes</div>
+      </div>
+      <div style="text-align:center;padding:10px 6px;background:var(--glass);border-radius:var(--r);border:1px solid var(--border);">
+        <div style="font-family:var(--ff-d);font-size:22px;font-weight:600;color:var(--green);">${doneTasks}</div>
+        <div style="font-size:10px;color:var(--t3);margin-top:3px;">Tâches clôturées</div>
+      </div>
+    </div>
+    ${nextReminder ? `<div style="margin-top:10px;padding:8px 12px;background:var(--amber-dim);border-radius:var(--r);border:1px solid rgba(240,176,80,0.2);display:flex;align-items:center;gap:8px;font-size:12px;">
+      <span>🔔</span><span style="color:var(--t1);flex:1;">${nextReminder.title}</span>
+      <span style="color:var(--amber);font-weight:600;">${diffDays(nextReminder.date)===0?"Aujourd'hui":diffDays(nextReminder.date)===1?'Demain':'J-'+diffDays(nextReminder.date)}</span>
+    </div>` : ''}`;
+}
+
+function weekMonday() {
+  const t = new Date(); t.setHours(0,0,0,0);
+  const dow = t.getDay()===0?6:t.getDay()-1;
+  const mon = new Date(t); mon.setDate(t.getDate()-dow);
+  return mon;
 }
 function renderStats() {
   const orlog=loadOrLog();
@@ -1170,35 +1243,89 @@ function renderDayPanel() {
   document.getElementById('day-title').textContent=
     isToday?"Aujourd'hui — "+d.toLocaleDateString('fr-FR',{day:'numeric',month:'long'}):
     d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+  const ownEvts=events.filter(e=>e.date===ds);
+  const orlogEvts=loadOrLog().filter(b=>b.date===ds);
   document.getElementById('day-sub').textContent=
-    events.filter(e=>e.date===ds).length + ' événement(s) · cliquez le calendrier pour changer de jour';
+    (ownEvts.length+orlogEvts.length)+' événement(s) ce jour';
   const evts=getEventsForDay(ds);
   const tl=document.getElementById('day-timeline');
   document.getElementById('timeline-label').textContent=isToday?"Aujourd'hui":fmtShort(ds);
   if(!evts.length){
-    tl.innerHTML=`<div class="timeline-empty">Aucun événement — <span style="color:var(--acc2);cursor:pointer;" onclick="openQuickAdd()">+ ajouter</span></div>`;
+    tl.innerHTML=`<div class="timeline-empty">Aucun événement</div>`;
     return;
   }
   tl.innerHTML=evts.map((e,i)=>{
     const color=EV_COLOR[e.type]||EV_COLOR.autre;
     const isLast=i===evts.length-1;
+    const ownIdx=e.fromOrLog?-1:events.findIndex(ev=>ev.id===e.id);
     const badges=[
-      e.fromOrLog?`<span class="badge badge-ghost">OrLog</span>`:'',
-      e.done?`<span class="badge badge-green">✓</span>`:''
+      e.fromOrLog?`<span class="badge badge-ghost" style="font-size:9px;">OrLog</span>`:'',
+      e.done?`<span class="badge badge-green" style="font-size:9px;">✓</span>`:''
     ].filter(Boolean).join('');
-    return `<div class="tl-item">
+    const delBtn=ownIdx>=0?`<button onclick="deleteEventInline(${ownIdx})" style="opacity:0;background:var(--rose-dim);border:1px solid rgba(224,90,122,0.2);color:var(--rose);width:22px;height:22px;border-radius:6px;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;margin-left:4px;transition:opacity 0.15s;" class="tl-del">×</button>`:'';
+    return `<div class="tl-item" style="cursor:default;" onmouseenter="this.querySelector('.tl-del')&&(this.querySelector('.tl-del').style.opacity='1')" onmouseleave="this.querySelector('.tl-del')&&(this.querySelector('.tl-del').style.opacity='0')">
       <div class="tl-left">
         <div class="tl-dot" style="background:${color};box-shadow:0 0 8px ${color}60;"></div>
         ${!isLast?'<div class="tl-connector"></div>':''}
       </div>
       <div class="tl-body">
-        <div class="tl-title">${e.title||'—'} ${badges}</div>
+        <div class="tl-title" style="display:flex;align-items:center;gap:6px;">${e.title||'—'} ${badges} ${delBtn}</div>
         ${e.note?`<div class="tl-meta">${e.note}</div>`:''}
       </div>
       ${e.time?`<div class="tl-time">${e.time}</div>`:''}
     </div>`;
   }).join('');
 }
+function deleteEventInline(idx) {
+  if(!confirm('Supprimer cet événement ?')) return;
+  events.splice(idx,1);
+  save(); renderDash(); showToast('Événement supprimé');
+}
+function renderUrgentTasks() {
+  const el = document.getElementById('urgent-tasks-list');
+  const urgent = tasks.filter(t=>!t.done&&t.priority==='high').slice(0,5);
+  const normal = tasks.filter(t=>!t.done&&t.priority==='med').slice(0,3);
+  const all = [...urgent, ...normal].slice(0,6);
+  if(!all.length) {
+    el.innerHTML=`<div style="font-size:12px;color:var(--t3);padding:6px 0;">Aucune tâche prioritaire — bonne journée 🎉</div>`;
+    return;
+  }
+  el.innerHTML = all.map(t=>{
+    const idx=tasks.indexOf(t);
+    const dot=t.priority==='high'?'var(--rose)':'var(--amber)';
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.03);cursor:pointer;" onclick="openTaskSheet(null,${idx})">
+      <div style="width:6px;height:6px;border-radius:50%;background:${dot};flex-shrink:0;"></div>
+      <div style="flex:1;font-size:12px;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t.text}</div>
+      <span style="font-size:10px;color:var(--t3);">${t.col==='pro'?'Pro':'Perso'}</span>
+      <div onclick="event.stopPropagation();toggleTask(${idx})" style="width:16px;height:16px;border-radius:5px;border:1.5px solid var(--border2);cursor:pointer;flex-shrink:0;"></div>
+    </div>`;
+  }).join('');
+}
+
+function saveQuickNote() {
+  const inp = document.getElementById('quick-note-input');
+  const text = inp.value.trim();
+  if(!text) return;
+  // Trouver ou créer la catégorie "Divers"
+  let diversCat = cats.find(c=>c.name==='Divers')||cats[0];
+  notes.unshift({id:Date.now(), title:text.substring(0,60), body:text.length>60?text:'', cat:diversCat?diversCat.id:'', date:todayStr()});
+  save(); inp.value=''; renderQuickNotes();
+  showToast('Note sauvegardée (⌘↵)');
+}
+function renderQuickNotes() {
+  const el = document.getElementById('quick-notes-list');
+  const recent = notes.slice(0,3);
+  if(!recent.length) { el.innerHTML=''; return; }
+  el.innerHTML = recent.map(n=>{
+    const idx=notes.indexOf(n);
+    return `<div style="display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-top:1px solid rgba(255,255,255,0.04);">
+      <div style="flex:1;font-size:12px;color:var(--t2);line-height:1.4;cursor:pointer;" onclick="openNoteDetail(${idx})">${n.title}</div>
+      <span style="font-size:10px;color:var(--t3);white-space:nowrap;">${n.date?fmtShort(n.date):''}</span>
+    </div>`;
+  }).join('');
+  if(notes.length>3) el.innerHTML+=`<div style="font-size:11px;color:var(--t3);padding-top:6px;cursor:pointer;" onclick="sw('library')">Voir toutes les notes →</div>`;
+}
+
 function renderUpcomingReminders() {
   const today=todayStr();
   const reminders=[
