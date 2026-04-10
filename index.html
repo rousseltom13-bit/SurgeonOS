@@ -709,6 +709,16 @@ body::before {
       </button>
     </nav>
     <div class="sb-bottom">
+      <button class="sb-btn" onclick="openExt('orlog')" title="OrLog">
+        <span>📋</span><span class="tooltip">OrLog</span>
+      </button>
+      <button class="sb-btn" onclick="openExt('ortopos')" title="OrTopos">
+        <span>📖</span><span class="tooltip">OrTopos</span>
+      </button>
+      <button class="sb-btn" onclick="openExt('finary')" title="Finary">
+        <span>📊</span><span class="tooltip">Finary</span>
+      </button>
+      <div class="sb-sep"></div>
       <button class="sb-btn" onclick="openSettings()" title="Réglages">
         <span>⚙</span><span class="tooltip">Réglages</span>
       </button>
@@ -764,10 +774,10 @@ body::before {
             <div class="gcard">
               <div class="gcard-title">Accès rapide</div>
               <div class="qlinks">
-                <a class="qlink" onclick="openExt('orlog')"><span class="qlink-icon">📋</span>OrLog</a>
-                <a class="qlink" onclick="openExt('ortopos')"><span class="qlink-icon">📖</span>OrTopos</a>
-                <a class="qlink" onclick="openExt('finary')"><span class="qlink-icon">📊</span>Finary</a>
-                <a class="qlink" onclick="sw('fininvest')"><span class="qlink-icon">💹</span>FinInvest</a>
+                <button class="qlink" onclick="openExt('orlog')"><span class="qlink-icon">📋</span>OrLog</button>
+                <button class="qlink" onclick="openExt('ortopos')"><span class="qlink-icon">📖</span>OrTopos</button>
+                <button class="qlink" onclick="openExt('finary')"><span class="qlink-icon">📊</span>Finary</button>
+                <button class="qlink" onclick="sw('fininvest')"><span class="qlink-icon">💹</span>FinInvest</button>
               </div>
             </div>
             <!-- Timeline -->
