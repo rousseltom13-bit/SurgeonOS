@@ -2,918 +2,951 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="SurgeonOS">
-<meta name="theme-color" content="#141210">
+<meta name="theme-color" content="#080810">
 <title>SurgeonOS</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&display=swap" rel="stylesheet">
 <style>
+/* ── RESET & ROOT ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  /* Base */
-  --bg0: #0f0d0b;
-  --bg1: #161410;
-  --bg2: #1e1b16;
-  --bg3: #272319;
-  --bg4: #312d22;
-  --bg5: #3d382a;
+  --bg0: #080810;
+  --bg1: #0d0d18;
+  --bg2: #12121f;
+  --bg3: #1a1a2e;
+  --bg4: #22223a;
+  --bg5: #2c2c48;
+  --glass: rgba(255,255,255,0.04);
+  --glass2: rgba(255,255,255,0.07);
+  --glass3: rgba(255,255,255,0.10);
+  --border: rgba(255,255,255,0.06);
+  --border2: rgba(255,255,255,0.11);
+  --t1: #f0eeff;
+  --t2: #9896b8;
+  --t3: #56546e;
+  --t4: #32304a;
 
-  /* Text */
-  --t1: #f0ebe2;
-  --t2: #a89d8a;
-  --t3: #6b6154;
-  --t4: #3d3830;
+  /* Accents */
+  --acc: #7c6af7;
+  --acc2: #a78bfa;
+  --acc-glow: rgba(124,106,247,0.25);
+  --acc-dim: rgba(124,106,247,0.12);
+  --warm: #e08a50;
+  --warm-dim: rgba(224,138,80,0.12);
+  --cyan: #4ecdc4;
+  --cyan-dim: rgba(78,205,196,0.10);
+  --rose: #e05a7a;
+  --rose-dim: rgba(224,90,122,0.10);
+  --green: #4dbb7a;
+  --green-dim: rgba(77,187,122,0.10);
+  --amber: #f0b050;
+  --amber-dim: rgba(240,176,80,0.10);
 
-  /* Accent warm */
-  --acc: #c87c3a;
-  --acc-l: #e89a58;
-  --acc-dim: rgba(200,124,58,0.15);
-  --acc-dim2: rgba(200,124,58,0.08);
-
-  /* Semantic */
-  --green: #5a9e4a;
-  --green-l: #7abf6a;
-  --green-bg: rgba(90,158,74,0.12);
-  --blue: #4a8fc4;
-  --blue-bg: rgba(74,143,196,0.12);
-  --amber: #c49a3a;
-  --amber-bg: rgba(196,154,58,0.12);
-  --red: #c45050;
-  --red-bg: rgba(196,80,80,0.12);
-  --purple: #9070d0;
-  --purple-bg: rgba(144,112,208,0.12);
-
-  /* Layout */
   --r: 10px;
   --r-lg: 16px;
   --r-xl: 22px;
-  --safe-top: env(safe-area-inset-top, 0px);
-  --safe-bot: env(safe-area-inset-bottom, 0px);
-
-  /* Typography */
-  --ff-display: 'Fraunces', Georgia, serif;
-  --ff-body: 'DM Sans', -apple-system, sans-serif;
+  --sidebar-w: 64px;
+  --ff: 'Sora', -apple-system, sans-serif;
+  --ff-d: 'Fraunces', Georgia, serif;
 }
-
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
 html, body {
   height: 100%; overflow: hidden;
   background: var(--bg0);
   color: var(--t1);
-  font-family: var(--ff-body);
-  font-size: 15px;
+  font-family: var(--ff);
+  font-size: 13px;
   -webkit-font-smoothing: antialiased;
 }
 
-/* ── TOPBAR ── */
-#app { display: flex; flex-direction: column; height: 100%; padding-top: var(--safe-top); }
-
-.topbar {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 14px 20px 12px;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
-  background: var(--bg0);
-  flex-shrink: 0;
-  position: relative;
-}
-.topbar::after {
+/* ── NOISE TEXTURE OVERLAY ── */
+body::before {
   content: '';
-  position: absolute; bottom: 0; left: 20px; right: 20px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--acc-dim), transparent);
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 9999; opacity: 0.4;
 }
-.topbar-brand {
-  display: flex; align-items: baseline; gap: 8px;
-}
-.topbar-name {
-  font-family: var(--ff-display);
-  font-size: 22px;
-  font-weight: 700;
-  letter-spacing: -0.5px;
-  color: var(--t1);
-}
-.topbar-name span { color: var(--acc); }
-.topbar-sub {
-  font-size: 11px;
-  color: var(--t3);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  font-weight: 300;
-}
-.topbar-actions { display: flex; align-items: center; gap: 8px; }
-.icon-btn {
-  width: 34px; height: 34px;
-  border-radius: 50%;
-  background: var(--bg3);
-  border: 1px solid rgba(255,255,255,0.06);
-  color: var(--t2);
-  font-size: 15px;
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: background 0.15s, color 0.15s;
-}
-.icon-btn:active { background: var(--bg4); color: var(--t1); }
 
-/* ── SCROLL AREA ── */
-.views { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 84px; }
-.view { display: none; padding: 20px; }
-.view.active { display: block; }
+/* ── AMBIENT GLOW ── */
+.ambient {
+  position: fixed; border-radius: 50%;
+  filter: blur(120px); pointer-events: none; z-index: 0;
+}
+.ambient-1 { width: 600px; height: 600px; background: rgba(124,106,247,0.06); top: -200px; left: 40px; }
+.ambient-2 { width: 400px; height: 400px; background: rgba(78,205,196,0.04); bottom: -100px; right: 200px; }
+.ambient-3 { width: 300px; height: 300px; background: rgba(224,138,80,0.04); top: 40%; left: 30%; }
 
-/* ── BOTTOM NAV ── */
-.bottomnav {
-  position: fixed; bottom: 0; left: 0; right: 0;
-  display: flex;
-  background: rgba(15,13,11,0.92);
+/* ── APP SHELL ── */
+#app {
+  display: flex; height: 100%; position: relative; z-index: 1;
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: var(--sidebar-w);
+  height: 100%;
+  background: rgba(13,13,24,0.8);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(255,255,255,0.05);
-  padding-bottom: var(--safe-bot);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  align-items: center;
+  padding: 20px 0;
+  flex-shrink: 0;
+  z-index: 10;
+}
+.sb-logo {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--acc), #a78bfa);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--ff-d); font-size: 16px; font-weight: 600;
+  color: white; margin-bottom: 28px;
+  box-shadow: 0 0 24px var(--acc-glow);
+  flex-shrink: 0;
+}
+.sb-nav { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+.sb-btn {
+  width: 44px; height: 44px;
+  border-radius: var(--r);
+  background: none; border: none;
+  color: var(--t3); font-size: 18px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s; position: relative;
+}
+.sb-btn:hover { background: var(--glass2); color: var(--t2); }
+.sb-btn.active {
+  background: var(--acc-dim);
+  color: var(--acc2);
+  box-shadow: 0 0 16px var(--acc-glow);
+}
+.sb-btn .tooltip {
+  position: absolute; left: 54px; top: 50%; transform: translateY(-50%);
+  background: var(--bg4); color: var(--t1);
+  padding: 5px 10px; border-radius: var(--r);
+  font-size: 11px; font-weight: 500; white-space: nowrap;
+  pointer-events: none; opacity: 0;
+  border: 1px solid var(--border2);
+  transition: opacity 0.15s;
   z-index: 100;
 }
-.bnav-item {
-  flex: 1; display: flex; flex-direction: column;
-  align-items: center; padding: 9px 4px 7px;
-  font-size: 10px; color: var(--t3);
-  cursor: pointer; gap: 3px;
-  border: none; background: none;
-  font-family: var(--ff-body);
-  letter-spacing: 0.02em;
-  transition: color 0.15s;
-}
-.bnav-item.active { color: var(--acc); }
-.bnav-icon { font-size: 19px; line-height: 1; }
+.sb-btn:hover .tooltip { opacity: 1; }
+.sb-sep { width: 28px; height: 1px; background: var(--border); margin: 8px 0; }
+.sb-bottom { margin-top: auto; display: flex; flex-direction: column; gap: 4px; }
 
-/* ── SECTION HEADER ── */
-.sh {
-  display: flex; align-items: baseline; justify-content: space-between;
-  margin-bottom: 14px;
+/* ── MAIN CONTENT ── */
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+/* Topbar */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 24px 14px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(8,8,16,0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  flex-shrink: 0;
 }
-.sh-title {
-  font-family: var(--ff-display);
-  font-size: 18px; font-weight: 500;
+.topbar-left { display: flex; align-items: baseline; gap: 12px; }
+.page-title {
+  font-family: var(--ff-d); font-size: 22px; font-weight: 600;
+  letter-spacing: -0.5px; color: var(--t1);
+}
+.page-sub { font-size: 11px; color: var(--t3); letter-spacing: 0.05em; }
+.topbar-right { display: flex; align-items: center; gap: 8px; }
+.tb-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 14px; border-radius: var(--r);
+  background: var(--acc-dim); color: var(--acc2);
+  border: 1px solid rgba(124,106,247,0.2);
+  font-size: 12px; font-weight: 500; cursor: pointer;
+  font-family: var(--ff); transition: all 0.15s;
+}
+.tb-btn:hover { background: rgba(124,106,247,0.2); }
+.tb-btn-ghost {
+  padding: 7px 10px; border-radius: var(--r);
+  background: var(--glass); color: var(--t2);
+  border: 1px solid var(--border);
+  font-size: 13px; cursor: pointer;
+  transition: background 0.15s;
+}
+.tb-btn-ghost:hover { background: var(--glass2); }
+
+/* Views */
+.views { flex: 1; overflow: hidden; }
+.view { display: none; height: 100%; }
+.view.active { display: flex; flex-direction: column; }
+
+/* ── DASHBOARD LAYOUT ── */
+#view-dash {
+  flex-direction: row !important;
+  overflow: hidden;
+}
+.dash-left {
+  width: 420px; min-width: 380px; max-width: 460px;
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.dash-right {
+  flex: 1; display: flex; flex-direction: column;
+  overflow: hidden;
+}
+
+/* Scrollable panes */
+.pane { flex: 1; overflow-y: auto; padding: 20px; }
+.pane::-webkit-scrollbar { width: 4px; }
+.pane::-webkit-scrollbar-track { background: transparent; }
+.pane::-webkit-scrollbar-thumb { background: var(--bg5); border-radius: 99px; }
+
+/* ── CALENDAR ── */
+.cal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.cal-month-name {
+  font-family: var(--ff-d); font-size: 16px; font-weight: 600;
   color: var(--t1); letter-spacing: -0.3px;
 }
-.sh-action {
-  font-size: 12px; color: var(--acc);
-  background: none; border: none;
-  cursor: pointer; font-family: var(--ff-body);
-  padding: 0;
+.cal-nav { display: flex; gap: 4px; align-items: center; }
+.cal-nav-btn {
+  width: 28px; height: 28px; border-radius: var(--r);
+  background: var(--glass); border: 1px solid var(--border);
+  color: var(--t2); cursor: pointer; font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
 }
-
-/* ── CARDS ── */
-.card {
-  background: var(--bg2);
-  border: 1px solid rgba(255,255,255,0.05);
-  border-radius: var(--r-lg);
-  padding: 16px;
-  margin-bottom: 12px;
+.cal-nav-btn:hover { background: var(--glass2); color: var(--t1); }
+.cal-today-btn {
+  padding: 4px 10px; font-size: 11px; font-weight: 500;
+  border-radius: var(--r); background: var(--glass);
+  border: 1px solid var(--border); color: var(--t3);
+  cursor: pointer; font-family: var(--ff);
+  transition: all 0.15s;
 }
-.card-sm {
-  background: var(--bg2);
-  border: 1px solid rgba(255,255,255,0.05);
-  border-radius: var(--r);
-  padding: 12px 14px;
-}
-.card-accent {
-  background: var(--acc-dim2);
-  border: 1px solid rgba(200,124,58,0.2);
-  border-radius: var(--r-lg);
-  padding: 16px;
-  margin-bottom: 12px;
-}
-.label {
-  font-size: 10px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--t3);
+.cal-today-btn:hover { color: var(--t1); background: var(--glass2); }
+.cal-grid-wrap { padding: 12px 16px 8px; flex-shrink: 0; }
+.cal-dow {
+  display: grid; grid-template-columns: repeat(7,1fr);
   margin-bottom: 6px;
 }
-.big-num {
-  font-family: var(--ff-display);
-  font-size: 38px; font-weight: 700;
-  letter-spacing: -2px;
-  line-height: 1;
-  color: var(--t1);
+.cal-dow-cell {
+  text-align: center; font-size: 10px; font-weight: 500;
+  color: var(--t3); letter-spacing: 0.08em; padding: 2px 0;
 }
-.big-num span { font-size: 16px; font-weight: 300; color: var(--t2); letter-spacing: 0; margin-left: 2px; }
-
-/* ── BADGES ── */
-.badge {
-  display: inline-flex; align-items: center;
-  padding: 3px 9px; border-radius: 99px;
-  font-size: 11px; font-weight: 500;
-}
-.badge-green  { background: var(--green-bg); color: var(--green-l); }
-.badge-blue   { background: var(--blue-bg); color: var(--blue); }
-.badge-amber  { background: var(--amber-bg); color: var(--amber); }
-.badge-red    { background: var(--red-bg); color: var(--red); }
-.badge-purple { background: var(--purple-bg); color: var(--purple); }
-.badge-ghost  { background: rgba(255,255,255,0.05); color: var(--t2); }
-
-/* ── WEEK STRIP ── */
-.week-strip {
-  display: grid; grid-template-columns: repeat(7, 1fr);
-  gap: 4px; margin-bottom: 20px;
-}
-.week-day {
+.cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 2px; }
+.cal-cell {
+  aspect-ratio: 1; border-radius: 8px;
   display: flex; flex-direction: column; align-items: center;
-  gap: 5px; padding: 10px 4px;
-  border-radius: var(--r);
-  cursor: pointer; background: none; border: none;
-  font-family: var(--ff-body); color: var(--t2);
-  transition: background 0.15s;
-  position: relative;
+  justify-content: flex-start; padding: 4px 2px 2px;
+  cursor: pointer; transition: background 0.12s;
+  position: relative; overflow: hidden;
 }
-.week-day:active { background: var(--bg3); }
-.week-day.today {
-  background: var(--acc-dim);
-  border: 1px solid rgba(200,124,58,0.25);
+.cal-cell:hover { background: var(--glass2); }
+.cal-cell.other { opacity: 0.25; }
+.cal-cell.today .cal-num {
+  background: var(--acc);
+  color: white; border-radius: 50%;
+  width: 22px; height: 22px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 12px var(--acc-glow);
 }
-.week-day.today .wd-num { color: var(--acc); }
-.week-day.today .wd-name { color: var(--acc); opacity: 0.7; }
-.wd-name { font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em; }
-.wd-num {
-  font-family: var(--ff-display);
-  font-size: 18px; font-weight: 500; line-height: 1;
+.cal-cell.selected { background: var(--acc-dim); border: 1px solid rgba(124,106,247,0.2); }
+.cal-num { font-size: 12px; font-weight: 500; color: var(--t1); line-height: 1; }
+.cal-cell.other .cal-num { color: var(--t3); }
+.cal-pips { display: flex; gap: 2px; margin-top: 3px; flex-wrap: wrap; justify-content: center; }
+.cal-pip { width: 4px; height: 4px; border-radius: 50%; flex-shrink: 0; }
+
+/* ── TODAY HEADER ── */
+.day-header {
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
 }
-.wd-dots { display: flex; gap: 2px; min-height: 6px; }
-.wd-dot { width: 4px; height: 4px; border-radius: 50%; }
-.wd-dot.bloc   { background: var(--acc); }
-.wd-dot.garde  { background: var(--red); }
-.wd-dot.consult { background: var(--blue); }
-.wd-dot.other  { background: var(--t3); }
+.day-title {
+  font-family: var(--ff-d); font-size: 17px; font-weight: 600;
+  color: var(--t1); margin-bottom: 3px;
+}
+.day-sub { font-size: 11px; color: var(--t3); }
 
 /* ── TIMELINE ── */
-.timeline { display: flex; flex-direction: column; gap: 1px; }
+.timeline-empty {
+  padding: 28px 0; text-align: center; color: var(--t3); font-size: 12px;
+}
 .tl-item {
-  display: flex; align-items: flex-start; gap: 12px;
-  padding: 10px 0;
+  display: flex; gap: 12px; padding: 9px 0;
   border-bottom: 1px solid rgba(255,255,255,0.03);
 }
 .tl-item:last-child { border-bottom: none; }
-.tl-dot-wrap {
-  display: flex; flex-direction: column; align-items: center;
-  padding-top: 4px; flex-shrink: 0; width: 14px;
-}
-.tl-dot {
-  width: 8px; height: 8px; border-radius: 50%;
-  flex-shrink: 0;
-}
-.tl-line {
-  width: 1px; flex: 1; min-height: 16px;
-  background: rgba(255,255,255,0.05);
-  margin-top: 4px;
-}
-.tl-content { flex: 1; }
-.tl-title { font-size: 14px; font-weight: 500; color: var(--t1); margin-bottom: 2px; }
-.tl-sub { font-size: 12px; color: var(--t2); }
-.tl-time { font-size: 11px; color: var(--t3); white-space: nowrap; padding-top: 3px; }
+.tl-left { display: flex; flex-direction: column; align-items: center; width: 12px; padding-top: 5px; flex-shrink: 0; }
+.tl-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.tl-connector { flex: 1; width: 1px; background: rgba(255,255,255,0.04); margin-top: 4px; min-height: 10px; }
+.tl-body { flex: 1; min-width: 0; }
+.tl-title { font-size: 13px; font-weight: 500; color: var(--t1); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tl-meta { font-size: 11px; color: var(--t3); }
+.tl-time { font-size: 10px; color: var(--t3); white-space: nowrap; padding-top: 4px; }
 
-/* ── STAT GRID ── */
-.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
-.stat-card {
-  background: var(--bg2);
-  border: 1px solid rgba(255,255,255,0.05);
+/* ── GLASS CARD ── */
+.gcard {
+  background: var(--glass);
+  border: 1px solid var(--border);
   border-radius: var(--r-lg);
-  padding: 14px 16px;
+  padding: 16px;
+  margin-bottom: 14px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.gcard-title {
+  font-size: 10px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--t3); margin-bottom: 12px;
 }
 
 /* ── QUICK LINKS ── */
-.quicklinks {
-  display: grid; grid-template-columns: repeat(4, 1fr);
-  gap: 8px; margin-bottom: 20px;
-}
-.ql-btn {
-  display: flex; flex-direction: column; align-items: center;
-  gap: 6px; padding: 12px 6px;
-  background: var(--bg2);
-  border: 1px solid rgba(255,255,255,0.05);
+.qlinks { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-bottom: 16px; }
+.qlink {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 12px 6px;
+  background: var(--glass);
+  border: 1px solid var(--border);
   border-radius: var(--r-lg);
   cursor: pointer; color: var(--t2);
-  font-size: 10px; font-family: var(--ff-body);
-  text-transform: uppercase; letter-spacing: 0.06em;
+  font-size: 10px; font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.07em;
   text-decoration: none;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  transition: all 0.15s;
 }
-.ql-btn:active { background: var(--bg3); color: var(--t1); }
-.ql-icon { font-size: 20px; }
+.qlink:hover { background: var(--glass3); border-color: var(--border2); color: var(--t1); transform: translateY(-1px); }
+.qlink-icon { font-size: 18px; }
 
-/* ── DAY MODAL ── */
+/* ── STAT PILLS ── */
+.stat-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+.stat-pill {
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 12px 14px;
+}
+.stat-pill-label { font-size: 10px; color: var(--t3); font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+.stat-pill-val { font-family: var(--ff-d); font-size: 26px; font-weight: 600; letter-spacing: -1px; color: var(--t1); line-height: 1; }
+.stat-pill-sub { font-size: 10px; color: var(--t3); margin-top: 3px; }
+
+/* ── TASKS VIEW ── */
+#view-tasks .view-body {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 0; flex: 1; overflow: hidden;
+}
+.task-col {
+  display: flex; flex-direction: column;
+  border-right: 1px solid var(--border);
+  overflow: hidden;
+}
+.task-col:last-child { border-right: none; }
+.task-col-header {
+  padding: 16px 20px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+.task-col-title {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; font-weight: 600; color: var(--t1);
+}
+.task-col-dot { width: 8px; height: 8px; border-radius: 50%; }
+.task-add-btn {
+  width: 26px; height: 26px; border-radius: var(--r);
+  background: var(--glass); border: 1px solid var(--border);
+  color: var(--t3); cursor: pointer; font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.task-add-btn:hover { background: var(--glass2); color: var(--t1); }
+.task-list { flex: 1; overflow-y: auto; padding: 12px 16px; }
+.task-list::-webkit-scrollbar { width: 3px; }
+.task-list::-webkit-scrollbar-thumb { background: var(--bg5); border-radius: 99px; }
+
+/* Task item */
+.task-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 12px; border-radius: var(--r);
+  margin-bottom: 4px; cursor: pointer;
+  transition: background 0.12s; position: relative;
+  border: 1px solid transparent;
+}
+.task-item:hover { background: var(--glass); border-color: var(--border); }
+.task-item.done { opacity: 0.4; }
+.task-item.done .task-text { text-decoration: line-through; }
+.task-check {
+  width: 16px; height: 16px; border-radius: 5px;
+  border: 1.5px solid var(--border2);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 1px; cursor: pointer;
+  transition: all 0.15s;
+}
+.task-check:hover { border-color: var(--acc); }
+.task-check.checked { background: var(--acc); border-color: var(--acc); }
+.task-check.checked::after { content: '✓'; font-size: 10px; color: white; font-weight: 600; }
+.task-body { flex: 1; min-width: 0; }
+.task-text { font-size: 13px; color: var(--t1); line-height: 1.4; margin-bottom: 3px; }
+.task-sub { font-size: 11px; color: var(--t3); }
+.task-badges { display: flex; gap: 5px; margin-top: 5px; flex-wrap: wrap; }
+.priority-high { color: var(--rose); background: var(--rose-dim); }
+.priority-med  { color: var(--amber); background: var(--amber-dim); }
+.priority-low  { color: var(--t3); background: var(--glass); }
+
+/* Project expand */
+.project-item {
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  margin-bottom: 8px; overflow: hidden;
+}
+.project-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 14px; cursor: pointer;
+  transition: background 0.12s;
+}
+.project-header:hover { background: var(--glass); }
+.project-chevron { font-size: 10px; color: var(--t3); transition: transform 0.2s; margin-left: auto; }
+.project-header.open .project-chevron { transform: rotate(90deg); }
+.project-subtasks { padding: 0 14px 8px; display: none; }
+.project-subtasks.open { display: block; }
+.subtask-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  font-size: 12px; color: var(--t2);
+}
+.subtask-item:last-child { border-bottom: none; }
+.subtask-check {
+  width: 14px; height: 14px; border-radius: 4px;
+  border: 1.5px solid var(--border2);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0; transition: all 0.15s;
+}
+.subtask-check:hover { border-color: var(--acc); }
+.subtask-check.checked { background: var(--acc); border-color: var(--acc); }
+.subtask-check.checked::after { content: '✓'; font-size: 8px; color: white; font-weight: 600; }
+
+/* Section separator */
+.task-section-label {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--t4);
+  padding: 10px 0 6px; margin-top: 4px;
+}
+
+/* ── LIBRARY VIEW ── */
+#view-library .view-body {
+  display: grid; grid-template-columns: 220px 1fr;
+  flex: 1; overflow: hidden;
+}
+.lib-sidebar {
+  border-right: 1px solid var(--border);
+  padding: 16px 12px;
+  overflow-y: auto;
+}
+.lib-sidebar::-webkit-scrollbar { width: 3px; }
+.lib-sidebar-title {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--t3);
+  padding: 0 8px; margin-bottom: 8px;
+}
+.lib-cat-btn {
+  display: flex; align-items: center; gap: 8px;
+  width: 100%; padding: 8px 10px; border-radius: var(--r);
+  background: none; border: none; color: var(--t2);
+  font-size: 12px; font-family: var(--ff); cursor: pointer;
+  text-align: left; transition: all 0.12s;
+}
+.lib-cat-btn:hover { background: var(--glass); color: var(--t1); }
+.lib-cat-btn.active { background: var(--acc-dim); color: var(--acc2); }
+.lib-cat-icon { font-size: 14px; }
+.lib-cat-count { margin-left: auto; font-size: 10px; color: var(--t3); }
+.lib-add-cat {
+  display: flex; align-items: center; gap: 6px;
+  width: 100%; padding: 7px 10px; border-radius: var(--r);
+  background: none; border: 1px dashed var(--border);
+  color: var(--t3); font-size: 11px; cursor: pointer;
+  font-family: var(--ff); margin-top: 8px; transition: all 0.15s;
+}
+.lib-add-cat:hover { border-color: var(--border2); color: var(--t2); }
+
+.lib-content { flex: 1; overflow-y: auto; padding: 20px; }
+.lib-content::-webkit-scrollbar { width: 4px; }
+.lib-content::-webkit-scrollbar-thumb { background: var(--bg5); border-radius: 99px; }
+
+.note-card {
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 16px;
+  margin-bottom: 10px;
+  cursor: pointer; transition: all 0.15s;
+}
+.note-card:hover { background: var(--glass2); border-color: var(--border2); transform: translateY(-1px); }
+.note-card-title { font-size: 13px; font-weight: 500; color: var(--t1); margin-bottom: 6px; }
+.note-card-body { font-size: 12px; color: var(--t2); line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.note-card-meta { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+.note-card-date { font-size: 10px; color: var(--t3); }
+.note-tag { font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 99px; background: var(--glass2); color: var(--t2); }
+
+/* Reminder card */
+.reminder-card {
+  display: flex; align-items: center; gap: 14px;
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 14px 16px;
+  margin-bottom: 8px;
+  cursor: pointer; transition: all 0.15s;
+}
+.reminder-card:hover { background: var(--glass2); }
+.reminder-icon { font-size: 22px; flex-shrink: 0; }
+.reminder-body { flex: 1; min-width: 0; }
+.reminder-title { font-size: 13px; font-weight: 500; color: var(--t1); margin-bottom: 3px; }
+.reminder-date { font-size: 11px; color: var(--t3); }
+.reminder-countdown {
+  font-size: 11px; font-weight: 600; padding: 3px 10px;
+  border-radius: 99px; white-space: nowrap;
+}
+.countdown-urgent { background: var(--rose-dim); color: var(--rose); }
+.countdown-soon   { background: var(--amber-dim); color: var(--amber); }
+.countdown-ok     { background: var(--green-dim); color: var(--green); }
+
+/* ── BADGE ── */
+.badge {
+  display: inline-flex; align-items: center;
+  padding: 2px 8px; border-radius: 99px;
+  font-size: 10px; font-weight: 500;
+}
+.badge-acc    { background: var(--acc-dim); color: var(--acc2); }
+.badge-green  { background: var(--green-dim); color: var(--green); }
+.badge-warm   { background: var(--warm-dim); color: var(--warm); }
+.badge-cyan   { background: var(--cyan-dim); color: var(--cyan); }
+.badge-rose   { background: var(--rose-dim); color: var(--rose); }
+.badge-amber  { background: var(--amber-dim); color: var(--amber); }
+.badge-ghost  { background: var(--glass); color: var(--t2); border: 1px solid var(--border); }
+
+/* ── SHEET OVERLAY ── */
 .overlay {
   position: fixed; inset: 0;
-  background: rgba(0,0,0,0.7);
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   z-index: 200; display: none;
-  align-items: flex-end; justify-content: center;
-  padding-bottom: var(--safe-bot);
-  backdrop-filter: blur(4px);
+  align-items: center; justify-content: center;
 }
 .overlay.show { display: flex; }
 .sheet {
   background: var(--bg2);
-  border-radius: 22px 22px 0 0;
-  width: 100%; max-width: 640px;
-  max-height: 88vh;
-  overflow-y: auto; -webkit-overflow-scrolling: touch;
-  padding: 8px 20px 24px;
-  border-top: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-xl);
+  width: 100%; max-width: 480px;
+  max-height: 90vh; overflow-y: auto;
+  padding: 28px;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04);
 }
-.sheet-handle {
-  width: 36px; height: 4px;
-  background: var(--bg5);
-  border-radius: 99px;
-  margin: 10px auto 18px;
-}
+.sheet::-webkit-scrollbar { width: 3px; }
+.sheet::-webkit-scrollbar-thumb { background: var(--bg5); }
 .sheet-title {
-  font-family: var(--ff-display);
-  font-size: 20px; font-weight: 500;
-  color: var(--t1); margin-bottom: 16px;
-  letter-spacing: -0.3px;
+  font-family: var(--ff-d); font-size: 20px; font-weight: 600;
+  color: var(--t1); margin-bottom: 22px; letter-spacing: -0.3px;
+}
+.sheet-close {
+  float: right; background: var(--glass); border: 1px solid var(--border);
+  color: var(--t2); width: 28px; height: 28px; border-radius: var(--r);
+  cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center;
 }
 
-/* ── FORM ── */
-.fg { margin-bottom: 14px; }
+/* Form elements */
+.fg { margin-bottom: 16px; }
 .fg label {
-  display: block; font-size: 10px; font-weight: 500;
+  display: block; font-size: 10px; font-weight: 600;
   text-transform: uppercase; letter-spacing: 0.1em;
-  color: var(--t3); margin-bottom: 6px;
+  color: var(--t3); margin-bottom: 7px;
 }
 .fg input, .fg select, .fg textarea {
-  width: 100%; padding: 11px 13px;
-  font-size: 14px; font-family: var(--ff-body);
-  background: var(--bg3);
-  border: 1px solid rgba(255,255,255,0.07);
-  border-radius: var(--r);
-  color: var(--t1);
+  width: 100%; padding: 10px 13px;
+  font-size: 13px; font-family: var(--ff);
+  background: var(--bg3); border: 1px solid var(--border2);
+  border-radius: var(--r); color: var(--t1);
   -webkit-appearance: none; appearance: none;
   transition: border-color 0.15s;
 }
 .fg input:focus, .fg select:focus, .fg textarea:focus {
-  outline: none;
-  border-color: rgba(200,124,58,0.4);
+  outline: none; border-color: rgba(124,106,247,0.5);
+  box-shadow: 0 0 0 3px rgba(124,106,247,0.08);
 }
-.fg textarea { resize: vertical; min-height: 72px; line-height: 1.5; }
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.fg select option { background: var(--bg3); }
+.fg textarea { resize: vertical; min-height: 80px; line-height: 1.6; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .btn-primary {
-  width: 100%; padding: 14px;
-  font-size: 14px; font-weight: 500;
-  font-family: var(--ff-body);
-  background: var(--acc);
-  color: #fff; border: none;
-  border-radius: var(--r-lg);
-  cursor: pointer; margin-top: 6px;
-  letter-spacing: 0.02em;
-  transition: opacity 0.15s;
+  width: 100%; padding: 12px;
+  font-size: 13px; font-weight: 600; font-family: var(--ff);
+  background: linear-gradient(135deg, var(--acc), #a78bfa);
+  color: white; border: none; border-radius: var(--r-lg);
+  cursor: pointer; margin-top: 6px; letter-spacing: 0.02em;
+  box-shadow: 0 4px 20px var(--acc-glow);
+  transition: opacity 0.15s, transform 0.15s;
 }
-.btn-primary:active { opacity: 0.82; }
+.btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+.btn-primary:active { transform: none; opacity: 0.8; }
 .btn-secondary {
-  padding: 10px 16px;
-  font-size: 13px; font-family: var(--ff-body);
-  background: var(--bg3);
-  color: var(--t1);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: var(--r);
-  cursor: pointer;
-  transition: background 0.15s;
+  padding: 10px 16px; font-size: 12px; font-family: var(--ff);
+  background: var(--glass); color: var(--t1);
+  border: 1px solid var(--border2); border-radius: var(--r);
+  cursor: pointer; transition: background 0.15s;
 }
-.btn-secondary:active { background: var(--bg4); }
+.btn-secondary:hover { background: var(--glass2); }
 .btn-danger {
-  padding: 10px 16px; font-size: 13px;
-  font-family: var(--ff-body);
-  background: var(--red-bg);
-  color: var(--red);
-  border: 1px solid rgba(196,80,80,0.2);
-  border-radius: var(--r); cursor: pointer;
-}
-
-/* ── CAREER MODULE ── */
-.career-tabs {
-  display: flex; gap: 3px;
-  background: var(--bg2); border-radius: var(--r);
-  padding: 3px; margin-bottom: 18px;
-  border: 1px solid rgba(255,255,255,0.04);
-}
-.ctab {
-  flex: 1; padding: 8px 4px;
-  font-size: 12px; font-weight: 500;
-  border: none; background: none;
-  cursor: pointer; color: var(--t3);
-  border-radius: 7px;
-  font-family: var(--ff-body);
-  text-align: center;
-  transition: background 0.15s, color 0.15s;
-}
-.ctab.active {
-  background: var(--bg4); color: var(--t1);
-  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
-}
-.cpanel { display: none; }
-.cpanel.active { display: block; }
-
-/* Skill items */
-.skill-item {
-  display: flex; align-items: center; gap: 12px;
-  padding: 12px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
+  padding: 10px 16px; font-size: 12px; font-family: var(--ff);
+  background: var(--rose-dim); color: var(--rose);
+  border: 1px solid rgba(224,90,122,0.2); border-radius: var(--r);
   cursor: pointer;
 }
-.skill-item:last-child { border-bottom: none; }
-.skill-left { flex: 1; min-width: 0; }
-.skill-name { font-size: 14px; font-weight: 500; color: var(--t1); margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.skill-cat { font-size: 11px; color: var(--t3); }
-.skill-level {
-  display: flex; gap: 4px; align-items: center; flex-shrink: 0;
-}
-.level-pip {
-  width: 8px; height: 8px; border-radius: 50%;
-  background: var(--bg4);
-  transition: background 0.2s;
-}
-.level-pip.filled { background: var(--acc); }
-.level-labels { display: flex; gap: 4px; }
+.sheet-actions { display: flex; gap: 10px; margin-top: 8px; }
+.sheet-actions .btn-secondary { flex: 1; text-align: center; }
+.sheet-actions .btn-primary { flex: 2; margin-top: 0; }
 
-/* Level selector */
-.level-select-row {
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
-  margin: 12px 0;
+/* Priority selector */
+.prio-row { display: flex; gap: 8px; }
+.prio-btn {
+  flex: 1; padding: 8px; border-radius: var(--r);
+  background: var(--glass); border: 1px solid var(--border);
+  font-size: 11px; font-weight: 500; cursor: pointer;
+  font-family: var(--ff); text-align: center; color: var(--t2);
+  transition: all 0.15s;
 }
-.lsel-btn {
-  padding: 10px 4px; font-size: 12px; font-weight: 500;
-  border-radius: var(--r); background: var(--bg3);
-  border: 1px solid rgba(255,255,255,0.06);
-  color: var(--t2); cursor: pointer; font-family: var(--ff-body);
-  text-align: center; transition: all 0.15s;
-}
-.lsel-btn.active {
-  background: var(--acc-dim);
-  border-color: rgba(200,124,58,0.3);
-  color: var(--acc-l);
-}
+.prio-btn.high.active { background: var(--rose-dim); border-color: rgba(224,90,122,0.3); color: var(--rose); }
+.prio-btn.med.active  { background: var(--amber-dim); border-color: rgba(240,176,80,0.3); color: var(--amber); }
+.prio-btn.low.active  { background: var(--green-dim); border-color: rgba(77,187,122,0.3); color: var(--green); }
 
-/* Objectives */
-.obj-item {
-  padding: 14px;
-  background: var(--bg3);
-  border-radius: var(--r-lg);
-  border: 1px solid rgba(255,255,255,0.05);
-  margin-bottom: 10px;
-  cursor: pointer;
-  transition: border-color 0.15s;
+/* Type selector */
+.type-row { display: flex; gap: 8px; }
+.type-btn {
+  flex: 1; padding: 8px; border-radius: var(--r);
+  background: var(--glass); border: 1px solid var(--border);
+  font-size: 11px; font-weight: 500; cursor: pointer;
+  font-family: var(--ff); text-align: center; color: var(--t2);
+  transition: all 0.15s;
 }
-.obj-item:active { border-color: rgba(200,124,58,0.2); }
-.obj-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-.obj-title { font-size: 14px; font-weight: 500; color: var(--t1); }
-.obj-horizon { font-size: 11px; color: var(--t3); }
-.obj-progress-wrap { height: 4px; background: var(--bg4); border-radius: 99px; overflow: hidden; margin-bottom: 6px; }
-.obj-progress { height: 100%; border-radius: 99px; background: var(--acc); transition: width 0.3s; }
-.obj-footer { display: flex; justify-content: space-between; font-size: 11px; color: var(--t3); }
+.type-btn.active { background: var(--acc-dim); border-color: rgba(124,106,247,0.3); color: var(--acc2); }
 
-/* Publications */
-.pub-item {
-  padding: 12px 14px;
-  background: var(--bg3);
-  border-radius: var(--r);
-  border: 1px solid rgba(255,255,255,0.05);
-  margin-bottom: 8px;
-  cursor: pointer;
-}
-.pub-title { font-size: 13px; font-weight: 500; color: var(--t1); margin-bottom: 4px; }
-.pub-meta { font-size: 11px; color: var(--t3); }
-
-/* ── PROGRESS BAR ── */
-.prog-wrap { height: 4px; background: var(--bg4); border-radius: 99px; overflow: hidden; }
-.prog-bar  { height: 100%; border-radius: 99px; }
-
-/* ── EMPTY STATE ── */
-.empty {
-  text-align: center; padding: 40px 20px;
-  color: var(--t3); font-size: 13px;
-}
-.empty-icon { font-size: 28px; margin-bottom: 10px; opacity: 0.5; }
+/* ── EMPTY ── */
+.empty { text-align: center; padding: 48px 20px; color: var(--t3); }
+.empty-icon { font-size: 32px; margin-bottom: 12px; opacity: 0.4; }
 .empty-add {
   display: inline-flex; align-items: center; gap: 6px;
-  margin-top: 14px; padding: 9px 18px;
-  background: var(--acc-dim); color: var(--acc-l);
-  border: 1px solid rgba(200,124,58,0.2);
-  border-radius: 99px; font-size: 13px;
-  cursor: pointer; font-family: var(--ff-body);
-  border-width: 1px; border-style: solid;
+  margin-top: 16px; padding: 8px 18px;
+  background: var(--acc-dim); color: var(--acc2);
+  border: 1px solid rgba(124,106,247,0.2);
+  border-radius: 99px; font-size: 12px; cursor: pointer;
+  font-family: var(--ff);
 }
 
 /* ── TOAST ── */
 .toast {
-  position: fixed;
-  bottom: calc(84px + var(--safe-bot) + 12px);
-  left: 50%; transform: translateX(-50%);
-  background: var(--bg4);
-  color: var(--t1);
-  border: 1px solid rgba(255,255,255,0.08);
-  padding: 10px 20px;
-  border-radius: 99px; font-size: 13px;
-  white-space: nowrap; z-index: 400;
-  display: none; font-weight: 400;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  position: fixed; bottom: 24px; left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg4); color: var(--t1);
+  border: 1px solid var(--border2);
+  padding: 10px 20px; border-radius: 99px;
+  font-size: 12px; white-space: nowrap; z-index: 400;
+  display: none; font-weight: 500;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
 }
 
-/* ── DIVIDER ── */
-.divider {
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
-  margin: 16px 0;
-}
+/* ── CAREER reuse ── */
+.career-body { flex: 1; overflow-y: auto; padding: 24px; }
+.career-body::-webkit-scrollbar { width: 4px; }
+.career-body::-webkit-scrollbar-thumb { background: var(--bg5); border-radius: 99px; }
 
-/* ── PILL TABS ── */
-.pill-tabs { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
-.pill {
-  padding: 5px 13px; font-size: 12px; font-weight: 500;
-  border-radius: 99px;
-  border: 1px solid rgba(255,255,255,0.07);
-  background: none; color: var(--t3);
-  cursor: pointer; font-family: var(--ff-body);
-  transition: all 0.15s;
-}
-.pill.active {
-  background: var(--acc-dim);
-  border-color: rgba(200,124,58,0.25);
-  color: var(--acc-l);
-}
-
-/* ── HORIZON TAG ── */
-.horizon-6  { color: var(--green); background: var(--green-bg); }
-.horizon-12 { color: var(--blue); background: var(--blue-bg); }
-.horizon-60 { color: var(--purple); background: var(--purple-bg); }
-
-/* ── CV SECTION ── */
-.cv-block {
-  background: var(--bg3);
-  border-radius: var(--r-lg);
-  padding: 14px;
-  margin-bottom: 10px;
-  border: 1px solid rgba(255,255,255,0.05);
-}
-.cv-block-title {
-  font-size: 11px; font-weight: 500;
-  text-transform: uppercase; letter-spacing: 0.1em;
-  color: var(--t3); margin-bottom: 10px;
-}
-.cv-row {
-  display: flex; align-items: flex-start; gap: 10px;
-  padding: 8px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
-  font-size: 13px;
-}
-.cv-row:last-child { border-bottom: none; padding-bottom: 0; }
-.cv-year { color: var(--t3); font-size: 11px; white-space: nowrap; padding-top: 1px; min-width: 36px; }
-.cv-text { color: var(--t1); flex: 1; line-height: 1.4; }
-
-/* ── ANIMATION ── */
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(8px); }
+/* ── ANIMATIONS ── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-.view.active > * { animation: fadeUp 0.22s ease both; }
-.view.active > *:nth-child(2) { animation-delay: 0.04s; }
-.view.active > *:nth-child(3) { animation-delay: 0.08s; }
-.view.active > *:nth-child(4) { animation-delay: 0.12s; }
-.view.active > *:nth-child(5) { animation-delay: 0.16s; }
+.view.active > * { animation: fadeIn 0.2s ease both; }
+@keyframes shimmer {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
 </style>
 </head>
 <body>
 
+<!-- Ambient glows -->
+<div class="ambient ambient-1"></div>
+<div class="ambient ambient-2"></div>
+<div class="ambient ambient-3"></div>
+
 <div id="app">
 
-  <!-- TOPBAR -->
-  <div class="topbar">
-    <div class="topbar-brand">
-      <div class="topbar-name">Surgeon<span>OS</span></div>
-      <div class="topbar-sub" id="topbar-date">—</div>
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-logo">S</div>
+    <nav class="sb-nav">
+      <button class="sb-btn active" onclick="sw('dash')" id="sb-dash" title="Dashboard">
+        <span>⊞</span><span class="tooltip">Dashboard</span>
+      </button>
+      <button class="sb-btn" onclick="sw('tasks')" id="sb-tasks">
+        <span>✓</span><span class="tooltip">Tâches</span>
+      </button>
+      <button class="sb-btn" onclick="sw('library')" id="sb-library">
+        <span>⬡</span><span class="tooltip">Bibliothèque</span>
+      </button>
+      <div class="sb-sep"></div>
+      <button class="sb-btn" onclick="sw('career')" id="sb-career">
+        <span>◈</span><span class="tooltip">Carrière</span>
+      </button>
+      <button class="sb-btn" onclick="sw('fininvest')" id="sb-fininvest">
+        <span>◎</span><span class="tooltip">FinInvest</span>
+      </button>
+    </nav>
+    <div class="sb-bottom">
+      <button class="sb-btn" onclick="openSettings()" title="Réglages">
+        <span>⚙</span><span class="tooltip">Réglages</span>
+      </button>
     </div>
-    <div class="topbar-actions">
-      <button class="icon-btn" onclick="openAddEventSheet()" title="Ajouter événement">＋</button>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="page-title" id="page-title">Dashboard</div>
+        <div class="page-sub" id="page-sub"></div>
+      </div>
+      <div class="topbar-right" id="topbar-actions">
+        <button class="tb-btn" onclick="openQuickAdd()">＋ Ajouter</button>
+      </div>
+    </div>
+
+    <!-- VIEWS -->
+    <div class="views">
+
+      <!-- ① DASHBOARD -->
+      <div class="view active" id="view-dash">
+
+        <!-- LEFT: calendar -->
+        <div class="dash-left">
+          <div class="cal-header">
+            <div class="cal-month-name" id="cal-month-name">—</div>
+            <div class="cal-nav">
+              <button class="cal-today-btn" onclick="calGoToday()">Aujourd'hui</button>
+              <button class="cal-nav-btn" onclick="calNav(-1)">‹</button>
+              <button class="cal-nav-btn" onclick="calNav(1)">›</button>
+            </div>
+          </div>
+          <div class="cal-grid-wrap">
+            <div class="cal-dow" id="cal-dow"></div>
+            <div class="cal-grid" id="cal-grid"></div>
+          </div>
+        </div>
+
+        <!-- RIGHT: day + stats -->
+        <div class="dash-right">
+          <div class="day-header">
+            <div class="day-title" id="day-title">—</div>
+            <div class="day-sub" id="day-sub">—</div>
+          </div>
+          <div class="pane">
+            <!-- Stats row -->
+            <div class="stat-row" id="stat-row"></div>
+            <!-- Quick links -->
+            <div class="gcard">
+              <div class="gcard-title">Accès rapide</div>
+              <div class="qlinks">
+                <a class="qlink" onclick="openExt('orlog')"><span class="qlink-icon">📋</span>OrLog</a>
+                <a class="qlink" onclick="openExt('ortopos')"><span class="qlink-icon">📖</span>OrTopos</a>
+                <a class="qlink" onclick="openExt('finary')"><span class="qlink-icon">📊</span>Finary</a>
+                <a class="qlink" onclick="sw('fininvest')"><span class="qlink-icon">💹</span>FinInvest</a>
+              </div>
+            </div>
+            <!-- Timeline -->
+            <div class="gcard">
+              <div class="gcard-title" id="timeline-label">Aujourd'hui</div>
+              <div id="day-timeline"></div>
+            </div>
+            <!-- Upcoming reminders -->
+            <div class="gcard" id="reminders-card">
+              <div class="gcard-title">Rappels à venir</div>
+              <div id="upcoming-reminders"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ② TASKS -->
+      <div class="view" id="view-tasks">
+        <div class="view-body" style="display:grid;grid-template-columns:1fr 1fr;flex:1;overflow:hidden;">
+          <div class="task-col">
+            <div class="task-col-header">
+              <div class="task-col-title">
+                <div class="task-col-dot" style="background:var(--acc);box-shadow:0 0 8px var(--acc-glow);"></div>
+                Professionnel
+              </div>
+              <button class="task-add-btn" onclick="openTaskSheet('pro')">+</button>
+            </div>
+            <div class="task-list" id="task-list-pro"></div>
+          </div>
+          <div class="task-col">
+            <div class="task-col-header">
+              <div class="task-col-title">
+                <div class="task-col-dot" style="background:var(--cyan);box-shadow:0 0 8px rgba(78,205,196,0.3);"></div>
+                Personnel
+              </div>
+              <button class="task-add-btn" onclick="openTaskSheet('perso')">+</button>
+            </div>
+            <div class="task-list" id="task-list-perso"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ③ LIBRARY -->
+      <div class="view" id="view-library">
+        <div class="view-body" style="display:grid;grid-template-columns:220px 1fr;flex:1;overflow:hidden;">
+          <div class="lib-sidebar">
+            <div class="lib-sidebar-title">Catégories</div>
+            <div id="lib-cats"></div>
+            <button class="lib-add-cat" onclick="openAddCatSheet()">＋ Catégorie</button>
+          </div>
+          <div class="lib-content" id="lib-content"></div>
+        </div>
+      </div>
+
+      <!-- ④ CAREER (repris v1) -->
+      <div class="view" id="view-career">
+        <div class="career-body">
+          <div style="display:flex;gap:6px;background:var(--glass);border-radius:var(--r);padding:3px;border:1px solid var(--border);margin-bottom:20px;">
+            <button class="type-btn active" onclick="switchCareerTab('skills',this)" style="flex:1;">Compétences</button>
+            <button class="type-btn" onclick="switchCareerTab('goals',this)" style="flex:1;">Objectifs</button>
+            <button class="type-btn" onclick="switchCareerTab('pubs',this)" style="flex:1;">Publications</button>
+            <button class="type-btn" onclick="switchCareerTab('cv',this)" style="flex:1;">CV</button>
+          </div>
+          <div id="cp-skills" class="cpanel active"></div>
+          <div id="cp-goals" class="cpanel" style="display:none;"></div>
+          <div id="cp-pubs" class="cpanel" style="display:none;"></div>
+          <div id="cp-cv" class="cpanel" style="display:none;"></div>
+        </div>
+      </div>
+
+      <!-- ⑤ FININVEST -->
+      <div class="view" id="view-fininvest">
+        <div class="pane" style="display:flex;align-items:center;justify-content:center;height:100%;">
+          <div style="text-align:center;">
+            <div style="font-size:40px;margin-bottom:16px;opacity:0.3;">💹</div>
+            <div style="font-size:16px;color:var(--t2);margin-bottom:8px;">FinInvest</div>
+            <div style="font-size:12px;color:var(--t3);">Intégration complète en v2</div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
-
-  <!-- VIEWS -->
-  <div class="views">
-
-    <!-- ① DASHBOARD -->
-    <div class="view active" id="view-dash">
-
-      <!-- Stats rapides -->
-      <div class="stat-grid">
-        <div class="stat-card">
-          <div class="label">Cette semaine</div>
-          <div class="big-num" id="stat-week">—<span>blocs</span></div>
-        </div>
-        <div class="stat-card">
-          <div class="label">Prochain bloc</div>
-          <div style="font-size:13px;font-weight:500;color:var(--t1);margin-top:6px;" id="stat-next">—</div>
-          <div style="font-size:11px;color:var(--t3);margin-top:3px;" id="stat-next-date"></div>
-        </div>
-      </div>
-
-      <!-- Week strip -->
-      <div class="sh">
-        <div class="sh-title" id="week-label">Semaine</div>
-        <div style="display:flex;gap:8px;align-items:center;">
-          <button class="sh-action" onclick="navWeek(-1)">‹</button>
-          <button class="sh-action" onclick="navWeek(0)" style="color:var(--t3);">Auj.</button>
-          <button class="sh-action" onclick="navWeek(1)">›</button>
-        </div>
-      </div>
-      <div class="week-strip" id="week-strip"></div>
-
-      <!-- Timeline du jour -->
-      <div class="sh">
-        <div class="sh-title" id="day-label">Aujourd'hui</div>
-        <button class="sh-action" onclick="openAddEventSheet()">+ Ajouter</button>
-      </div>
-      <div class="card" style="padding:8px 14px;">
-        <div class="timeline" id="day-timeline"></div>
-      </div>
-
-      <!-- Quick links -->
-      <div class="divider"></div>
-      <div class="sh"><div class="sh-title">Accès rapide</div></div>
-      <div class="quicklinks">
-        <a class="ql-btn" id="ql-orlog" href="#" onclick="openExternal('orlog')">
-          <span class="ql-icon">📋</span>OrLog
-        </a>
-        <a class="ql-btn" id="ql-ortopos" href="#" onclick="openExternal('ortopos')">
-          <span class="ql-icon">📖</span>OrTopos
-        </a>
-        <a class="ql-btn" id="ql-finary" href="#" onclick="openExternal('finary')">
-          <span class="ql-icon">📊</span>Finary
-        </a>
-        <a class="ql-btn" onclick="sw('fininvest')">
-          <span class="ql-icon">💹</span>FinInvest
-        </a>
-      </div>
-
-    </div>
-
-    <!-- ② CARRIÈRE -->
-    <div class="view" id="view-career">
-
-      <div class="career-tabs">
-        <button class="ctab active" onclick="switchCareerTab('skills',this)">Compétences</button>
-        <button class="ctab" onclick="switchCareerTab('goals',this)">Objectifs</button>
-        <button class="ctab" onclick="switchCareerTab('pubs',this)">Publications</button>
-        <button class="ctab" onclick="switchCareerTab('cv',this)">CV</button>
-      </div>
-
-      <!-- COMPÉTENCES -->
-      <div class="cpanel active" id="cp-skills">
-        <div class="sh">
-          <div class="sh-title">Compétences</div>
-          <button class="sh-action" onclick="openSkillSheet()">+ Ajouter</button>
-        </div>
-        <div class="pill-tabs" id="skill-filters">
-          <button class="pill active" onclick="filterSkills('all',this)">Toutes</button>
-        </div>
-        <div class="card" style="padding:8px 14px;">
-          <div id="skills-list"></div>
-        </div>
-      </div>
-
-      <!-- OBJECTIFS -->
-      <div class="cpanel" id="cp-goals">
-        <div class="sh">
-          <div class="sh-title">Objectifs</div>
-          <button class="sh-action" onclick="openGoalSheet()">+ Ajouter</button>
-        </div>
-        <div class="pill-tabs">
-          <button class="pill active" onclick="filterGoals('all',this)">Tous</button>
-          <button class="pill" onclick="filterGoals('6',this)">6 mois</button>
-          <button class="pill" onclick="filterGoals('12',this)">1 an</button>
-          <button class="pill" onclick="filterGoals('60',this)">5 ans</button>
-        </div>
-        <div id="goals-list"></div>
-      </div>
-
-      <!-- PUBLICATIONS -->
-      <div class="cpanel" id="cp-pubs">
-        <div class="sh">
-          <div class="sh-title">Publications & comm.</div>
-          <button class="sh-action" onclick="openPubSheet()">+ Ajouter</button>
-        </div>
-        <div class="pill-tabs">
-          <button class="pill active" onclick="filterPubs('all',this)">Tout</button>
-          <button class="pill" onclick="filterPubs('Article',this)">Articles</button>
-          <button class="pill" onclick="filterPubs('Communication',this)">Comms</button>
-          <button class="pill" onclick="filterPubs('DU',this)">DU / DESC</button>
-          <button class="pill" onclick="filterPubs('Formation',this)">Formations</button>
-        </div>
-        <div id="pubs-list"></div>
-      </div>
-
-      <!-- CV VIVANT -->
-      <div class="cpanel" id="cp-cv">
-        <div class="sh">
-          <div class="sh-title">CV vivant</div>
-          <button class="sh-action" onclick="exportCV()">Exporter</button>
-        </div>
-        <div id="cv-content"></div>
-      </div>
-
-    </div>
-
-    <!-- ③ FININVEST (placeholder v1) -->
-    <div class="view" id="view-fininvest">
-      <div class="sh"><div class="sh-title">FinInvest</div></div>
-      <div class="card" style="text-align:center;padding:40px 20px;">
-        <div style="font-size:28px;margin-bottom:12px;opacity:0.4;">💹</div>
-        <div style="font-size:14px;color:var(--t2);margin-bottom:6px;">Module FinInvest</div>
-        <div style="font-size:12px;color:var(--t3);">Intégration complète en v2</div>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- BOTTOM NAV -->
-  <nav class="bottomnav">
-    <button class="bnav-item active" onclick="sw('dash')" id="bn-dash">
-      <span class="bnav-icon">⊡</span><span>Semaine</span>
-    </button>
-    <button class="bnav-item" onclick="sw('career')" id="bn-career">
-      <span class="bnav-icon">◈</span><span>Carrière</span>
-    </button>
-    <button class="bnav-item" onclick="sw('fininvest')" id="bn-fininvest">
-      <span class="bnav-icon">◎</span><span>FinInvest</span>
-    </button>
-  </nav>
-
 </div>
 
 <!-- ── OVERLAYS ── -->
 
-<!-- Add Event Sheet -->
-<div class="overlay" id="event-overlay">
+<!-- Quick add event -->
+<div class="overlay" id="ov-event">
   <div class="sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-title" id="event-sheet-title">Nouvel événement</div>
+    <button class="sheet-close" onclick="closeOv('ov-event')">×</button>
+    <div class="sheet-title" id="ev-title-h">Nouvel événement</div>
     <div class="fg">
       <label>Type</label>
-      <select id="ev-type" onchange="updateEvTypeUI()">
-        <option value="bloc">Bloc opératoire</option>
-        <option value="consult">Consultation</option>
-        <option value="garde">Garde</option>
-        <option value="formation">Formation / Congrès</option>
-        <option value="autre">Autre</option>
-      </select>
+      <div class="type-row">
+        <button class="type-btn active" data-ev="bloc" onclick="selEvType(this)">Bloc</button>
+        <button class="type-btn" data-ev="consult" onclick="selEvType(this)">Consult.</button>
+        <button class="type-btn" data-ev="garde" onclick="selEvType(this)">Garde</button>
+        <button class="type-btn" data-ev="rappel" onclick="selEvType(this)">Rappel</button>
+        <button class="type-btn" data-ev="autre" onclick="selEvType(this)">Autre</button>
+      </div>
     </div>
-    <div class="fg">
-      <label>Date</label>
-      <input type="date" id="ev-date">
-    </div>
+    <div class="fg"><label>Titre</label><input type="text" id="ev-title" placeholder="Description..."></div>
     <div class="form-row">
-      <div class="fg">
-        <label>Heure début</label>
-        <input type="time" id="ev-start" value="08:00">
-      </div>
-      <div class="fg">
-        <label>Heure fin</label>
-        <input type="time" id="ev-end" value="12:00">
-      </div>
+      <div class="fg"><label>Date</label><input type="date" id="ev-date"></div>
+      <div class="fg"><label>Heure</label><input type="time" id="ev-time" value="08:00"></div>
     </div>
-    <div class="fg" id="ev-title-wrap">
-      <label>Titre / description</label>
-      <input type="text" id="ev-title" placeholder="ex. PTG D — Dr Martin">
-    </div>
-    <div class="fg">
-      <label>Note</label>
-      <input type="text" id="ev-note" placeholder="Optionnel...">
-    </div>
-    <div style="display:flex;gap:10px;margin-top:4px;">
-      <button class="btn-secondary" style="flex:1;" onclick="closeOverlay('event-overlay')">Annuler</button>
-      <button class="btn-primary" style="flex:2;margin-top:0;" onclick="saveEvent()">Enregistrer</button>
+    <div class="fg"><label>Note</label><input type="text" id="ev-note" placeholder="Optionnel..."></div>
+    <div class="sheet-actions">
+      <button class="btn-secondary" onclick="closeOv('ov-event')">Annuler</button>
+      <button class="btn-primary" onclick="saveEvent()">Enregistrer</button>
     </div>
   </div>
 </div>
 
-<!-- Day detail sheet -->
-<div class="overlay" id="day-overlay">
+<!-- Add task -->
+<div class="overlay" id="ov-task">
   <div class="sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-title" id="day-sheet-title">—</div>
-    <div id="day-sheet-events"></div>
-    <button class="btn-primary" onclick="openAddEventFromDay()" style="margin-top:8px;">+ Ajouter un événement</button>
-  </div>
-</div>
-
-<!-- Skill sheet -->
-<div class="overlay" id="skill-overlay">
-  <div class="sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-title" id="skill-sheet-title">Nouvelle compétence</div>
-    <div class="fg">
-      <label>Nom de la technique / compétence</label>
-      <input type="text" id="sk-name" placeholder="ex. PTG cimentée, Voie de Hardinge...">
-    </div>
-    <div class="fg">
-      <label>Catégorie (libre)</label>
-      <input type="text" id="sk-cat" placeholder="ex. Genou, Hanche, Trauma, Arthroscopie...">
-    </div>
-    <div class="fg">
-      <label>Niveau</label>
-      <div class="level-select-row">
-        <button class="lsel-btn" data-level="1" onclick="selectLevel(1)">Observé</button>
-        <button class="lsel-btn" data-level="2" onclick="selectLevel(2)">Assisté</button>
-        <button class="lsel-btn" data-level="3" onclick="selectLevel(3)">Réalisé</button>
-        <button class="lsel-btn" data-level="4" onclick="selectLevel(4)">Autonome</button>
-      </div>
-    </div>
-    <div class="fg">
-      <label>Note</label>
-      <input type="text" id="sk-note" placeholder="Optionnel...">
-    </div>
-    <div style="display:flex;gap:10px;margin-top:4px;" id="skill-sheet-btns">
-      <button class="btn-secondary" style="flex:1;" onclick="closeOverlay('skill-overlay')">Annuler</button>
-      <button class="btn-primary" style="flex:2;margin-top:0;" onclick="saveSkill()">Enregistrer</button>
-    </div>
-  </div>
-</div>
-
-<!-- Goal sheet -->
-<div class="overlay" id="goal-overlay">
-  <div class="sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-title" id="goal-sheet-title">Nouvel objectif</div>
-    <div class="fg">
-      <label>Objectif</label>
-      <input type="text" id="gl-title" placeholder="ex. Autonomie PTG, Poste d'Assistant...">
-    </div>
-    <div class="fg">
-      <label>Horizon</label>
-      <select id="gl-horizon">
-        <option value="6">6 mois</option>
-        <option value="12">1 an</option>
-        <option value="60">5 ans</option>
-      </select>
-    </div>
-    <div class="fg">
-      <label>Progression (0–100%)</label>
-      <input type="range" id="gl-progress" min="0" max="100" value="0" style="width:100%;accent-color:var(--acc);" oninput="document.getElementById('gl-prog-val').textContent=this.value+'%'">
-      <div style="text-align:right;font-size:12px;color:var(--t3);margin-top:4px;" id="gl-prog-val">0%</div>
-    </div>
-    <div class="fg">
-      <label>Note</label>
-      <textarea id="gl-note" placeholder="Détails, étapes, contexte..."></textarea>
-    </div>
-    <div style="display:flex;gap:10px;margin-top:4px;" id="goal-sheet-btns">
-      <button class="btn-secondary" style="flex:1;" onclick="closeOverlay('goal-overlay')">Annuler</button>
-      <button class="btn-primary" style="flex:2;margin-top:0;" onclick="saveGoal()">Enregistrer</button>
-    </div>
-  </div>
-</div>
-
-<!-- Pub sheet -->
-<div class="overlay" id="pub-overlay">
-  <div class="sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-title" id="pub-sheet-title">Nouvelle entrée</div>
+    <button class="sheet-close" onclick="closeOv('ov-task')">×</button>
+    <div class="sheet-title" id="task-title-h">Nouvelle tâche</div>
     <div class="fg">
       <label>Type</label>
-      <select id="pb-type">
-        <option>Article</option>
-        <option>Communication</option>
-        <option>DU</option>
-        <option>DESC</option>
-        <option>Formation</option>
-        <option>Prix / Distinction</option>
-      </select>
-    </div>
-    <div class="fg">
-      <label>Titre</label>
-      <input type="text" id="pb-title" placeholder="Titre de la publication, communication...">
-    </div>
-    <div class="form-row">
-      <div class="fg">
-        <label>Année</label>
-        <input type="number" id="pb-year" placeholder="2025" inputmode="numeric">
-      </div>
-      <div class="fg">
-        <label>Statut</label>
-        <select id="pb-status">
-          <option>En cours</option>
-          <option>Soumis</option>
-          <option>Accepté</option>
-          <option>Publié</option>
-        </select>
+      <div class="type-row" id="task-type-row">
+        <button class="type-btn active" data-tt="task" onclick="selTaskType(this)">Tâche</button>
+        <button class="type-btn" data-tt="project" onclick="selTaskType(this)">Projet</button>
+        <button class="type-btn" data-tt="note" onclick="selTaskType(this)">Note</button>
       </div>
     </div>
+    <div class="fg"><label>Titre</label><input type="text" id="task-text" placeholder="Que faut-il faire ?"></div>
+    <div class="fg" id="task-sub-wrap"><label>Détail / sous-tâches</label><textarea id="task-sub" placeholder="Étapes, contexte... (une par ligne pour les sous-tâches)"></textarea></div>
     <div class="fg">
-      <label>Revue / Lieu / Détails</label>
-      <input type="text" id="pb-journal" placeholder="ex. OTSR, Congrès SoFCOT...">
+      <label>Priorité</label>
+      <div class="prio-row">
+        <button class="prio-btn high" onclick="selPrio(this,'high')">🔴 Haute</button>
+        <button class="prio-btn med active" onclick="selPrio(this,'med')">🟡 Normale</button>
+        <button class="prio-btn low" onclick="selPrio(this,'low')">⚪ Basse</button>
+      </div>
     </div>
-    <div style="display:flex;gap:10px;margin-top:4px;" id="pub-sheet-btns">
-      <button class="btn-secondary" style="flex:1;" onclick="closeOverlay('pub-overlay')">Annuler</button>
-      <button class="btn-primary" style="flex:2;margin-top:0;" onclick="savePub()">Enregistrer</button>
+    <div class="sheet-actions" id="task-sheet-btns">
+      <button class="btn-secondary" onclick="closeOv('ov-task')">Annuler</button>
+      <button class="btn-primary" onclick="saveTask()">Enregistrer</button>
     </div>
+  </div>
+</div>
+
+<!-- Add note/resource -->
+<div class="overlay" id="ov-note">
+  <div class="sheet">
+    <button class="sheet-close" onclick="closeOv('ov-note')">×</button>
+    <div class="sheet-title" id="note-title-h">Nouvelle note</div>
+    <div class="fg"><label>Titre</label><input type="text" id="note-title" placeholder="Titre..."></div>
+    <div class="fg"><label>Contenu</label><textarea id="note-body" placeholder="Notes, recette, référence..." style="min-height:140px;"></textarea></div>
+    <div class="fg"><label>Catégorie</label><select id="note-cat"></select></div>
+    <div class="sheet-actions" id="note-sheet-btns">
+      <button class="btn-secondary" onclick="closeOv('ov-note')">Annuler</button>
+      <button class="btn-primary" onclick="saveNote()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add category -->
+<div class="overlay" id="ov-cat">
+  <div class="sheet">
+    <button class="sheet-close" onclick="closeOv('ov-cat')">×</button>
+    <div class="sheet-title">Nouvelle catégorie</div>
+    <div class="fg"><label>Nom</label><input type="text" id="cat-name" placeholder="ex. Cuisine, Lecture, Médecine..."></div>
+    <div class="fg"><label>Icône (emoji)</label><input type="text" id="cat-icon" placeholder="📚" maxlength="2"></div>
+    <div class="sheet-actions">
+      <button class="btn-secondary" onclick="closeOv('ov-cat')">Annuler</button>
+      <button class="btn-primary" onclick="saveCat()">Créer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Note detail -->
+<div class="overlay" id="ov-note-detail">
+  <div class="sheet" style="max-width:560px;">
+    <button class="sheet-close" onclick="closeOv('ov-note-detail')">×</button>
+    <div id="note-detail-content"></div>
   </div>
 </div>
 
@@ -921,634 +954,812 @@ html, body {
 <div class="toast" id="toast"></div>
 
 <script>
-// ── STATE ──
-let events = [], skills = [], goals = [], pubs = [];
-let currentWeekOffset = 0;
-let selectedDay = null;
-let editingSkillIdx = -1, editingGoalIdx = -1, editingPubIdx = -1;
+// ═══════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════
+let events   = [];   // {id,date,time,type,title,note}
+let tasks    = [];   // {id,col,type,text,sub,priority,done,subtasks:[{text,done}]}
+let notes    = [];   // {id,title,body,cat,date}
+let cats     = [];   // {id,name,icon}
+let skills   = [], goals = [], pubs = [];
+
+let calYear, calMonth;
+let selectedDay   = null;
+let curEvType     = 'bloc';
+let curTaskType   = 'task';
+let curTaskCol    = 'pro';
+let curPrio       = 'med';
+let curLibCat     = 'all';
+let editingTask   = -1;
+let editingNote   = -1;
+let editingEvent  = -1;
 let selectedSkillLevel = 0;
-let skillCatFilter = 'all', goalHorizonFilter = 'all', pubTypeFilter = 'all';
+let editingSkillIdx=-1, editingGoalIdx=-1, editingPubIdx=-1;
+let goalFilter='all', pubFilter='all', skillFilter='all';
 
 const LINKS = {
   orlog:   'https://rousseltom13-bit.github.io/Logbook-Chirurgie/',
-  ortopos: 'https://spontaneous-jalebi-c3c0e5.netlify.app/', 
+  ortopos: 'https://spontaneous-jalebi-c3c0e5.netlify.app/',
   finary:  'https://app.finary.com'
 };
 
-const EV_COLORS = {
-  bloc:      '#c87c3a',
-  consult:   '#4a8fc4',
-  garde:     '#c45050',
-  formation: '#9070d0',
-  autre:     '#6b6154'
-};
+const EV_COLOR = { bloc:'#7c6af7', consult:'#4ecdc4', garde:'#e05a7a', rappel:'#f0b050', autre:'#9896b8' };
+const PRIO_ORDER = { high:0, med:1, low:2 };
+const LEVEL_LABELS = ['','Observé','Assisté','Réalisé','Autonome'];
+const HORIZON_LABELS = {'6':'6 mois','12':'1 an','60':'5 ans'};
 
-const LEVEL_LABELS = ['', 'Observé', 'Assisté', 'Réalisé', 'Autonome'];
-const HORIZON_LABELS = { '6': '6 mois', '12': '1 an', '60': '5 ans' };
-
-// ── PERSISTENCE ──
+// ═══════════════════════════════════════
+//  PERSISTENCE
+// ═══════════════════════════════════════
 function save() {
-  try { localStorage.setItem('sos_events',  JSON.stringify(events));  } catch(e) {}
-  try { localStorage.setItem('sos_skills',  JSON.stringify(skills));  } catch(e) {}
-  try { localStorage.setItem('sos_goals',   JSON.stringify(goals));   } catch(e) {}
-  try { localStorage.setItem('sos_pubs',    JSON.stringify(pubs));    } catch(e) {}
+  const s = k => v => { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} };
+  s('sos2_events')(events); s('sos2_tasks')(tasks);
+  s('sos2_notes')(notes); s('sos2_cats')(cats);
+  s('sos2_skills')(skills); s('sos2_goals')(goals); s('sos2_pubs')(pubs);
 }
 function load() {
-  try { const d = localStorage.getItem('sos_events');  if(d) events  = JSON.parse(d); } catch(e) {}
-  try { const d = localStorage.getItem('sos_skills');  if(d) skills  = JSON.parse(d); } catch(e) {}
-  try { const d = localStorage.getItem('sos_goals');   if(d) goals   = JSON.parse(d); } catch(e) {}
-  try { const d = localStorage.getItem('sos_pubs');    if(d) pubs    = JSON.parse(d); } catch(e) {}
+  const g = (k,fb) => { try { const d=localStorage.getItem(k); return d?JSON.parse(d):fb; } catch(e){return fb;} };
+  events = g('sos2_events',[]); tasks  = g('sos2_tasks',[]);
+  notes  = g('sos2_notes',[]); cats   = g('sos2_cats', defaultCats());
+  skills = g('sos2_skills',[]); goals  = g('sos2_goals',[]); pubs = g('sos2_pubs',[]);
+}
+function defaultCats() {
+  return [
+    {id:'c1', name:'Médecine', icon:'🩺'},
+    {id:'c2', name:'Cuisine',  icon:'🍳'},
+    {id:'c3', name:'Lecture',  icon:'📚'},
+    {id:'c4', name:'Divers',   icon:'📌'}
+  ];
 }
 
-// ── DATE UTILS (no UTC bugs) ──
-function localDateStr(d) {
-  return d.getFullYear() + '-' +
-    String(d.getMonth() + 1).padStart(2, '0') + '-' +
-    String(d.getDate()).padStart(2, '0');
+// ═══════════════════════════════════════
+//  DATE UTILS
+// ═══════════════════════════════════════
+function localStr(d) {
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 }
-function todayStr() { return localDateStr(new Date()); }
-function parseLocal(s) {
-  const [y, m, d] = s.split('-').map(Number);
-  return new Date(y, m - 1, d);
-}
-function fmtDate(s, opts) {
-  return parseLocal(s).toLocaleDateString('fr-FR', opts || { day: 'numeric', month: 'long' });
-}
-function fmtDateShort(s) {
-  return parseLocal(s).toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
-}
-function weekStart(offset) {
-  const today = new Date(); today.setHours(0,0,0,0);
-  const dow = today.getDay() === 0 ? 6 : today.getDay() - 1; // lundi = 0
-  const mon = new Date(today); mon.setDate(today.getDate() - dow + offset * 7);
-  return mon;
-}
+function todayStr() { return localStr(new Date()); }
+function parseLocal(s) { const[y,m,d]=s.split('-').map(Number); return new Date(y,m-1,d); }
+function fmtFull(s) { return parseLocal(s).toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'}); }
+function fmtShort(s){ return parseLocal(s).toLocaleDateString('fr-FR',{day:'numeric',month:'short'}); }
 function diffDays(s) {
-  const t = new Date(); t.setHours(0,0,0,0);
-  const d = parseLocal(s); d.setHours(0,0,0,0);
-  return Math.round((d - t) / 86400000);
+  const t=new Date();t.setHours(0,0,0,0);
+  const d=parseLocal(s);d.setHours(0,0,0,0);
+  return Math.round((d-t)/86400000);
 }
 
-// ── ORLOG INTEGRATION ──
-function loadOrLogSummary() {
-  try {
-    const raw = localStorage.getItem('orlog_blocs_summary');
-    return raw ? JSON.parse(raw) : [];
-  } catch(e) { return []; }
-}
-function getEventsForDate(ds) {
-  const own = events.filter(e => e.date === ds);
-  const orlog = loadOrLogSummary()
-    .filter(b => b.date === ds)
-    .map(b => ({
-      date: b.date, type: 'bloc',
-      title: b.interv || 'Bloc opératoire',
-      note: b.patient ? b.patient + (b.side ? ' · ' + b.side : '') : '',
-      start: '', end: '',
-      fromOrLog: true,
-      done: b.done,
-      statut: b.statut
-    }));
-  return [...orlog, ...own].sort((a, b) => (a.start || '').localeCompare(b.start || ''));
-}
-
-// ── NAVIGATION ──
+// ═══════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════
+const PAGE_TITLES = {
+  dash:'Dashboard', tasks:'Tâches', library:'Bibliothèque',
+  career:'Carrière', fininvest:'FinInvest'
+};
 function sw(v) {
-  document.querySelectorAll('.view').forEach(e => e.classList.remove('active'));
-  document.querySelectorAll('.bnav-item').forEach(e => e.classList.remove('active'));
-  const vEl = document.getElementById('view-' + v);
-  const bEl = document.getElementById('bn-' + v);
-  if (vEl) vEl.classList.add('active');
-  if (bEl) bEl.classList.add('active');
-  if (v === 'dash')     renderDash();
-  if (v === 'career')   renderCareer();
+  document.querySelectorAll('.view').forEach(e=>e.classList.remove('active'));
+  document.querySelectorAll('.sb-btn').forEach(e=>e.classList.remove('active'));
+  const vEl=document.getElementById('view-'+v);
+  const bEl=document.getElementById('sb-'+v);
+  if(vEl) vEl.classList.add('active');
+  if(bEl) bEl.classList.add('active');
+  document.getElementById('page-title').textContent = PAGE_TITLES[v]||v;
+  const now=new Date();
+  document.getElementById('page-sub').textContent =
+    now.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+  if(v==='dash')     renderDash();
+  if(v==='tasks')    renderTasks();
+  if(v==='library')  renderLibrary();
+  if(v==='career')   renderCareerView();
 }
-function openExternal(key) {
-  const url = LINKS[key];
-  if (url) window.open(url, '_blank');
-  else showToast('URL non configurée — voir LINKS dans le code');
+function openExt(k) {
+  const u=LINKS[k];
+  if(u) window.open(u,'_blank');
+  else showToast('URL non configurée');
 }
 
-// ── TOPBAR ──
-function initTopbar() {
-  const now = new Date();
-  const label = now.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
-  document.getElementById('topbar-date').textContent = label.charAt(0).toUpperCase() + label.slice(1);
+// ═══════════════════════════════════════
+//  CALENDAR
+// ═══════════════════════════════════════
+function calInit() {
+  const n=new Date(); calYear=n.getFullYear(); calMonth=n.getMonth();
+  selectedDay=todayStr();
+}
+function calNav(dir) {
+  calMonth+=dir;
+  if(calMonth>11){calMonth=0;calYear++;}
+  if(calMonth<0){calMonth=11;calYear--;}
+  renderCal();
+}
+function calGoToday() {
+  const n=new Date(); calYear=n.getFullYear(); calMonth=n.getMonth();
+  selectedDay=todayStr(); renderDash();
+}
+function getEventsForDay(ds) {
+  const orlog = loadOrLog().filter(b=>b.date===ds).map(b=>({
+    type:'bloc', title:b.interv||'Bloc (OrLog)', time:'',
+    note:b.patient||'', fromOrLog:true, done:b.done
+  }));
+  const own = events.filter(e=>e.date===ds);
+  return [...orlog,...own].sort((a,b)=>(a.time||'').localeCompare(b.time||''));
+}
+function loadOrLog() {
+  try { const d=localStorage.getItem('orlog_blocs_summary'); return d?JSON.parse(d):[]; } catch(e){return[];}
+}
+function renderCal() {
+  const monthNames=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  document.getElementById('cal-month-name').textContent=monthNames[calMonth]+' '+calYear;
+  const DOW=['L','M','M','J','V','S','D'];
+  document.getElementById('cal-dow').innerHTML=DOW.map(d=>`<div class="cal-dow-cell">${d}</div>`).join('');
+  const first=new Date(calYear,calMonth,1);
+  const last=new Date(calYear,calMonth+1,0);
+  let dow=first.getDay()-1; if(dow<0)dow=6;
+  const today=todayStr();
+  let cells='';
+  // prev month padding
+  for(let i=dow-1;i>=0;i--){
+    const d=new Date(calYear,calMonth,0-i);
+    const ds=localStr(d);
+    cells+=`<div class="cal-cell other" onclick="selectDay('${ds}')"><div class="cal-num">${d.getDate()}</div></div>`;
+  }
+  // current month
+  for(let day=1;day<=last.getDate();day++){
+    const d=new Date(calYear,calMonth,day);
+    const ds=localStr(d);
+    const evts=getEventsForDay(ds);
+    const isToday=ds===today; const isSel=ds===selectedDay;
+    const pips=evts.slice(0,4).map(e=>`<div class="cal-pip" style="background:${EV_COLOR[e.type]||EV_COLOR.autre}"></div>`).join('');
+    cells+=`<div class="cal-cell${isToday?' today':''}${isSel?' selected':''}" onclick="selectDay('${ds}')">
+      <div class="cal-num">${day}</div>
+      <div class="cal-pips">${pips}</div>
+    </div>`;
+  }
+  // next month padding
+  const total=dow+last.getDate(); const rem=(7-total%7)%7;
+  for(let i=1;i<=rem;i++){
+    const d=new Date(calYear,calMonth+1,i);
+    const ds=localStr(d);
+    cells+=`<div class="cal-cell other" onclick="selectDay('${ds}')"><div class="cal-num">${d.getDate()}</div></div>`;
+  }
+  document.getElementById('cal-grid').innerHTML=cells;
+}
+function selectDay(ds) {
+  selectedDay=ds;
+  renderCal();
+  renderDayPanel();
 }
 
-// ── DASHBOARD ──
+// ═══════════════════════════════════════
+//  DASHBOARD
+// ═══════════════════════════════════════
 function renderDash() {
-  renderWeekStats();
-  renderWeekStrip();
-  renderDayTimeline(selectedDay || todayStr());
+  renderCal();
+  renderStats();
+  renderDayPanel();
+  renderUpcomingReminders();
 }
-
-function renderWeekStats() {
-  const mon = weekStart(currentWeekOffset);
-  const days = Array.from({length:7}, (_, i) => {
-    const d = new Date(mon); d.setDate(mon.getDate() + i);
-    return localDateStr(d);
-  });
-  const orlog = loadOrLogSummary();
-  const weekBlocs = days.reduce((n, ds) => {
-    const fromOrLog = orlog.filter(b => b.date === ds).length;
-    const fromOwn   = events.filter(e => e.date === ds && e.type === 'bloc').length;
-    return n + fromOrLog + fromOwn;
-  }, 0);
-  document.getElementById('stat-week').innerHTML = weekBlocs + '<span>blocs</span>';
-
-  // Prochain bloc
-  const allItems = [...orlog, ...events.filter(e => e.type === 'bloc')]
-    .filter(b => b.date >= todayStr())
-    .sort((a, b) => a.date.localeCompare(b.date));
-  if (allItems.length) {
-    const next = allItems[0];
-    document.getElementById('stat-next').textContent = (next.interv || next.title || 'Bloc').substring(0, 22);
-    const d = diffDays(next.date);
-    document.getElementById('stat-next-date').textContent =
-      d === 0 ? "Aujourd'hui" : d === 1 ? 'Demain' : fmtDateShort(next.date);
-  } else {
-    document.getElementById('stat-next').textContent = 'Aucun prévu';
-    document.getElementById('stat-next-date').textContent = '';
-  }
+function renderStats() {
+  const orlog=loadOrLog();
+  const today=todayStr();
+  const now=new Date();
+  // blocs ce mois
+  const monthKey=calYear+'-'+String(calMonth+1).padStart(2,'0');
+  const monthBlocs=orlog.filter(b=>b.date&&b.date.startsWith(monthKey)).length
+    + events.filter(e=>e.date&&e.date.startsWith(monthKey)&&e.type==='bloc').length;
+  // tâches en attente
+  const pendingPro=tasks.filter(t=>t.col==='pro'&&!t.done).length;
+  const pendingPerso=tasks.filter(t=>t.col==='perso'&&!t.done).length;
+  document.getElementById('stat-row').innerHTML=`
+    <div class="stat-pill"><div class="stat-pill-label">Blocs ce mois</div><div class="stat-pill-val">${monthBlocs}</div><div class="stat-pill-sub">OrLog + manuel</div></div>
+    <div class="stat-pill"><div class="stat-pill-label">Tâches pro</div><div class="stat-pill-val">${pendingPro}</div><div class="stat-pill-sub">en attente</div></div>
+    <div class="stat-pill"><div class="stat-pill-label">Tâches perso</div><div class="stat-pill-val">${pendingPerso}</div><div class="stat-pill-sub">en attente</div></div>`;
 }
-
-function renderWeekStrip() {
-  const mon = weekStart(currentWeekOffset);
-  const today = todayStr();
-  const DAY_NAMES = ['L','M','M','J','V','S','D'];
-  let html = '';
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(mon); d.setDate(mon.getDate() + i);
-    const ds = localDateStr(d);
-    const isToday = ds === today;
-    const evts = getEventsForDate(ds);
-    const dots = evts.slice(0, 3).map(e => `<div class="wd-dot ${e.type}"></div>`).join('');
-    html += `<button class="week-day${isToday ? ' today' : ''}" onclick="selectDayFn('${ds}')">
-      <span class="wd-name">${DAY_NAMES[i]}</span>
-      <span class="wd-num">${d.getDate()}</span>
-      <div class="wd-dots">${dots}</div>
-    </button>`;
-  }
-  document.getElementById('week-strip').innerHTML = html;
-
-  // Week label
-  const end = new Date(mon); end.setDate(mon.getDate() + 6);
-  const monLabel = mon.toLocaleDateString('fr-FR', {day:'numeric', month:'short'});
-  const endLabel = end.toLocaleDateString('fr-FR', {day:'numeric', month:'short'});
-  document.getElementById('week-label').textContent = `${monLabel} — ${endLabel}`;
-}
-
-function selectDayFn(ds) {
-  selectedDay = ds;
-  renderDayTimeline(ds);
-  const d = parseLocal(ds);
-  const isToday = ds === todayStr();
-  document.getElementById('day-label').textContent =
-    isToday ? "Aujourd'hui" :
-    d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
-}
-
-function renderDayTimeline(ds) {
-  const evts = getEventsForDate(ds);
-  const el = document.getElementById('day-timeline');
-  if (!evts.length) {
-    el.innerHTML = `<div style="padding:20px 0;text-align:center;color:var(--t3);font-size:13px;">Aucun événement</div>`;
+function renderDayPanel() {
+  const ds=selectedDay||todayStr();
+  const d=parseLocal(ds);
+  const isToday=ds===todayStr();
+  document.getElementById('day-title').textContent=
+    isToday?"Aujourd'hui — "+d.toLocaleDateString('fr-FR',{day:'numeric',month:'long'}):
+    d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+  document.getElementById('day-sub').textContent=
+    events.filter(e=>e.date===ds).length + ' événement(s) · cliquez le calendrier pour changer de jour';
+  const evts=getEventsForDay(ds);
+  const tl=document.getElementById('day-timeline');
+  document.getElementById('timeline-label').textContent=isToday?"Aujourd'hui":fmtShort(ds);
+  if(!evts.length){
+    tl.innerHTML=`<div class="timeline-empty">Aucun événement — <span style="color:var(--acc2);cursor:pointer;" onclick="openQuickAdd()">+ ajouter</span></div>`;
     return;
   }
-  el.innerHTML = evts.map((e, i) => {
-    const color = EV_COLORS[e.type] || EV_COLORS.autre;
-    const timeStr = e.start ? e.start + (e.end ? '–' + e.end : '') : '';
-    const isLast = i === evts.length - 1;
-    const doneBadge = e.fromOrLog && e.done
-      ? `<span class="badge badge-green" style="font-size:10px;margin-left:6px;">✓</span>` : '';
-    const orlogBadge = e.fromOrLog
-      ? `<span class="badge badge-ghost" style="font-size:10px;margin-left:4px;">OrLog</span>` : '';
+  tl.innerHTML=evts.map((e,i)=>{
+    const color=EV_COLOR[e.type]||EV_COLOR.autre;
+    const isLast=i===evts.length-1;
+    const badges=[
+      e.fromOrLog?`<span class="badge badge-ghost">OrLog</span>`:'',
+      e.done?`<span class="badge badge-green">✓</span>`:''
+    ].filter(Boolean).join('');
     return `<div class="tl-item">
-      <div class="tl-dot-wrap">
-        <div class="tl-dot" style="background:${color}"></div>
-        ${!isLast ? '<div class="tl-line"></div>' : ''}
+      <div class="tl-left">
+        <div class="tl-dot" style="background:${color};box-shadow:0 0 8px ${color}60;"></div>
+        ${!isLast?'<div class="tl-connector"></div>':''}
       </div>
-      <div class="tl-content">
-        <div class="tl-title">${e.title || e.interv || '—'}${doneBadge}${orlogBadge}</div>
-        ${e.note ? `<div class="tl-sub">${e.note}</div>` : ''}
+      <div class="tl-body">
+        <div class="tl-title">${e.title||'—'} ${badges}</div>
+        ${e.note?`<div class="tl-meta">${e.note}</div>`:''}
       </div>
-      ${timeStr ? `<div class="tl-time">${timeStr}</div>` : ''}
+      ${e.time?`<div class="tl-time">${e.time}</div>`:''}
+    </div>`;
+  }).join('');
+}
+function renderUpcomingReminders() {
+  const today=todayStr();
+  const reminders=[
+    ...events.filter(e=>e.type==='rappel'&&e.date>=today),
+    ...events.filter(e=>e.type!=='rappel'&&e.date>today).slice(0,3)
+  ].sort((a,b)=>a.date.localeCompare(b.date)).slice(0,4);
+  const el=document.getElementById('upcoming-reminders');
+  if(!reminders.length){
+    el.innerHTML=`<div style="color:var(--t3);font-size:12px;padding:8px 0;">Aucun rappel à venir</div>`; return;
+  }
+  el.innerHTML=reminders.map(r=>{
+    const d=diffDays(r.date);
+    const cls=d<=1?'countdown-urgent':d<=7?'countdown-soon':'countdown-ok';
+    const lbl=d===0?"Aujourd'hui":d===1?'Demain':`J-${d}`;
+    return `<div class="reminder-card">
+      <div class="reminder-icon">${r.type==='garde'?'🏥':r.type==='formation'?'📖':r.type==='rappel'?'🔔':'📅'}</div>
+      <div class="reminder-body">
+        <div class="reminder-title">${r.title||'—'}</div>
+        <div class="reminder-date">${fmtFull(r.date)}</div>
+      </div>
+      <div class="reminder-countdown ${cls}">${lbl}</div>
     </div>`;
   }).join('');
 }
 
-function navWeek(dir) {
-  if (dir === 0) { currentWeekOffset = 0; selectedDay = todayStr(); }
-  else currentWeekOffset += dir;
-  renderDash();
+// ═══════════════════════════════════════
+//  EVENTS
+// ═══════════════════════════════════════
+function openQuickAdd() {
+  editingEvent=-1;
+  document.getElementById('ev-title-h').textContent='Nouvel événement';
+  document.getElementById('ev-title').value='';
+  document.getElementById('ev-date').value=selectedDay||todayStr();
+  document.getElementById('ev-time').value='08:00';
+  document.getElementById('ev-note').value='';
+  curEvType='bloc';
+  document.querySelectorAll('#ov-event .type-btn').forEach(b=>b.classList.toggle('active',b.dataset.ev==='bloc'));
+  openOv('ov-event');
 }
-
-// ── ADD EVENT ──
-let editingEventIdx = -1;
-function openAddEventSheet(ds) {
-  editingEventIdx = -1;
-  document.getElementById('event-sheet-title').textContent = 'Nouvel événement';
-  document.getElementById('ev-date').value = ds || selectedDay || todayStr();
-  document.getElementById('ev-type').value = 'bloc';
-  document.getElementById('ev-start').value = '08:00';
-  document.getElementById('ev-end').value = '12:00';
-  document.getElementById('ev-title').value = '';
-  document.getElementById('ev-note').value = '';
-  openOverlay('event-overlay');
-}
-function openAddEventFromDay() {
-  closeOverlay('day-overlay');
-  openAddEventSheet(selectedDay);
+function selEvType(btn) {
+  document.querySelectorAll('#ov-event .type-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active'); curEvType=btn.dataset.ev;
 }
 function saveEvent() {
-  const ev = {
-    date:  document.getElementById('ev-date').value,
-    type:  document.getElementById('ev-type').value,
-    title: document.getElementById('ev-title').value.trim(),
-    start: document.getElementById('ev-start').value,
-    end:   document.getElementById('ev-end').value,
-    note:  document.getElementById('ev-note').value.trim(),
-    id:    editingEventIdx >= 0 ? events[editingEventIdx].id : Date.now()
+  const title=document.getElementById('ev-title').value.trim();
+  if(!title){showToast('Titre requis');return;}
+  const ev={
+    id: editingEvent>=0?events[editingEvent].id:Date.now(),
+    type:curEvType, title,
+    date:document.getElementById('ev-date').value,
+    time:document.getElementById('ev-time').value,
+    note:document.getElementById('ev-note').value.trim()
   };
-  if (!ev.date) { showToast('Date requise'); return; }
-  if (editingEventIdx >= 0) events[editingEventIdx] = ev;
+  if(!ev.date){showToast('Date requise');return;}
+  if(editingEvent>=0) events[editingEvent]=ev;
   else events.push(ev);
-  save();
-  closeOverlay('event-overlay');
-  selectedDay = ev.date;
-  renderDash();
+  save(); closeOv('ov-event');
+  selectedDay=ev.date; renderDash();
   showToast('Événement enregistré');
 }
-function deleteEvent(idx) {
-  if (!confirm('Supprimer cet événement ?')) return;
-  events.splice(idx, 1);
-  save(); closeOverlay('day-overlay');
-  renderDash(); showToast('Supprimé');
-}
 
-// ── CAREER ──
-function renderCareer() {
-  renderSkills();
-  renderGoals();
-  renderPubs();
-  renderCV();
+// ═══════════════════════════════════════
+//  TASKS
+// ═══════════════════════════════════════
+function renderTasks() {
+  renderTaskCol('pro');
+  renderTaskCol('perso');
 }
-function switchCareerTab(tab, btn) {
-  document.querySelectorAll('.ctab').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.cpanel').forEach(p => p.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('cp-' + tab).classList.add('active');
-}
-
-// ── SKILLS ──
-function renderSkills() {
-  const cats = [...new Set(skills.map(s => s.cat).filter(Boolean))];
-  const filterEl = document.getElementById('skill-filters');
-  filterEl.innerHTML = `<button class="pill${skillCatFilter==='all'?' active':''}" onclick="filterSkills('all',this)">Toutes</button>` +
-    cats.map(c => `<button class="pill${skillCatFilter===c?' active':''}" onclick="filterSkills('${c}',this)">${c}</button>`).join('');
-
-  const filtered = skillCatFilter === 'all' ? skills : skills.filter(s => s.cat === skillCatFilter);
-  const el = document.getElementById('skills-list');
-  if (!filtered.length) {
-    el.innerHTML = `<div class="empty">
-      <div class="empty-icon">🩺</div>
-      <div>Aucune compétence enregistrée</div>
-      <button class="empty-add" onclick="openSkillSheet()">+ Ajouter une compétence</button>
-    </div>`; return;
+function renderTaskCol(col) {
+  const colTasks=tasks.filter(t=>t.col===col);
+  const pending=colTasks.filter(t=>!t.done).sort((a,b)=>PRIO_ORDER[a.priority]-PRIO_ORDER[b.priority]);
+  const done=colTasks.filter(t=>t.done);
+  const el=document.getElementById('task-list-'+col);
+  if(!colTasks.length){
+    el.innerHTML=`<div class="empty"><div class="empty-icon">${col==='pro'?'💼':'🏠'}</div><div>Aucune tâche</div><button class="empty-add" onclick="openTaskSheet('${col}')">+ Ajouter</button></div>`;
+    return;
   }
-  el.innerHTML = filtered.map((s, i) => {
-    const idx = skills.indexOf(s);
-    const pips = [1,2,3,4].map(n =>
-      `<div class="level-pip${s.level >= n ? ' filled' : ''}"></div>`
-    ).join('');
-    return `<div class="skill-item" onclick="openSkillSheet(${idx})">
-      <div class="skill-left">
-        <div class="skill-name">${s.name}</div>
-        <div class="skill-cat">${s.cat || '—'} · ${LEVEL_LABELS[s.level] || '—'}</div>
+  let html='';
+  // Priority groups
+  ['high','med','low'].forEach(prio=>{
+    const items=pending.filter(t=>t.priority===prio&&t.type==='task');
+    if(!items.length) return;
+    const labels={high:'Haute priorité',med:'Normale',low:'Basse'};
+    html+=`<div class="task-section-label">${labels[prio]}</div>`;
+    items.forEach(t=>{
+      const idx=tasks.indexOf(t);
+      const prioClass=`priority-${prio}`;
+      html+=`<div class="task-item${t.done?' done':''}" onclick="openTaskSheet(null,${idx})">
+        <div class="task-check${t.done?' checked':''}" onclick="event.stopPropagation();toggleTask(${idx})"></div>
+        <div class="task-body">
+          <div class="task-text">${t.text}</div>
+          ${t.sub?`<div class="task-sub">${t.sub.split('\n')[0].substring(0,50)}</div>`:''}
+        </div>
+      </div>`;
+    });
+  });
+  // Projects
+  const projects=pending.filter(t=>t.type==='project');
+  if(projects.length){
+    html+=`<div class="task-section-label">Projets</div>`;
+    projects.forEach(t=>{
+      const idx=tasks.indexOf(t);
+      const subs=(t.subtasks||[]);
+      const doneSubs=subs.filter(s=>s.done).length;
+      html+=`<div class="project-item">
+        <div class="project-header" onclick="toggleProject(this)">
+          <div class="task-check${t.done?' checked':''}" onclick="event.stopPropagation();toggleTask(${idx})"></div>
+          <div style="flex:1;"><div class="task-text">${t.text}</div>${subs.length?`<div class="task-sub">${doneSubs}/${subs.length} sous-tâches</div>`:''}
+          </div>
+          <span class="project-chevron">›</span>
+        </div>
+        <div class="project-subtasks">
+          ${subs.map((s,si)=>`<div class="subtask-item">
+            <div class="subtask-check${s.done?' checked':''}" onclick="toggleSubtask(${idx},${si})"></div>
+            <span style="${s.done?'text-decoration:line-through;opacity:0.4':''}">${s.text}</span>
+          </div>`).join('')}
+          ${subs.length?'':'<div style="font-size:11px;color:var(--t3);padding:4px 0;">Aucune sous-tâche</div>'}
+          <button onclick="openTaskSheet('${col}',${idx})" style="margin-top:6px;background:none;border:none;color:var(--acc2);font-size:11px;cursor:pointer;font-family:var(--ff);">+ Modifier</button>
+        </div>
+      </div>`;
+    });
+  }
+  // Notes
+  const notes_tasks=pending.filter(t=>t.type==='note');
+  if(notes_tasks.length){
+    html+=`<div class="task-section-label">Notes / pense-bête</div>`;
+    notes_tasks.forEach(t=>{
+      const idx=tasks.indexOf(t);
+      html+=`<div class="task-item" onclick="openTaskSheet(null,${idx})">
+        <div style="width:16px;flex-shrink:0;margin-top:2px;font-size:12px;color:var(--t3);">📌</div>
+        <div class="task-body"><div class="task-text">${t.text}</div>${t.sub?`<div class="task-sub">${t.sub.substring(0,60)}</div>`:''}</div>
+      </div>`;
+    });
+  }
+  // Done (collapsed)
+  if(done.length){
+    html+=`<div class="task-section-label" style="opacity:0.5;cursor:pointer;" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">Terminées (${done.length}) ▾</div>`;
+    html+=`<div style="display:none;">`;
+    done.slice(0,10).forEach(t=>{
+      const idx=tasks.indexOf(t);
+      html+=`<div class="task-item done" onclick="openTaskSheet(null,${idx})">
+        <div class="task-check checked" onclick="event.stopPropagation();toggleTask(${idx})"></div>
+        <div class="task-body"><div class="task-text">${t.text}</div></div>
+      </div>`;
+    });
+    html+=`</div>`;
+  }
+  el.innerHTML=html;
+}
+function toggleProject(hdr) {
+  hdr.classList.toggle('open');
+  hdr.nextElementSibling.classList.toggle('open');
+}
+function toggleTask(idx) {
+  tasks[idx].done=!tasks[idx].done;
+  save(); renderTasks(); renderStats();
+}
+function toggleSubtask(taskIdx,subIdx) {
+  if(!tasks[taskIdx].subtasks) tasks[taskIdx].subtasks=[];
+  tasks[taskIdx].subtasks[subIdx].done=!tasks[taskIdx].subtasks[subIdx].done;
+  const all=tasks[taskIdx].subtasks.every(s=>s.done);
+  if(all) tasks[taskIdx].done=true;
+  save(); renderTasks();
+}
+function openTaskSheet(col, idx) {
+  editingTask = idx!==undefined ? idx : -1;
+  curTaskCol  = col || (idx!==undefined?tasks[idx].col:'pro');
+  const t = idx!==undefined ? tasks[idx] : null;
+  document.getElementById('task-title-h').textContent = t ? 'Modifier la tâche' : 'Nouvelle tâche';
+  document.getElementById('task-text').value = t ? t.text : '';
+  document.getElementById('task-sub').value  = t ? (t.type==='project'?(t.subtasks||[]).map(s=>s.text).join('\n'):(t.sub||'')) : '';
+  curTaskType = t ? t.type : 'task';
+  curPrio     = t ? (t.priority||'med') : 'med';
+  document.querySelectorAll('#task-type-row .type-btn').forEach(b=>b.classList.toggle('active',b.dataset.tt===curTaskType));
+  document.querySelectorAll('.prio-btn').forEach(b=>b.classList.toggle('active',b.classList.contains(curPrio)));
+  const btns=document.getElementById('task-sheet-btns');
+  btns.innerHTML = t
+    ? `<button class="btn-danger" onclick="deleteTask(${idx})">Supprimer</button>
+       <button class="btn-secondary" onclick="closeOv('ov-task')">Annuler</button>
+       <button class="btn-primary" style="flex:2;margin-top:0;" onclick="saveTask()">Enregistrer</button>`
+    : `<button class="btn-secondary" onclick="closeOv('ov-task')">Annuler</button>
+       <button class="btn-primary" style="flex:2;margin-top:0;" onclick="saveTask()">Enregistrer</button>`;
+  openOv('ov-task');
+}
+function selTaskType(btn) {
+  document.querySelectorAll('#task-type-row .type-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active'); curTaskType=btn.dataset.tt;
+}
+function selPrio(btn,p) {
+  document.querySelectorAll('.prio-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active'); curPrio=p;
+}
+function saveTask() {
+  const text=document.getElementById('task-text').value.trim();
+  if(!text){showToast('Texte requis');return;}
+  const subRaw=document.getElementById('task-sub').value.trim();
+  let subtasks=[];
+  if(curTaskType==='project'&&subRaw){
+    subtasks=subRaw.split('\n').filter(l=>l.trim()).map(l=>{
+      const existing=(editingTask>=0?(tasks[editingTask].subtasks||[]).find(s=>s.text===l.trim()):null);
+      return existing||{text:l.trim(),done:false};
+    });
+  }
+  const t={
+    id: editingTask>=0?tasks[editingTask].id:Date.now(),
+    col:curTaskCol, type:curTaskType, text,
+    sub:curTaskType!=='project'?subRaw:'',
+    subtasks, priority:curPrio,
+    done: editingTask>=0?tasks[editingTask].done:false
+  };
+  if(editingTask>=0) tasks[editingTask]=t;
+  else tasks.push(t);
+  save(); closeOv('ov-task'); renderTasks(); renderStats();
+  showToast(editingTask>=0?'Tâche mise à jour':'Tâche ajoutée');
+}
+function deleteTask(idx) {
+  if(!confirm('Supprimer ?'))return;
+  tasks.splice(idx,1);
+  save(); closeOv('ov-task'); renderTasks(); renderStats(); showToast('Supprimée');
+}
+
+// ═══════════════════════════════════════
+//  LIBRARY
+// ═══════════════════════════════════════
+function renderLibrary() {
+  renderLibCats();
+  renderLibContent();
+}
+function renderLibCats() {
+  const el=document.getElementById('lib-cats');
+  const allCount=notes.length;
+  let html=`<button class="lib-cat-btn${curLibCat==='all'?' active':''}" onclick="setLibCat('all')">
+    <span class="lib-cat-icon">⊞</span> Toutes
+    <span class="lib-cat-count">${allCount}</span>
+  </button>`;
+  // Rappels category always shown
+  const rCount=events.filter(e=>e.type==='rappel').length;
+  html+=`<button class="lib-cat-btn${curLibCat==='__reminders'?' active':''}" onclick="setLibCat('__reminders')">
+    <span class="lib-cat-icon">🔔</span> Rappels
+    <span class="lib-cat-count">${rCount}</span>
+  </button>`;
+  cats.forEach(c=>{
+    const n=notes.filter(no=>no.cat===c.id).length;
+    html+=`<button class="lib-cat-btn${curLibCat===c.id?' active':''}" onclick="setLibCat('${c.id}')">
+      <span class="lib-cat-icon">${c.icon}</span>${c.name}
+      <span class="lib-cat-count">${n}</span>
+    </button>`;
+  });
+  el.innerHTML=html;
+}
+function setLibCat(id) {
+  curLibCat=id; renderLibCats(); renderLibContent();
+}
+function renderLibContent() {
+  const el=document.getElementById('lib-content');
+  if(curLibCat==='__reminders'){
+    renderRemindersInLib(el); return;
+  }
+  const filtered=curLibCat==='all'?notes:notes.filter(n=>n.cat===curLibCat);
+  const catName=curLibCat==='all'?'Toutes les notes':(cats.find(c=>c.id===curLibCat)||{name:'—'}).name;
+  let html=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+    <div style="font-family:var(--ff-d);font-size:18px;font-weight:600;">${catName}</div>
+    <button class="tb-btn" onclick="openNoteSheet()">＋ Note</button>
+  </div>`;
+  if(!filtered.length){
+    html+=`<div class="empty"><div class="empty-icon">📝</div><div>Aucune note dans cette catégorie</div><button class="empty-add" onclick="openNoteSheet()">+ Ajouter</button></div>`;
+    el.innerHTML=html; return;
+  }
+  const sorted=filtered.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  html+=sorted.map(n=>{
+    const idx=notes.indexOf(n);
+    const cat=cats.find(c=>c.id===n.cat)||{name:'',icon:'📌'};
+    return `<div class="note-card" onclick="openNoteDetail(${idx})">
+      <div class="note-card-title">${n.title}</div>
+      ${n.body?`<div class="note-card-body">${n.body}</div>`:''}
+      <div class="note-card-meta">
+        <span class="note-card-date">${n.date?fmtShort(n.date):''}</span>
+        <span class="note-tag">${cat.icon} ${cat.name}</span>
       </div>
-      <div class="skill-level">${pips}</div>
     </div>`;
   }).join('');
+  el.innerHTML=html;
 }
-function filterSkills(cat, btn) {
-  skillCatFilter = cat;
-  document.querySelectorAll('#skill-filters .pill').forEach(b => b.classList.remove('active'));
+function renderRemindersInLib(el) {
+  const today=todayStr();
+  const reminders=events.filter(e=>e.type==='rappel').sort((a,b)=>a.date.localeCompare(b.date));
+  let html=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+    <div style="font-family:var(--ff-d);font-size:18px;font-weight:600;">Rappels</div>
+    <button class="tb-btn" onclick="openReminderSheet()">＋ Rappel</button>
+  </div>`;
+  if(!reminders.length){
+    html+=`<div class="empty"><div class="empty-icon">🔔</div><div>Aucun rappel</div><button class="empty-add" onclick="openReminderSheet()">+ Ajouter</button></div>`;
+    el.innerHTML=html; return;
+  }
+  const past=reminders.filter(r=>r.date<today);
+  const future=reminders.filter(r=>r.date>=today);
+  if(future.length){
+    html+=future.map(r=>{
+      const d=diffDays(r.date);
+      const cls=d<=1?'countdown-urgent':d<=7?'countdown-soon':'countdown-ok';
+      const lbl=d===0?"Aujourd'hui":d===1?'Demain':`J-${d}`;
+      return `<div class="reminder-card">
+        <div class="reminder-icon">🔔</div>
+        <div class="reminder-body">
+          <div class="reminder-title">${r.title}</div>
+          <div class="reminder-date">${fmtFull(r.date)}</div>
+          ${r.note?`<div class="reminder-date" style="margin-top:3px;">${r.note}</div>`:''}
+        </div>
+        <div class="reminder-countdown ${cls}">${lbl}</div>
+      </div>`;
+    }).join('');
+  }
+  if(past.length){
+    html+=`<div style="font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--t4);margin:16px 0 8px;">Passés</div>`;
+    html+=past.map(r=>`<div class="reminder-card" style="opacity:0.4;">
+      <div class="reminder-icon">🔔</div>
+      <div class="reminder-body"><div class="reminder-title">${r.title}</div><div class="reminder-date">${fmtFull(r.date)}</div></div>
+      <div class="reminder-countdown" style="color:var(--t3);background:var(--glass);">Passé</div>
+    </div>`).join('');
+  }
+  el.innerHTML=html;
+}
+function openReminderSheet() {
+  editingEvent=-1; curEvType='rappel';
+  document.getElementById('ev-title-h').textContent='Nouveau rappel';
+  document.getElementById('ev-title').value='';
+  document.getElementById('ev-date').value=todayStr();
+  document.getElementById('ev-time').value='09:00';
+  document.getElementById('ev-note').value='';
+  document.querySelectorAll('#ov-event .type-btn').forEach(b=>b.classList.toggle('active',b.dataset.ev==='rappel'));
+  openOv('ov-event');
+}
+function openNoteSheet(idx) {
+  editingNote = idx!==undefined?idx:-1;
+  const n = idx!==undefined?notes[idx]:null;
+  document.getElementById('note-title-h').textContent = n ? 'Modifier la note' : 'Nouvelle note';
+  document.getElementById('note-title').value = n ? n.title : '';
+  document.getElementById('note-body').value  = n ? n.body : '';
+  const sel=document.getElementById('note-cat');
+  sel.innerHTML=cats.map(c=>`<option value="${c.id}">${c.icon} ${c.name}</option>`).join('');
+  if(n&&n.cat) sel.value=n.cat;
+  else if(curLibCat!=='all'&&curLibCat!=='__reminders') sel.value=curLibCat;
+  const btns=document.getElementById('note-sheet-btns');
+  btns.innerHTML = n
+    ? `<button class="btn-danger" onclick="deleteNote(${idx})">Supprimer</button>
+       <button class="btn-secondary" onclick="closeOv('ov-note')">Annuler</button>
+       <button class="btn-primary" style="flex:2;margin-top:0;" onclick="saveNote()">Enregistrer</button>`
+    : `<button class="btn-secondary" onclick="closeOv('ov-note')">Annuler</button>
+       <button class="btn-primary" style="flex:2;margin-top:0;" onclick="saveNote()">Enregistrer</button>`;
+  openOv('ov-note');
+}
+function saveNote() {
+  const title=document.getElementById('note-title').value.trim();
+  if(!title){showToast('Titre requis');return;}
+  const n={
+    id: editingNote>=0?notes[editingNote].id:Date.now(),
+    title, body:document.getElementById('note-body').value.trim(),
+    cat:document.getElementById('note-cat').value,
+    date:todayStr()
+  };
+  if(editingNote>=0) notes[editingNote]=n;
+  else notes.push(n);
+  save(); closeOv('ov-note'); renderLibrary();
+  showToast(editingNote>=0?'Note mise à jour':'Note ajoutée');
+}
+function deleteNote(idx) {
+  if(!confirm('Supprimer ?'))return;
+  notes.splice(idx,1); save(); closeOv('ov-note'); renderLibrary(); showToast('Supprimée');
+}
+function openNoteDetail(idx) {
+  const n=notes[idx];
+  const cat=cats.find(c=>c.id===n.cat)||{icon:'📌',name:''};
+  document.getElementById('note-detail-content').innerHTML=`
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:20px;">
+      <div style="font-family:var(--ff-d);font-size:20px;font-weight:600;color:var(--t1);line-height:1.3;">${n.title}</div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:20px;">
+      <span class="badge badge-ghost">${cat.icon} ${cat.name}</span>
+      ${n.date?`<span class="badge badge-ghost">${fmtShort(n.date)}</span>`:''}
+    </div>
+    ${n.body?`<div style="font-size:13px;color:var(--t2);line-height:1.8;white-space:pre-wrap;">${n.body}</div>`:''}
+    <div style="display:flex;gap:8px;margin-top:24px;">
+      <button class="btn-secondary" onclick="closeOv('ov-note-detail')">Fermer</button>
+      <button class="btn-secondary" onclick="closeOv('ov-note-detail');openNoteSheet(${idx})">Modifier</button>
+    </div>`;
+  openOv('ov-note-detail');
+}
+function openAddCatSheet() { openOv('ov-cat'); document.getElementById('cat-name').value=''; document.getElementById('cat-icon').value=''; }
+function saveCat() {
+  const name=document.getElementById('cat-name').value.trim();
+  if(!name){showToast('Nom requis');return;}
+  cats.push({id:'c'+Date.now(), name, icon:document.getElementById('cat-icon').value.trim()||'📁'});
+  save(); closeOv('ov-cat'); renderLibrary(); showToast('Catégorie créée');
+}
+
+// ═══════════════════════════════════════
+//  CAREER (repris v1 adapté au nouveau design)
+// ═══════════════════════════════════════
+function renderCareerView() {
+  renderSkills(); renderGoals(); renderPubsList(); renderCV();
+}
+function switchCareerTab(tab,btn) {
+  document.querySelectorAll('#view-career .type-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  renderSkills();
+  ['skills','goals','pubs','cv'].forEach(t=>document.getElementById('cp-'+t).style.display=t===tab?'block':'none');
+}
+function renderSkills() {
+  const cats2=[...new Set(skills.map(s=>s.cat).filter(Boolean))];
+  const el=document.getElementById('cp-skills');
+  const filtered=skillFilter==='all'?skills:skills.filter(s=>s.cat===skillFilter);
+  let html=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;"><div style="font-size:14px;font-weight:500;color:var(--t1);">Compétences chirurgicales</div><button class="tb-btn" onclick="openSkillSheet()">+ Ajouter</button></div>`;
+  html+=`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;">
+    <button class="type-btn${skillFilter==='all'?' active':''}" onclick="skillFilter='all';renderSkills()">Toutes</button>
+    ${cats2.map(c=>`<button class="type-btn${skillFilter===c?' active':''}" onclick="skillFilter='${c}';renderSkills()">${c}</button>`).join('')}
+  </div>`;
+  if(!filtered.length){html+=`<div class="empty"><div class="empty-icon">🩺</div><div>Aucune compétence</div><button class="empty-add" onclick="openSkillSheet()">+ Ajouter</button></div>`;el.innerHTML=html;return;}
+  html+=`<div style="background:var(--glass);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;">`;
+  html+=filtered.map((s,i)=>{
+    const idx=skills.indexOf(s);
+    const pips=[1,2,3,4].map(n=>`<div style="width:8px;height:8px;border-radius:50%;background:${s.level>=n?'var(--acc)':'var(--bg5)'};${s.level>=n?'box-shadow:0 0 6px var(--acc-glow)':''}"></div>`).join('');
+    return `<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.03);cursor:pointer;transition:background 0.12s;" onmouseover="this.style.background='var(--glass2)'" onmouseout="this.style.background=''" onclick="openSkillSheet(${idx})">
+      <div style="flex:1;"><div style="font-size:13px;font-weight:500;color:var(--t1);margin-bottom:2px;">${s.name}</div><div style="font-size:11px;color:var(--t3);">${s.cat||'—'} · ${LEVEL_LABELS[s.level]||'—'}</div></div>
+      <div style="display:flex;gap:4px;">${pips}</div>
+    </div>`;
+  }).join('');
+  html+=`</div>`;
+  el.innerHTML=html;
 }
 function openSkillSheet(idx) {
-  editingSkillIdx = idx !== undefined ? idx : -1;
-  selectedSkillLevel = 0;
-  const s = idx !== undefined ? skills[idx] : null;
-  document.getElementById('skill-sheet-title').textContent = s ? 'Modifier la compétence' : 'Nouvelle compétence';
-  document.getElementById('sk-name').value = s ? s.name : '';
-  document.getElementById('sk-cat').value = s ? (s.cat || '') : '';
-  document.getElementById('sk-note').value = s ? (s.note || '') : '';
-  selectedSkillLevel = s ? s.level : 0;
-  updateLevelBtns(selectedSkillLevel);
-  const btns = document.getElementById('skill-sheet-btns');
-  btns.innerHTML = s
-    ? `<button class="btn-danger" style="flex:1;" onclick="deleteSkill(${idx})">Supprimer</button>
-       <button class="btn-primary" style="flex:2;margin-top:0;" onclick="saveSkill()">Enregistrer</button>`
-    : `<button class="btn-secondary" style="flex:1;" onclick="closeOverlay('skill-overlay')">Annuler</button>
-       <button class="btn-primary" style="flex:2;margin-top:0;" onclick="saveSkill()">Enregistrer</button>`;
-  openOverlay('skill-overlay');
-}
-function selectLevel(n) {
-  selectedSkillLevel = n;
-  updateLevelBtns(n);
-}
-function updateLevelBtns(n) {
-  document.querySelectorAll('.lsel-btn').forEach(b => {
-    b.classList.toggle('active', parseInt(b.dataset.level) === n);
-  });
+  editingSkillIdx=idx!==undefined?idx:-1;
+  selectedSkillLevel=0;
+  const s=idx!==undefined?skills[idx]:null;
+  // Reuse sheet from v1 logic via a generic modal
+  const content=`<button class="sheet-close" onclick="closeOv('ov-skill')">×</button>
+    <div class="sheet-title">${s?'Modifier':'Nouvelle compétence'}</div>
+    <div class="fg"><label>Nom</label><input type="text" id="sk-name" value="${s?s.name:''}" placeholder="ex. PTG cimentée..."></div>
+    <div class="fg"><label>Catégorie</label><input type="text" id="sk-cat" value="${s?s.cat||'':''}" placeholder="ex. Genou, Hanche..."></div>
+    <div class="fg"><label>Niveau</label>
+      <div class="type-row">
+        ${[1,2,3,4].map(n=>`<button class="type-btn${(s?s.level:0)>=n?' active':''}" data-lv="${n}" onclick="document.querySelectorAll('#ov-skill .type-btn').forEach(b=>b.classList.toggle('active',parseInt(b.dataset.lv)<=${n}));selectedSkillLevel=${n};">${LEVEL_LABELS[n]}</button>`).join('')}
+      </div>
+    </div>
+    <div class="sheet-actions">
+      ${s?`<button class="btn-danger" onclick="deleteSkill(${idx})">Supprimer</button>`:''}
+      <button class="btn-secondary" onclick="closeOv('ov-skill')">Annuler</button>
+      <button class="btn-primary" style="flex:2;margin-top:0;" onclick="saveSkill()">Enregistrer</button>
+    </div>`;
+  selectedSkillLevel=s?s.level:0;
+  let ov=document.getElementById('ov-skill');
+  if(!ov){ov=document.createElement('div');ov.className='overlay';ov.id='ov-skill';ov.innerHTML=`<div class="sheet" style="max-width:480px;"></div>`;document.body.appendChild(ov);ov.addEventListener('click',e=>{if(e.target===ov)closeOv('ov-skill');});}
+  ov.querySelector('.sheet').innerHTML=content;
+  openOv('ov-skill');
 }
 function saveSkill() {
-  const name = document.getElementById('sk-name').value.trim();
-  if (!name) { showToast('Nom requis'); return; }
-  const sk = {
-    name, cat: document.getElementById('sk-cat').value.trim(),
-    level: selectedSkillLevel,
-    note: document.getElementById('sk-note').value.trim(),
-    updatedAt: todayStr()
-  };
-  if (editingSkillIdx >= 0) skills[editingSkillIdx] = sk;
-  else skills.push(sk);
-  save(); closeOverlay('skill-overlay'); renderSkills();
-  showToast(editingSkillIdx >= 0 ? 'Compétence mise à jour' : 'Compétence ajoutée');
+  const name=document.getElementById('sk-name').value.trim();
+  if(!name){showToast('Nom requis');return;}
+  const sk={name,cat:document.getElementById('sk-cat').value.trim(),level:selectedSkillLevel,updatedAt:todayStr()};
+  if(editingSkillIdx>=0)skills[editingSkillIdx]=sk; else skills.push(sk);
+  save();closeOv('ov-skill');renderSkills();showToast('Enregistré');
 }
-function deleteSkill(idx) {
-  if (!confirm('Supprimer cette compétence ?')) return;
-  skills.splice(idx, 1);
-  save(); closeOverlay('skill-overlay'); renderSkills(); showToast('Supprimée');
-}
+function deleteSkill(idx){if(!confirm('Supprimer ?'))return;skills.splice(idx,1);save();closeOv('ov-skill');renderSkills();showToast('Supprimée');}
 
-// ── GOALS ──
 function renderGoals() {
-  const filtered = goalHorizonFilter === 'all' ? goals : goals.filter(g => g.horizon === goalHorizonFilter);
-  const el = document.getElementById('goals-list');
-  if (!filtered.length) {
-    el.innerHTML = `<div class="empty">
-      <div class="empty-icon">🎯</div>
-      <div>Aucun objectif défini</div>
-      <button class="empty-add" onclick="openGoalSheet()">+ Ajouter un objectif</button>
-    </div>`; return;
-  }
-  // Trier par horizon puis par progression décroissante
-  const order = {'6':0,'12':1,'60':2};
-  const sorted = filtered.slice().sort((a,b) => (order[a.horizon]||0) - (order[b.horizon]||0));
-  el.innerHTML = sorted.map(g => {
-    const idx = goals.indexOf(g);
-    const hClass = `horizon-${g.horizon}`;
-    const pct = g.progress || 0;
-    return `<div class="obj-item" onclick="openGoalSheet(${idx})">
-      <div class="obj-header">
-        <div class="obj-title">${g.title}</div>
-        <span class="badge ${hClass}" style="font-size:10px;">${HORIZON_LABELS[g.horizon] || ''}</span>
+  const el=document.getElementById('cp-goals');
+  const filtered=goalFilter==='all'?goals:goals.filter(g=>g.horizon===goalFilter);
+  let html=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;"><div style="font-size:14px;font-weight:500;">Objectifs</div><button class="tb-btn" onclick="openGoalSheet()">+ Ajouter</button></div>`;
+  html+=`<div style="display:flex;gap:6px;margin-bottom:14px;">
+    ${['all','6','12','60'].map(h=>`<button class="type-btn${goalFilter===h?' active':''}" onclick="goalFilter='${h}';renderGoals();">${h==='all'?'Tous':HORIZON_LABELS[h]}</button>`).join('')}
+  </div>`;
+  if(!filtered.length){html+=`<div class="empty"><div class="empty-icon">🎯</div><div>Aucun objectif</div><button class="empty-add" onclick="openGoalSheet()">+ Ajouter</button></div>`;el.innerHTML=html;return;}
+  html+=filtered.slice().sort((a,b)=>({'6':0,'12':1,'60':2}[a.horizon]||0)-({'6':0,'12':1,'60':2}[b.horizon]||0)).map(g=>{
+    const idx=goals.indexOf(g);const pct=g.progress||0;
+    const hcls={'6':'badge-green','12':'badge-acc','60':'badge-acc'}[g.horizon]||'badge-ghost';
+    return `<div style="background:var(--glass);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;margin-bottom:10px;cursor:pointer;" onclick="openGoalSheet(${idx})">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;">
+        <div style="font-size:13px;font-weight:500;color:var(--t1);">${g.title}</div>
+        <span class="badge ${hcls}">${HORIZON_LABELS[g.horizon]||''}</span>
       </div>
-      <div class="obj-progress-wrap"><div class="obj-progress" style="width:${pct}%"></div></div>
-      <div class="obj-footer">
-        <span>${pct}% atteint</span>
-        ${g.note ? `<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:55%;">${g.note}</span>` : ''}
+      <div style="height:4px;background:var(--bg5);border-radius:99px;overflow:hidden;margin-bottom:6px;"><div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--acc),var(--acc2));border-radius:99px;"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--t3);">
+        <span>${pct}%</span>${g.note?`<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:60%;">${g.note}</span>`:''}
       </div>
     </div>`;
   }).join('');
-}
-function filterGoals(h, btn) {
-  goalHorizonFilter = h;
-  document.querySelectorAll('#cp-goals .pill').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderGoals();
+  el.innerHTML=html;
 }
 function openGoalSheet(idx) {
-  editingGoalIdx = idx !== undefined ? idx : -1;
-  const g = idx !== undefined ? goals[idx] : null;
-  document.getElementById('goal-sheet-title').textContent = g ? 'Modifier l\'objectif' : 'Nouvel objectif';
-  document.getElementById('gl-title').value    = g ? g.title : '';
-  document.getElementById('gl-horizon').value  = g ? g.horizon : '12';
-  document.getElementById('gl-progress').value = g ? (g.progress || 0) : 0;
-  document.getElementById('gl-prog-val').textContent = (g ? (g.progress || 0) : 0) + '%';
-  document.getElementById('gl-note').value     = g ? (g.note || '') : '';
-  const btns = document.getElementById('goal-sheet-btns');
-  btns.innerHTML = g
-    ? `<button class="btn-danger" style="flex:1;" onclick="deleteGoal(${idx})">Supprimer</button>
-       <button class="btn-primary" style="flex:2;margin-top:0;" onclick="saveGoal()">Enregistrer</button>`
-    : `<button class="btn-secondary" style="flex:1;" onclick="closeOverlay('goal-overlay')">Annuler</button>
-       <button class="btn-primary" style="flex:2;margin-top:0;" onclick="saveGoal()">Enregistrer</button>`;
-  openOverlay('goal-overlay');
+  editingGoalIdx=idx!==undefined?idx:-1;
+  const g=idx!==undefined?goals[idx]:null;
+  const content=`<button class="sheet-close" onclick="closeOv('ov-goal')">×</button>
+    <div class="sheet-title">${g?'Modifier':'Nouvel objectif'}</div>
+    <div class="fg"><label>Objectif</label><input type="text" id="gl-title" value="${g?g.title:''}" placeholder="ex. Autonomie PTG..."></div>
+    <div class="fg"><label>Horizon</label><select id="gl-horizon">${['6','12','60'].map(h=>`<option value="${h}"${g&&g.horizon===h?' selected':''}>${HORIZON_LABELS[h]}</option>`).join('')}</select></div>
+    <div class="fg"><label>Progression : <span id="gl-pv">${g?g.progress||0:0}%</span></label><input type="range" id="gl-progress" min="0" max="100" value="${g?g.progress||0:0}" style="width:100%;accent-color:var(--acc);" oninput="document.getElementById('gl-pv').textContent=this.value+'%'"></div>
+    <div class="fg"><label>Note</label><textarea id="gl-note" placeholder="Détails...">${g?g.note||'':''}</textarea></div>
+    <div class="sheet-actions">
+      ${g?`<button class="btn-danger" onclick="deleteGoal(${idx})">Supprimer</button>`:''}
+      <button class="btn-secondary" onclick="closeOv('ov-goal')">Annuler</button>
+      <button class="btn-primary" style="flex:2;margin-top:0;" onclick="saveGoal()">Enregistrer</button>
+    </div>`;
+  let ov=document.getElementById('ov-goal');
+  if(!ov){ov=document.createElement('div');ov.className='overlay';ov.id='ov-goal';ov.innerHTML=`<div class="sheet" style="max-width:480px;"></div>`;document.body.appendChild(ov);ov.addEventListener('click',e=>{if(e.target===ov)closeOv('ov-goal');});}
+  ov.querySelector('.sheet').innerHTML=content;
+  openOv('ov-goal');
 }
-function saveGoal() {
-  const title = document.getElementById('gl-title').value.trim();
-  if (!title) { showToast('Titre requis'); return; }
-  const gl = {
-    title,
-    horizon:  document.getElementById('gl-horizon').value,
-    progress: parseInt(document.getElementById('gl-progress').value),
-    note:     document.getElementById('gl-note').value.trim(),
-    updatedAt: todayStr()
-  };
-  if (editingGoalIdx >= 0) goals[editingGoalIdx] = gl;
-  else goals.push(gl);
-  save(); closeOverlay('goal-overlay'); renderGoals();
-  showToast(editingGoalIdx >= 0 ? 'Objectif mis à jour' : 'Objectif ajouté');
-}
-function deleteGoal(idx) {
-  if (!confirm('Supprimer cet objectif ?')) return;
-  goals.splice(idx, 1);
-  save(); closeOverlay('goal-overlay'); renderGoals(); showToast('Supprimé');
-}
+function saveGoal(){const title=document.getElementById('gl-title').value.trim();if(!title){showToast('Titre requis');return;}const gl={title,horizon:document.getElementById('gl-horizon').value,progress:parseInt(document.getElementById('gl-progress').value),note:document.getElementById('gl-note').value.trim()};if(editingGoalIdx>=0)goals[editingGoalIdx]=gl;else goals.push(gl);save();closeOv('ov-goal');renderGoals();showToast('Enregistré');}
+function deleteGoal(idx){if(!confirm('Supprimer ?'))return;goals.splice(idx,1);save();closeOv('ov-goal');renderGoals();showToast('Supprimé');}
 
-// ── PUBS ──
-function renderPubs() {
-  const filtered = pubTypeFilter === 'all' ? pubs : pubs.filter(p => p.type === pubTypeFilter);
-  const el = document.getElementById('pubs-list');
-  if (!filtered.length) {
-    el.innerHTML = `<div class="empty">
-      <div class="empty-icon">📝</div>
-      <div>Aucune publication / communication</div>
-      <button class="empty-add" onclick="openPubSheet()">+ Ajouter</button>
-    </div>`; return;
-  }
-  const sorted = filtered.slice().sort((a,b) => (b.year||0) - (a.year||0));
-  el.innerHTML = sorted.map(p => {
-    const idx = pubs.indexOf(p);
-    const statusBadge = p.status === 'Publié' ? 'badge-green' :
-                        p.status === 'Accepté' ? 'badge-blue' :
-                        p.status === 'Soumis'  ? 'badge-amber' : 'badge-ghost';
-    return `<div class="pub-item" onclick="openPubSheet(${idx})">
+function renderPubsList(){
+  const el=document.getElementById('cp-pubs');
+  const filtered=pubFilter==='all'?pubs:pubs.filter(p=>p.type===pubFilter);
+  let html=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;"><div style="font-size:14px;font-weight:500;">Publications & communications</div><button class="tb-btn" onclick="openPubSheet()">+ Ajouter</button></div>`;
+  html+=`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;">${['all','Article','Communication','DU','Formation'].map(t=>`<button class="type-btn${pubFilter===t?' active':''}" onclick="pubFilter='${t}';renderPubsList();">${t==='all'?'Tout':t}</button>`).join('')}</div>`;
+  if(!filtered.length){html+=`<div class="empty"><div class="empty-icon">📝</div><div>Aucune entrée</div><button class="empty-add" onclick="openPubSheet()">+ Ajouter</button></div>`;el.innerHTML=html;return;}
+  html+=filtered.slice().sort((a,b)=>(b.year||0)-(a.year||0)).map(p=>{
+    const idx=pubs.indexOf(p);
+    const sc={'Publié':'badge-green','Accepté':'badge-acc','Soumis':'badge-amber'}[p.status]||'badge-ghost';
+    return `<div style="background:var(--glass);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;margin-bottom:8px;cursor:pointer;" onclick="openPubSheet(${idx})">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:4px;">
-        <div class="pub-title" style="flex:1;">${p.title}</div>
-        <span class="badge ${statusBadge}" style="flex-shrink:0;">${p.status}</span>
+        <div style="font-size:13px;font-weight:500;">${p.title}</div>
+        <span class="badge ${sc}">${p.status}</span>
       </div>
-      <div class="pub-meta">${p.type}${p.year ? ' · ' + p.year : ''}${p.journal ? ' · ' + p.journal : ''}</div>
+      <div style="font-size:11px;color:var(--t3);">${p.type}${p.year?' · '+p.year:''}${p.journal?' · '+p.journal:''}</div>
     </div>`;
   }).join('');
+  el.innerHTML=html;
 }
-function filterPubs(type, btn) {
-  pubTypeFilter = type;
-  document.querySelectorAll('#cp-pubs .pill').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderPubs();
-}
-function openPubSheet(idx) {
-  editingPubIdx = idx !== undefined ? idx : -1;
-  const p = idx !== undefined ? pubs[idx] : null;
-  document.getElementById('pub-sheet-title').textContent = p ? 'Modifier l\'entrée' : 'Nouvelle entrée';
-  document.getElementById('pb-type').value    = p ? p.type : 'Article';
-  document.getElementById('pb-title').value   = p ? p.title : '';
-  document.getElementById('pb-year').value    = p ? (p.year || '') : new Date().getFullYear();
-  document.getElementById('pb-status').value  = p ? p.status : 'En cours';
-  document.getElementById('pb-journal').value = p ? (p.journal || '') : '';
-  const btns = document.getElementById('pub-sheet-btns');
-  btns.innerHTML = p
-    ? `<button class="btn-danger" style="flex:1;" onclick="deletePub(${idx})">Supprimer</button>
-       <button class="btn-primary" style="flex:2;margin-top:0;" onclick="savePub()">Enregistrer</button>`
-    : `<button class="btn-secondary" style="flex:1;" onclick="closeOverlay('pub-overlay')">Annuler</button>
-       <button class="btn-primary" style="flex:2;margin-top:0;" onclick="savePub()">Enregistrer</button>`;
-  openOverlay('pub-overlay');
-}
-function savePub() {
-  const title = document.getElementById('pb-title').value.trim();
-  if (!title) { showToast('Titre requis'); return; }
-  const pb = {
-    type:    document.getElementById('pb-type').value,
-    title,
-    year:    parseInt(document.getElementById('pb-year').value) || null,
-    status:  document.getElementById('pb-status').value,
-    journal: document.getElementById('pb-journal').value.trim()
-  };
-  if (editingPubIdx >= 0) pubs[editingPubIdx] = pb;
-  else pubs.push(pb);
-  save(); closeOverlay('pub-overlay'); renderPubs();
-  showToast(editingPubIdx >= 0 ? 'Mis à jour' : 'Ajouté');
-}
-function deletePub(idx) {
-  if (!confirm('Supprimer ?')) return;
-  pubs.splice(idx, 1);
-  save(); closeOverlay('pub-overlay'); renderPubs(); showToast('Supprimé');
-}
+function openPubSheet(idx){editingPubIdx=idx!==undefined?idx:-1;const p=idx!==undefined?pubs[idx]:null;const content=`<button class="sheet-close" onclick="closeOv('ov-pub')">×</button><div class="sheet-title">${p?'Modifier':'Nouvelle entrée'}</div><div class="fg"><label>Type</label><select id="pb-type">${['Article','Communication','DU','DESC','Formation','Prix'].map(t=>`<option${p&&p.type===t?' selected':''}>${t}</option>`).join('')}</select></div><div class="fg"><label>Titre</label><input type="text" id="pb-title" value="${p?p.title:''}" placeholder="Titre..."></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;"><div class="fg"><label>Année</label><input type="number" id="pb-year" value="${p?p.year||'':new Date().getFullYear()}" inputmode="numeric"></div><div class="fg"><label>Statut</label><select id="pb-status">${['En cours','Soumis','Accepté','Publié'].map(s=>`<option${p&&p.status===s?' selected':''}>${s}</option>`).join('')}</select></div></div><div class="fg"><label>Revue / Lieu</label><input type="text" id="pb-journal" value="${p?p.journal||'':''}" placeholder="ex. OTSR, SoFCOT..."></div><div class="sheet-actions">${p?`<button class="btn-danger" onclick="deletePub(${idx})">Supprimer</button>`:''}<button class="btn-secondary" onclick="closeOv('ov-pub')">Annuler</button><button class="btn-primary" style="flex:2;margin-top:0;" onclick="savePub()">Enregistrer</button></div>`;let ov=document.getElementById('ov-pub');if(!ov){ov=document.createElement('div');ov.className='overlay';ov.id='ov-pub';ov.innerHTML=`<div class="sheet" style="max-width:480px;"></div>`;document.body.appendChild(ov);ov.addEventListener('click',e=>{if(e.target===ov)closeOv('ov-pub');});}ov.querySelector('.sheet').innerHTML=content;openOv('ov-pub');}
+function savePub(){const title=document.getElementById('pb-title').value.trim();if(!title){showToast('Titre requis');return;}const pb={type:document.getElementById('pb-type').value,title,year:parseInt(document.getElementById('pb-year').value)||null,status:document.getElementById('pb-status').value,journal:document.getElementById('pb-journal').value.trim()};if(editingPubIdx>=0)pubs[editingPubIdx]=pb;else pubs.push(pb);save();closeOv('ov-pub');renderPubsList();showToast('Enregistré');}
+function deletePub(idx){if(!confirm('Supprimer ?'))return;pubs.splice(idx,1);save();closeOv('ov-pub');renderPubsList();showToast('Supprimé');}
 
-// ── CV VIVANT ──
-function renderCV() {
-  const el = document.getElementById('cv-content');
-  let html = '';
-
-  // Poste
-  html += `<div class="cv-block">
-    <div class="cv-block-title">Poste actuel</div>
-    <div style="font-size:14px;color:var(--t1);">Docteur Junior en Orthopédie-Traumatologie</div>
-    <div style="font-size:12px;color:var(--t3);margin-top:4px;">Transition vers poste d'Assistant — 2026</div>
-  </div>`;
-
-  // Compétences par niveau
-  const autonomes = skills.filter(s => s.level === 4);
-  const realises  = skills.filter(s => s.level === 3);
-  if (autonomes.length || realises.length) {
-    html += `<div class="cv-block"><div class="cv-block-title">Compétences chirurgicales</div>`;
-    if (autonomes.length) {
-      html += `<div style="font-size:11px;color:var(--t3);margin-bottom:6px;margin-top:4px;">Autonome</div>`;
-      html += autonomes.map(s => `<div class="cv-row"><div class="cv-year"></div><div class="cv-text">${s.name}${s.cat ? ' <span style="color:var(--t3);">· ' + s.cat + '</span>' : ''}</div></div>`).join('');
-    }
-    if (realises.length) {
-      html += `<div style="font-size:11px;color:var(--t3);margin-bottom:6px;margin-top:10px;">Réalisé supervisé</div>`;
-      html += realises.map(s => `<div class="cv-row"><div class="cv-year"></div><div class="cv-text">${s.name}${s.cat ? ' <span style="color:var(--t3);">· ' + s.cat + '</span>' : ''}</div></div>`).join('');
-    }
-    html += `</div>`;
+function renderCV(){
+  const el=document.getElementById('cp-cv');
+  let html=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;"><div style="font-size:14px;font-weight:500;">CV vivant</div><button class="tb-btn" onclick="exportCV()">Exporter .txt</button></div>`;
+  const autonomes=skills.filter(s=>s.level===4),realises=skills.filter(s=>s.level===3);
+  if(autonomes.length||realises.length){
+    html+=`<div style="background:var(--glass);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;margin-bottom:12px;"><div style="font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--t3);margin-bottom:12px;">Compétences chirurgicales</div>`;
+    if(autonomes.length){html+=`<div style="font-size:11px;color:var(--acc2);margin-bottom:8px;">Autonome</div>`;html+=autonomes.map(s=>`<div style="font-size:13px;color:var(--t1);padding:5px 0;border-bottom:1px solid var(--border);">${s.name}${s.cat?` <span style="color:var(--t3);">· ${s.cat}</span>`:''}</div>`).join('');}
+    if(realises.length){html+=`<div style="font-size:11px;color:var(--t2);margin:12px 0 8px;">Réalisé supervisé</div>`;html+=realises.map(s=>`<div style="font-size:13px;color:var(--t1);padding:5px 0;border-bottom:1px solid var(--border);">${s.name}${s.cat?` <span style="color:var(--t3);">· ${s.cat}</span>`:''}</div>`).join('');}
+    html+=`</div>`;
   }
-
-  // Publications acceptées / publiées
-  const pubsOk = pubs.filter(p => p.status === 'Publié' || p.status === 'Accepté')
-    .sort((a,b) => (b.year||0) - (a.year||0));
-  if (pubsOk.length) {
-    html += `<div class="cv-block"><div class="cv-block-title">Publications & communications</div>`;
-    html += pubsOk.map(p =>
-      `<div class="cv-row">
-        <div class="cv-year">${p.year || '—'}</div>
-        <div class="cv-text">${p.title}${p.journal ? ' <span style="color:var(--t3);">· ' + p.journal + '</span>' : ''}</div>
-      </div>`
-    ).join('');
-    html += `</div>`;
-  }
-
-  // DU / DESC
-  const dus = pubs.filter(p => p.type === 'DU' || p.type === 'DESC');
-  if (dus.length) {
-    html += `<div class="cv-block"><div class="cv-block-title">Formations complémentaires</div>`;
-    html += dus.map(p =>
-      `<div class="cv-row">
-        <div class="cv-year">${p.year || '—'}</div>
-        <div class="cv-text">${p.title}${p.status ? ' <span style="color:var(--t3);">· ' + p.status + '</span>' : ''}</div>
-      </div>`
-    ).join('');
-    html += `</div>`;
-  }
-
-  if (!html.includes('cv-block" style') && skills.length === 0 && pubs.length === 0) {
-    html += `<div class="empty"><div class="empty-icon">📄</div><div>Remplis les compétences et publications pour générer ton CV</div></div>`;
-  }
-
-  el.innerHTML = html;
+  const pubsOk=pubs.filter(p=>p.status==='Publié'||p.status==='Accepté').sort((a,b)=>(b.year||0)-(a.year||0));
+  if(pubsOk.length){html+=`<div style="background:var(--glass);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;margin-bottom:12px;"><div style="font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--t3);margin-bottom:12px;">Publications & communications</div>`;html+=pubsOk.map(p=>`<div style="display:flex;gap:12px;padding:6px 0;border-bottom:1px solid var(--border);"><span style="font-size:11px;color:var(--t3);min-width:36px;">${p.year||'—'}</span><span style="font-size:13px;color:var(--t1);">${p.title}${p.journal?` <span style="color:var(--t3);">· ${p.journal}</span>`:''}</span></div>`).join('');html+=`</div>`;}
+  if(!autonomes.length&&!realises.length&&!pubsOk.length)html+=`<div class="empty"><div class="empty-icon">📄</div><div>Remplis les compétences et publications pour générer ton CV</div></div>`;
+  el.innerHTML=html;
 }
+function exportCV(){let t='CURRICULUM VITAE — SurgeonOS\n================================\n\n';const a=skills.filter(s=>s.level===4),r=skills.filter(s=>s.level===3);if(a.length){t+='AUTONOME\n';a.forEach(s=>{t+=`  • ${s.name}${s.cat?' ('+s.cat+')':''}\n`;});t+='\n';}if(r.length){t+='RÉALISÉ SUPERVISÉ\n';r.forEach(s=>{t+=`  • ${s.name}${s.cat?' ('+s.cat+')':''}\n`;});t+='\n';}const ok=pubs.filter(p=>p.status==='Publié'||p.status==='Accepté').sort((a,b)=>(b.year||0)-(a.year||0));if(ok.length){t+='PUBLICATIONS\n';ok.forEach(p=>{t+=`  ${p.year||'—'} — ${p.title}${p.journal?' ('+p.journal+')':''}\n`;});}const bl=new Blob([t],{type:'text/plain'});const a2=document.createElement('a');a2.href=URL.createObjectURL(bl);a2.download='cv-surgeonos-'+todayStr()+'.txt';a2.click();showToast('CV exporté');}
 
-function exportCV() {
-  // Génère un texte simple exportable
-  let txt = 'CURRICULUM VITAE — SurgeonOS\n';
-  txt += '================================\n\n';
-  txt += 'Docteur Junior en Orthopédie-Traumatologie\n';
-  txt += 'Transition vers poste d\'Assistant — 2026\n\n';
-  const autonomes = skills.filter(s => s.level === 4);
-  const realises  = skills.filter(s => s.level === 3);
-  if (autonomes.length) {
-    txt += 'COMPÉTENCES — AUTONOME\n';
-    autonomes.forEach(s => { txt += `  • ${s.name}${s.cat ? ' (' + s.cat + ')' : ''}\n`; });
-    txt += '\n';
-  }
-  if (realises.length) {
-    txt += 'COMPÉTENCES — RÉALISÉ SUPERVISÉ\n';
-    realises.forEach(s => { txt += `  • ${s.name}${s.cat ? ' (' + s.cat + ')' : ''}\n`; });
-    txt += '\n';
-  }
-  const pubsOk = pubs.filter(p => p.status === 'Publié' || p.status === 'Accepté').sort((a,b)=>(b.year||0)-(a.year||0));
-  if (pubsOk.length) {
-    txt += 'PUBLICATIONS & COMMUNICATIONS\n';
-    pubsOk.forEach(p => { txt += `  ${p.year || '—'} — ${p.title}${p.journal ? ' (' + p.journal + ')' : ''}\n`; });
-    txt += '\n';
-  }
-  const blob = new Blob([txt], {type:'text/plain'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'cv-surgeonos-' + todayStr() + '.txt';
-  a.click();
-  showToast('CV exporté');
-}
+// ═══════════════════════════════════════
+//  OVERLAYS
+// ═══════════════════════════════════════
+function openOv(id){document.getElementById(id).classList.add('show');}
+function closeOv(id){document.getElementById(id).classList.remove('show');}
+document.querySelectorAll('.overlay').forEach(el=>{el.addEventListener('click',e=>{if(e.target===el)closeOv(el.id);});});
+function openSettings(){showToast('Réglages à venir en v3');}
 
-// ── OVERLAYS ──
-function openOverlay(id) { document.getElementById(id).classList.add('show'); }
-function closeOverlay(id) { document.getElementById(id).classList.remove('show'); }
+// ═══════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════
+let toastT;
+function showToast(msg){const el=document.getElementById('toast');el.textContent=msg;el.style.display='block';clearTimeout(toastT);toastT=setTimeout(()=>{el.style.display='none';},2400);}
 
-// Close on backdrop tap
-document.querySelectorAll('.overlay').forEach(el => {
-  el.addEventListener('click', e => { if (e.target === el) closeOverlay(el.id); });
-});
-
-// ── TOAST ──
-let toastTimer;
-function showToast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.style.display = 'block';
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { el.style.display = 'none'; }, 2400);
-}
-
-// ── INIT ──
+// ═══════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════
 load();
-initTopbar();
-selectedDay = todayStr();
+calInit();
+const now=new Date();
+document.getElementById('page-sub').textContent=now.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
 renderDash();
-
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw-surgeonos.js').catch(() => {});
+if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw-surgeonos.js').catch(()=>{});
 </script>
 </body>
 </html>
