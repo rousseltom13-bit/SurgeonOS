@@ -1998,6 +1998,14 @@ function renderCal() {
       multiItems.push({ start: e.date, end: endIncl, title: e.title, color: col, bg: col+'2e', isGcal:false, evId:e.id });
     }
   });
+  // Blocs OrLog → barres (vert si réalisé, violet si prévu)
+  loadOrLog().forEach(b => {
+    if(!b.date) return;
+    if(b.date >= cells[0].ds && b.date <= cells[cells.length-1].ds) {
+      const col = b.done ? '#4dbb7a' : '#7c6af7';
+      multiItems.push({ start: b.date, end: b.date, title: b.interv || 'Bloc', color: col, bg: col+'2e', isGcal:false, isOrlog:true });
+    }
+  });
 
   // 3. Attribuer une lane (ligne) sans chevauchement
   const MAX_LANES = calFullscreen ? 3 : 2;
@@ -2030,12 +2038,8 @@ function renderCal() {
     const row = Math.floor(ci/7);
     const spacerH = lanesPerRow[row] * (LANE_H + LANE_GAP);
     const isToday = cell.ds===today, isSel = cell.ds===selectedDay;
-    // Pips : uniquement les events OrLog (blocs prévus/réalisés)
-    const orlogEvts = loadOrLog().filter(b => b.date===cell.ds);
-    let pipsHtml = '';
-    if(orlogEvts.length > 0) {
-      pipsHtml = `<div class="cal-pips">${orlogEvts.slice(0,4).map(b=>`<div class="cal-pip" style="background:${b.done?'var(--green)':'var(--acc)'}"></div>`).join('')}</div>`;
-    }
+    // Plus de pips - tous les événements sont en barres
+    const pipsHtml = '';
     html += `<div class="cal-cell${!cell.inMonth?' other':''}${isToday?' today':''}${isSel?' selected':''}" onclick="selectDay('${cell.ds}')" ondblclick="openQuickAddOnDay('${cell.ds}')" data-ci="${ci}" title="Double-clic pour ajouter">
       <div class="cal-num">${cell.day}</div>
       <div class="cal-cell-spacer" style="height:${spacerH}px"></div>
@@ -3140,8 +3144,8 @@ async function gcalFetchCalendars() {
 async function gcalSync() {
   if(!gcalIsConnected()) return;
   showToast('Synchronisation GCal…');
-  const timeMin = new Date(); timeMin.setMonth(timeMin.getMonth() - 1); timeMin.setHours(0,0,0,0);
-  const timeMax = new Date(); timeMax.setMonth(timeMax.getMonth() + 3); timeMax.setHours(23,59,59,999);
+  const timeMin = new Date(); timeMin.setMonth(timeMin.getMonth() - 2); timeMin.setHours(0,0,0,0);
+  const timeMax = new Date(); timeMax.setMonth(timeMax.getMonth() + 12); timeMax.setHours(23,59,59,999);
   const allEvents = [];
   for(const calId of gcalEnabledCals) {
     try {
@@ -3150,7 +3154,7 @@ async function gcalSync() {
       url.searchParams.set('timeMax', timeMax.toISOString());
       url.searchParams.set('singleEvents', 'true');
       url.searchParams.set('orderBy', 'startTime');
-      url.searchParams.set('maxResults', '250');
+      url.searchParams.set('maxResults', '2500');
       const resp = await fetch(url.toString(), {
         headers: { Authorization: 'Bearer ' + gcalToken.access_token }
       });
