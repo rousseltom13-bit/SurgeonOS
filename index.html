@@ -1038,11 +1038,25 @@ body::before {
     </div>
     <div class="fg"><label>Titre</label><input type="text" id="ev-title" placeholder="Description..."></div>
     <div class="form-row">
-      <div class="fg"><label>Date</label><input type="date" id="ev-date"></div>
-      <div class="fg"><label>Heure</label><input type="time" id="ev-time" value="08:00"></div>
+      <div class="fg"><label>Date début</label><input type="date" id="ev-date"></div>
+      <div class="fg"><label>Date fin (optionnel)</label><input type="date" id="ev-date-end"></div>
+    </div>
+    <div class="fg"><label>Heure (si horaire précis)</label><input type="time" id="ev-time"></div>
+    <!-- Couleur personnalisée -->
+    <div class="fg">
+      <label>Couleur</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;" id="ev-color-row">
+        <button class="ev-color-btn active" data-color="" style="width:24px;height:24px;border-radius:50%;background:var(--acc);border:2px solid white;" onclick="selEvColor(this,'')"></button>
+        <button class="ev-color-btn" data-color="#e05a7a" style="width:24px;height:24px;border-radius:50%;background:#e05a7a;border:2px solid transparent;" onclick="selEvColor(this,'#e05a7a')"></button>
+        <button class="ev-color-btn" data-color="#4ecdc4" style="width:24px;height:24px;border-radius:50%;background:#4ecdc4;border:2px solid transparent;" onclick="selEvColor(this,'#4ecdc4')"></button>
+        <button class="ev-color-btn" data-color="#f0b050" style="width:24px;height:24px;border-radius:50%;background:#f0b050;border:2px solid transparent;" onclick="selEvColor(this,'#f0b050')"></button>
+        <button class="ev-color-btn" data-color="#4dbb7a" style="width:24px;height:24px;border-radius:50%;background:#4dbb7a;border:2px solid transparent;" onclick="selEvColor(this,'#4dbb7a')"></button>
+        <button class="ev-color-btn" data-color="#9070d0" style="width:24px;height:24px;border-radius:50%;background:#9070d0;border:2px solid transparent;" onclick="selEvColor(this,'#9070d0')"></button>
+        <button class="ev-color-btn" data-color="#e08a50" style="width:24px;height:24px;border-radius:50%;background:#e08a50;border:2px solid transparent;" onclick="selEvColor(this,'#e08a50')"></button>
+      </div>
     </div>
     <div class="fg"><label>Note</label><input type="text" id="ev-note" placeholder="Optionnel..."></div>
-    <div class="sheet-actions">
+    <div class="sheet-actions" id="ev-sheet-btns">
       <button class="btn-secondary" onclick="closeOv('ov-event')">Annuler</button>
       <button class="btn-primary" onclick="saveEvent()">Enregistrer</button>
     </div>
@@ -1961,18 +1975,28 @@ function renderCal() {
   travels.forEach(t => {
     if(!t.start || !t.end) return;
     if(t.end >= cells[0].ds && t.start <= cells[cells.length-1].ds)
-      multiItems.push({ start: t.start, end: t.end, title: '✈ '+t.dest, color: '#4ecdc4', bg: 'rgba(78,205,196,0.18)' });
+      multiItems.push({ start: t.start, end: t.end, title: '✈ '+t.dest, color: '#4ecdc4', bg: 'rgba(78,205,196,0.18)', isGcal:false, isTravel:true });
   });
-  // GCal all-day : end est EXCLUSIF dans l'API Google → soustraire 1 jour
-  gcalEvents.filter(e => e.allDay && e.endDate && e.endDate > e.date).forEach(e => {
-    const endEx = parseLocal(e.endDate); endEx.setDate(endEx.getDate()-1);
-    const endIncl = localStr(endEx);
+  // TOUS les events GCal → barres (1 jour ou plusieurs, all-day ou avec heure)
+  gcalEvents.forEach(e => {
+    let endIncl = e.date; // par défaut : même jour
+    if(e.allDay && e.endDate && e.endDate > e.date) {
+      // End exclusif → inclusif
+      const endEx = parseLocal(e.endDate); endEx.setDate(endEx.getDate()-1);
+      endIncl = localStr(endEx);
+    } else if(!e.allDay && e.endDate && e.endDate > e.date) {
+      endIncl = e.endDate;
+    }
     if(endIncl >= cells[0].ds && e.date <= cells[cells.length-1].ds)
-      multiItems.push({ start: e.date, end: endIncl, title: e.title, color: e.calColor||'#7c6af7', bg: (e.calColor||'#7c6af7')+'2e' });
+      multiItems.push({ start: e.date, end: endIncl, title: e.title, color: e.calColor||'#7c6af7', bg: (e.calColor||'#7c6af7')+'2e', isGcal:true, gcalId:e.gcalId });
   });
-  // Events manuels avec date de fin
-  events.filter(e => e.dateEnd && e.dateEnd > e.date).forEach(e => {
-    multiItems.push({ start: e.date, end: e.dateEnd, title: e.title, color: EV_COLOR[e.type]||EV_COLOR.autre, bg: (EV_COLOR[e.type]||EV_COLOR.autre)+'2e' });
+  // Events manuels SurgeonOS → barres (1 jour ou plusieurs)
+  events.forEach(e => {
+    const endIncl = (e.dateEnd && e.dateEnd >= e.date) ? e.dateEnd : e.date;
+    if(endIncl >= cells[0].ds && e.date <= cells[cells.length-1].ds) {
+      const col = e.customColor || EV_COLOR[e.type] || EV_COLOR.autre;
+      multiItems.push({ start: e.date, end: endIncl, title: e.title, color: col, bg: col+'2e', isGcal:false, evId:e.id });
+    }
   });
 
   // 3. Attribuer une lane (ligne) sans chevauchement
@@ -2006,24 +2030,13 @@ function renderCal() {
     const row = Math.floor(ci/7);
     const spacerH = lanesPerRow[row] * (LANE_H + LANE_GAP);
     const isToday = cell.ds===today, isSel = cell.ds===selectedDay;
-    // Pips événements ponctuels
-    const evts = getEventsForDay(cell.ds).filter(e => !e.allDay);
-    const gcalSingle = gcalEvents.filter(e => e.date===cell.ds && e.allDay && (!e.endDate||e.endDate<=e.date));
+    // Pips : uniquement les events OrLog (blocs prévus/réalisés)
+    const orlogEvts = loadOrLog().filter(b => b.date===cell.ds);
     let pipsHtml = '';
-    if(calFullscreen) {
-      pipsHtml = [...evts,...gcalSingle].slice(0,3).map(e=>{
-        const c = e.fromGcal?(e.calColor||'#4ecdc4'):(EV_COLOR[e.type]||EV_COLOR.autre);
-        return `<div style="height:14px;line-height:14px;border-radius:2px;background:${c}22;color:${c};font-size:9px;font-weight:500;padding:0 3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:1px;">${e.title||'—'}</div>`;
-      }).join('');
-      if([...evts,...gcalSingle].length>3) pipsHtml+=`<div style="font-size:9px;color:var(--t3);">+${[...evts,...gcalSingle].length-3}</div>`;
-    } else {
-      const pips = [...evts,...gcalSingle].slice(0,4).map(e=>{
-        const c = e.fromGcal?(e.calColor||'#4ecdc4'):(EV_COLOR[e.type]||EV_COLOR.autre);
-        return `<div class="cal-pip" style="background:${c}"></div>`;
-      }).join('');
-      if(pips) pipsHtml=`<div class="cal-pips">${pips}</div>`;
+    if(orlogEvts.length > 0) {
+      pipsHtml = `<div class="cal-pips">${orlogEvts.slice(0,4).map(b=>`<div class="cal-pip" style="background:${b.done?'var(--green)':'var(--acc)'}"></div>`).join('')}</div>`;
     }
-    html += `<div class="cal-cell${!cell.inMonth?' other':''}${isToday?' today':''}${isSel?' selected':''}" onclick="selectDay('${cell.ds}')" data-ci="${ci}">
+    html += `<div class="cal-cell${!cell.inMonth?' other':''}${isToday?' today':''}${isSel?' selected':''}" onclick="selectDay('${cell.ds}')" ondblclick="openQuickAddOnDay('${cell.ds}')" data-ci="${ci}" title="Double-clic pour ajouter">
       <div class="cal-num">${cell.day}</div>
       <div class="cal-cell-spacer" style="height:${spacerH}px"></div>
       ${pipsHtml}
@@ -2082,7 +2095,17 @@ function renderCal() {
         });
         bar.textContent = isFirst||colStart===0 ? item.title : '';
         bar.title = item.title;
-        bar.onclick = ev => { ev.stopPropagation(); selectDay(rowCells[0].ds); };
+        bar.onclick = ev => {
+          ev.stopPropagation();
+          if(item.isTravel) { sw('travel'); return; }
+          if(item.isGcal) { showToast('Événement Google Calendar — modifiable dans GCal'); return; }
+          if(item.evId !== undefined) {
+            const idx = events.findIndex(e=>e.id===item.evId);
+            if(idx>=0) openEditEvent(idx);
+          } else {
+            selectDay(rowCells[0].ds);
+          }
+        };
         grid.appendChild(bar);
       });
     });
@@ -2332,9 +2355,7 @@ function renderDayPanel() {
   }).join('');
 }
 function deleteEventInline(idx) {
-  if(!confirm('Supprimer cet événement ?')) return;
-  events.splice(idx,1);
-  save(); renderDash(); showToast('Événement supprimé');
+  openEditEvent(idx);
 }
 function renderUrgentTasks() {
   const el = document.getElementById('urgent-tasks-list');
@@ -2409,30 +2430,66 @@ function renderUpcomingReminders() {
 // ═══════════════════════════════════════
 //  EVENTS
 // ═══════════════════════════════════════
+let curEvColor = '';
+
 function openQuickAdd() {
-  editingEvent=-1;
-  document.getElementById('ev-title-h').textContent='Nouvel événement';
-  document.getElementById('ev-title').value='';
-  document.getElementById('ev-date').value=selectedDay||todayStr();
-  document.getElementById('ev-time').value='08:00';
-  document.getElementById('ev-note').value='';
-  curEvType='bloc';
+  openQuickAddOnDay(selectedDay || todayStr());
+}
+function openQuickAddOnDay(ds) {
+  editingEvent = -1; curEvColor = '';
+  document.getElementById('ev-title-h').textContent = 'Nouvel événement';
+  document.getElementById('ev-title').value = '';
+  document.getElementById('ev-date').value = ds;
+  document.getElementById('ev-date-end').value = '';
+  document.getElementById('ev-time').value = '';
+  document.getElementById('ev-note').value = '';
+  curEvType = 'bloc';
   document.querySelectorAll('#ov-event .type-btn').forEach(b=>b.classList.toggle('active',b.dataset.ev==='bloc'));
+  document.querySelectorAll('.ev-color-btn').forEach(b=>b.style.border=b.dataset.color===''?'2px solid white':'2px solid transparent');
+  const btns = document.getElementById('ev-sheet-btns');
+  btns.innerHTML = `<button class="btn-secondary" onclick="closeOv('ov-event')">Annuler</button><button class="btn-primary" onclick="saveEvent()">Enregistrer</button>`;
   openOv('ov-event');
+}
+function openEditEvent(idx) {
+  const ev = events[idx];
+  editingEvent = idx; curEvColor = ev.customColor || '';
+  document.getElementById('ev-title-h').textContent = 'Modifier l\'événement';
+  document.getElementById('ev-title').value = ev.title || '';
+  document.getElementById('ev-date').value = ev.date || '';
+  document.getElementById('ev-date-end').value = ev.dateEnd || '';
+  document.getElementById('ev-time').value = ev.time || '';
+  document.getElementById('ev-note').value = ev.note || '';
+  curEvType = ev.type || 'autre';
+  document.querySelectorAll('#ov-event .type-btn').forEach(b=>b.classList.toggle('active',b.dataset.ev===curEvType));
+  document.querySelectorAll('.ev-color-btn').forEach(b=>b.style.border=b.dataset.color===curEvColor?'2px solid white':'2px solid transparent');
+  const btns = document.getElementById('ev-sheet-btns');
+  btns.innerHTML = `<button class="btn-danger" onclick="deleteEventFromSheet(${idx})">Supprimer</button><button class="btn-secondary" onclick="closeOv('ov-event')">Annuler</button><button class="btn-primary" style="flex:2;margin-top:0;" onclick="saveEvent()">Enregistrer</button>`;
+  openOv('ov-event');
+}
+function deleteEventFromSheet(idx) {
+  if(!confirm('Supprimer cet événement ?')) return;
+  events.splice(idx,1); save(); closeOv('ov-event'); renderDash(); showToast('Supprimé');
 }
 function selEvType(btn) {
   document.querySelectorAll('#ov-event .type-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active'); curEvType=btn.dataset.ev;
 }
+function selEvColor(btn, color) {
+  curEvColor = color;
+  document.querySelectorAll('.ev-color-btn').forEach(b=>b.style.border=b.dataset.color===color?'2px solid white':'2px solid transparent');
+}
 function saveEvent() {
   const title=document.getElementById('ev-title').value.trim();
   if(!title){showToast('Titre requis');return;}
+  const dateEnd = document.getElementById('ev-date-end').value;
   const ev={
     id: editingEvent>=0?events[editingEvent].id:Date.now(),
     type:curEvType, title,
     date:document.getElementById('ev-date').value,
+    dateEnd: dateEnd && dateEnd >= document.getElementById('ev-date').value ? dateEnd : null,
     time:document.getElementById('ev-time').value,
-    note:document.getElementById('ev-note').value.trim()
+    note:document.getElementById('ev-note').value.trim(),
+    customColor: curEvColor || null
   };
   if(!ev.date){showToast('Date requise');return;}
   if(editingEvent>=0) events[editingEvent]=ev;
