@@ -243,20 +243,25 @@ body::before {
   transition: all 0.15s;
 }
 .cal-today-btn:hover { color: var(--t1); background: var(--glass2); }
-.cal-grid-wrap { padding: 12px 16px 8px; flex-shrink: 0; }
+.cal-grid-wrap { padding: 8px 12px 4px; flex-shrink: 0; }
 .cal-dow {
   display: grid; grid-template-columns: repeat(7,1fr);
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 .cal-dow-cell {
   text-align: center; font-size: 10px; font-weight: 500;
   color: var(--t3); letter-spacing: 0.08em; padding: 2px 0;
 }
-.cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 2px; }
+.cal-grid {
+  display: grid; grid-template-columns: repeat(7,1fr);
+  gap: 1px;
+}
+/* Mode normal : cellules avec hauteur fixe pour laisser de la place aux barres */
 .cal-cell {
-  aspect-ratio: 1; border-radius: 8px;
-  display: flex; flex-direction: column; align-items: center;
-  justify-content: flex-start; padding: 4px 2px 2px;
+  min-height: 52px;
+  border-radius: 6px;
+  display: flex; flex-direction: column; align-items: stretch;
+  padding: 3px 2px 2px;
   cursor: pointer; transition: background 0.12s;
   position: relative; overflow: hidden;
 }
@@ -265,15 +270,58 @@ body::before {
 .cal-cell.today .cal-num {
   background: var(--acc);
   color: white; border-radius: 50%;
-  width: 22px; height: 22px;
+  width: 20px; height: 20px;
   display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 0 12px var(--acc-glow);
+  box-shadow: 0 0 10px var(--acc-glow);
+  margin: 0 auto;
+  font-size: 11px;
 }
 .cal-cell.selected { background: var(--acc-dim); border: 1px solid rgba(124,106,247,0.2); }
-.cal-num { font-size: 12px; font-weight: 500; color: var(--t1); line-height: 1; }
+.cal-num {
+  font-size: 11px; font-weight: 500; color: var(--t1);
+  line-height: 1; text-align: center; margin-bottom: 2px; flex-shrink: 0;
+}
 .cal-cell.other .cal-num { color: var(--t3); }
-.cal-pips { display: flex; gap: 2px; margin-top: 3px; flex-wrap: wrap; justify-content: center; }
+
+/* Barres d'événements dans les cellules */
+.cal-bars { display: flex; flex-direction: column; gap: 1px; flex: 1; overflow: hidden; }
+.cal-bar {
+  height: 5px; border-radius: 2px; width: 100%;
+  flex-shrink: 0;
+}
+.cal-bar-label {
+  height: 14px; border-radius: 2px;
+  font-size: 9px; font-weight: 500;
+  padding: 0 3px; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+  line-height: 14px; flex-shrink: 0;
+}
+/* Barres multi-jours (span) */
+.cal-bar-span {
+  height: 14px; border-radius: 2px;
+  font-size: 9px; font-weight: 500;
+  padding: 0 4px; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+  line-height: 14px; flex-shrink: 0;
+}
+.cal-bar-span.start { border-radius: 3px 0 0 3px; }
+.cal-bar-span.mid   { border-radius: 0; }
+.cal-bar-span.end   { border-radius: 0 3px 3px 0; }
+.cal-pips { display: flex; gap: 2px; margin-top: 2px; flex-wrap: wrap; justify-content: center; }
 .cal-pip { width: 4px; height: 4px; border-radius: 50%; flex-shrink: 0; }
+
+/* ── PLEIN ÉCRAN CALENDRIER ── */
+.cal-fullscreen {
+  position: fixed; inset: 0;
+  background: var(--bg0); z-index: 150;
+  display: flex; flex-direction: column;
+}
+.cal-fullscreen .cal-fixed { flex: 1; display: flex; flex-direction: column; }
+.cal-fullscreen .cal-grid-wrap { flex: 1; display: flex; flex-direction: column; padding: 12px 20px; }
+.cal-fullscreen .cal-grid { flex: 1; gap: 2px; }
+.cal-fullscreen .cal-cell { min-height: unset; }
+.cal-fullscreen .cal-bar-label { height: 16px; font-size: 10px; line-height: 16px; }
+.cal-fullscreen .cal-bar-span { height: 16px; font-size: 10px; line-height: 16px; }
 
 /* ── TODAY HEADER ── */
 .day-header {
@@ -724,13 +772,13 @@ body::before {
       </button>
     </nav>
     <div class="sb-bottom">
-      <button class="sb-btn" onclick="openExt('orlog')" title="OrLog">
+      <button class="sb-btn" onclick="openExt('orlog')">
         <span>📋</span><span class="tooltip">OrLog</span>
       </button>
-      <button class="sb-btn" onclick="openExt('ortopos')" title="OrTopos">
+      <button class="sb-btn" onclick="openExt('ortopos')">
         <span>📖</span><span class="tooltip">OrTopos</span>
       </button>
-      <button class="sb-btn" onclick="openExt('finary')" title="Finary">
+      <button class="sb-btn" onclick="openExt('finary')">
         <span>📊</span><span class="tooltip">Finary</span>
       </button>
       <div class="sb-sep"></div>
@@ -773,6 +821,7 @@ body::before {
                 <button class="cal-today-btn" onclick="calGoToday()">Aujourd'hui</button>
                 <button class="cal-nav-btn" onclick="calNav(-1)">‹</button>
                 <button class="cal-nav-btn" onclick="calNav(1)">›</button>
+                <button class="cal-nav-btn" onclick="toggleCalFullscreen()" id="cal-fs-btn" title="Plein écran" style="font-size:12px;">⤢</button>
               </div>
             </div>
             <div class="cal-grid-wrap">
@@ -806,15 +855,13 @@ body::before {
             <div class="gcard" id="weekly-summary"></div>
             <!-- Stats row -->
             <div class="stat-row" id="stat-row"></div>
-            <!-- Quick links -->
-            <div class="gcard">
-              <div class="gcard-title">Accès rapide</div>
-              <div class="qlinks">
-                <button class="qlink" onclick="openExt('orlog')"><span class="qlink-icon">📋</span>OrLog</button>
-                <button class="qlink" onclick="openExt('ortopos')"><span class="qlink-icon">📖</span>OrTopos</button>
-                <button class="qlink" onclick="openExt('finary')"><span class="qlink-icon">📊</span>Finary</button>
-                <button class="qlink" onclick="sw('fininvest')"><span class="qlink-icon">💹</span>FinInvest</button>
+            <!-- Tâches prioritaires — en haut, remplace Quick links -->
+            <div class="gcard" id="urgent-tasks-card">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                <div class="gcard-title" style="margin-bottom:0;">Tâches prioritaires</div>
+                <button onclick="sw('tasks')" style="background:none;border:none;color:var(--t3);font-size:11px;cursor:pointer;font-family:var(--ff);">Voir toutes →</button>
               </div>
+              <div id="urgent-tasks-list"></div>
             </div>
             <!-- Timeline -->
             <div class="gcard">
@@ -823,14 +870,6 @@ body::before {
                 <button onclick="openQuickAdd()" style="background:var(--acc-dim);border:1px solid rgba(124,106,247,0.2);color:var(--acc2);padding:4px 10px;border-radius:var(--r);font-size:11px;cursor:pointer;font-family:var(--ff);">+ Événement</button>
               </div>
               <div id="day-timeline"></div>
-            </div>
-            <!-- Tâches urgentes du jour -->
-            <div class="gcard" id="urgent-tasks-card">
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-                <div class="gcard-title" style="margin-bottom:0;">Tâches prioritaires</div>
-                <button onclick="sw('tasks')" style="background:none;border:none;color:var(--t3);font-size:11px;cursor:pointer;font-family:var(--ff);">Voir toutes →</button>
-              </div>
-              <div id="urgent-tasks-list"></div>
             </div>
             <!-- Note rapide -->
             <div class="gcard">
@@ -1855,42 +1894,165 @@ function getEventsForDay(ds) {
 function loadOrLog() {
   try { const d=localStorage.getItem('orlog_blocs_summary'); return d?JSON.parse(d):[]; } catch(e){return[];}
 }
+let calFullscreen = false;
+
+function toggleCalFullscreen() {
+  calFullscreen = !calFullscreen;
+  const dashLeft = document.querySelector('.dash-left');
+  const btn = document.getElementById('cal-fs-btn');
+  if(calFullscreen) {
+    dashLeft.classList.add('cal-fullscreen');
+    // Cacher les widgets sous le calendrier en plein écran
+    document.getElementById('cal-left-widgets').style.display = 'none';
+    if(btn) btn.textContent = '⤡';
+    if(btn) btn.title = 'Réduire';
+  } else {
+    dashLeft.classList.remove('cal-fullscreen');
+    document.getElementById('cal-left-widgets').style.display = '';
+    if(btn) btn.textContent = '⤢';
+    if(btn) btn.title = 'Plein écran';
+  }
+  renderCal();
+}
+
+// Fermer plein écran avec Escape
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape' && calFullscreen) toggleCalFullscreen();
+});
+
 function renderCal() {
   const monthNames=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
-  document.getElementById('cal-month-name').textContent=monthNames[calMonth]+' '+calYear;
+  document.getElementById('cal-month-name').textContent = monthNames[calMonth] + ' ' + calYear;
   const DOW=['L','M','M','J','V','S','D'];
-  document.getElementById('cal-dow').innerHTML=DOW.map(d=>`<div class="cal-dow-cell">${d}</div>`).join('');
-  const first=new Date(calYear,calMonth,1);
-  const last=new Date(calYear,calMonth+1,0);
-  let dow=first.getDay()-1; if(dow<0)dow=6;
-  const today=todayStr();
-  let cells='';
-  // prev month padding
-  for(let i=dow-1;i>=0;i--){
+  document.getElementById('cal-dow').innerHTML = DOW.map(d=>`<div class="cal-dow-cell">${d}</div>`).join('');
+
+  const first = new Date(calYear, calMonth, 1);
+  const last  = new Date(calYear, calMonth+1, 0);
+  let dow = first.getDay()-1; if(dow<0) dow=6;
+  const today = todayStr();
+
+  // ── Collecter tous les événements multi-jours du mois ──
+  // (voyages + events GCal all-day multi-jours)
+  const multiDayItems = [];
+
+  // Voyages
+  travels.forEach(t => {
+    if(t.end >= localStr(new Date(calYear,calMonth,1)) && t.start <= localStr(new Date(calYear,calMonth+1,0))) {
+      multiDayItems.push({ start: t.start, end: t.end, title: '✈ '+t.dest, color: '#4ecdc4', colorBg: 'rgba(78,205,196,0.2)' });
+    }
+  });
+  // Events GCal all-day multi-jours
+  gcalEvents.filter(e => e.allDay && e.date).forEach(e => {
+    // Chercher la date de fin dans les données brutes — on approxime à 1 jour si pas d'end
+    if(e.endDate && e.endDate !== e.date) {
+      const endAdj = e.endDate; // GCal all-day end est exclusif
+      if(endAdj >= localStr(new Date(calYear,calMonth,1)) && e.date <= localStr(new Date(calYear,calMonth+1,0))) {
+        multiDayItems.push({ start: e.date, end: endAdj, title: e.title, color: e.calColor||'#7c6af7', colorBg: (e.calColor||'#7c6af7')+'33' });
+      }
+    }
+  });
+  // Events manuels multi-jours (type rappel avec date fin)
+  events.filter(e => e.dateEnd && e.dateEnd > e.date).forEach(e => {
+    multiDayItems.push({ start: e.date, end: e.dateEnd, title: e.title, color: EV_COLOR[e.type]||EV_COLOR.autre, colorBg: (EV_COLOR[e.type]||EV_COLOR.autre)+'33' });
+  });
+
+  // Construire toutes les cellules du mois (y compris padding)
+  const allCells = [];
+  for(let i=dow-1;i>=0;i--) {
     const d=new Date(calYear,calMonth,0-i);
-    const ds=localStr(d);
-    cells+=`<div class="cal-cell other" onclick="selectDay('${ds}')"><div class="cal-num">${d.getDate()}</div></div>`;
+    allCells.push({ date: localStr(d), day: d.getDate(), inMonth: false });
   }
-  // current month
-  for(let day=1;day<=last.getDate();day++){
+  for(let day=1;day<=last.getDate();day++) {
     const d=new Date(calYear,calMonth,day);
-    const ds=localStr(d);
-    const evts=getEventsForDay(ds);
-    const isToday=ds===today; const isSel=ds===selectedDay;
-    const pips=evts.slice(0,4).map(e=>`<div class="cal-pip" style="background:${EV_COLOR[e.type]||EV_COLOR.autre}"></div>`).join('');
-    cells+=`<div class="cal-cell${isToday?' today':''}${isSel?' selected':''}" onclick="selectDay('${ds}')">
-      <div class="cal-num">${day}</div>
-      <div class="cal-pips">${pips}</div>
-    </div>`;
+    allCells.push({ date: localStr(d), day, inMonth: true });
   }
-  // next month padding
-  const total=dow+last.getDate(); const rem=(7-total%7)%7;
-  for(let i=1;i<=rem;i++){
+  const total = dow + last.getDate();
+  const rem = (7 - total%7) % 7;
+  for(let i=1;i<=rem;i++) {
     const d=new Date(calYear,calMonth+1,i);
-    const ds=localStr(d);
-    cells+=`<div class="cal-cell other" onclick="selectDay('${ds}')"><div class="cal-num">${d.getDate()}</div></div>`;
+    allCells.push({ date: localStr(d), day: d.getDate(), inMonth: false });
   }
-  document.getElementById('cal-grid').innerHTML=cells;
+
+  // Attribuer les lignes aux items multi-jours (max 2 lignes par cellule)
+  const rowAssignments = {}; // date -> [item|null, item|null]
+  const itemRows = new Map(); // item -> rowIndex
+
+  multiDayItems.forEach(item => {
+    // Trouver la première ligne disponible sur toute la durée
+    let row = 0;
+    outer: for(row=0; row<3; row++) {
+      let cur = new Date(item.start.split('-').map(Number)[0], item.start.split('-').map(Number)[1]-1, item.start.split('-').map(Number)[2]);
+      const endD = parseLocal(item.end);
+      while(localStr(cur) <= localStr(endD)) {
+        const ds = localStr(cur);
+        if(rowAssignments[ds] && rowAssignments[ds][row]) { row++; continue outer; }
+        cur.setDate(cur.getDate()+1);
+      }
+      break;
+    }
+    itemRows.set(item, row);
+    // Marquer les cellules
+    let cur = parseLocal(item.start);
+    const endD = parseLocal(item.end);
+    while(localStr(cur) <= localStr(endD)) {
+      const ds = localStr(cur);
+      if(!rowAssignments[ds]) rowAssignments[ds] = {};
+      rowAssignments[ds][row] = item;
+      cur.setDate(cur.getDate()+1);
+    }
+  });
+
+  // Générer le HTML des cellules
+  let cells = '';
+  allCells.forEach(cell => {
+    const { date: ds, day, inMonth } = cell;
+    const isToday = ds === today;
+    const isSel = ds === selectedDay;
+
+    // Événements ponctuels du jour (hors multi-jours)
+    const dayEvts = getEventsForDay(ds).filter(e => !e.fromGcal || !e.allDay);
+    const gcalAllDay = gcalEvents.filter(e => e.allDay && e.date === ds && (!e.endDate || e.endDate === ds));
+
+    // Construire les barres multi-jours pour cette cellule
+    const maxRows = calFullscreen ? 3 : 2;
+    let barsHtml = '';
+    for(let r=0; r<maxRows; r++) {
+      const item = rowAssignments[ds] && rowAssignments[ds][r];
+      if(item) {
+        const isStart = item.start === ds;
+        const isEnd   = item.end === ds;
+        const spanClass = isStart ? 'start' : isEnd ? 'end' : 'mid';
+        const label = isStart || calFullscreen ? item.title : '';
+        barsHtml += `<div class="cal-bar-span ${spanClass}" style="background:${item.colorBg};color:${item.color};border-left:${isStart?'2px solid '+item.color:'none'};">${label}</div>`;
+      } else {
+        barsHtml += `<div style="height:${calFullscreen?16:14}px;flex-shrink:0;"></div>`;
+      }
+    }
+
+    // Événements ponctuels : texte en plein écran, pips sinon
+    let evHtml = '';
+    if(calFullscreen) {
+      const allEvts = [...dayEvts.slice(0,3), ...gcalAllDay.slice(0,1)];
+      allEvts.forEach(e => {
+        const color = e.fromGcal ? (e.calColor||'#4ecdc4') : (EV_COLOR[e.type]||EV_COLOR.autre);
+        evHtml += `<div class="cal-bar-label" style="background:${color}22;color:${color};">${e.title||'—'}</div>`;
+      });
+      if(dayEvts.length + gcalAllDay.length > 3) evHtml += `<div style="font-size:9px;color:var(--t3);padding:0 2px;">+${dayEvts.length+gcalAllDay.length-3}</div>`;
+    } else {
+      const pips = [...dayEvts, ...gcalAllDay].slice(0,4).map(e => {
+        const color = e.fromGcal ? (e.calColor||'#4ecdc4') : (EV_COLOR[e.type]||EV_COLOR.autre);
+        return `<div class="cal-pip" style="background:${color}"></div>`;
+      }).join('');
+      if(pips) evHtml = `<div class="cal-pips">${pips}</div>`;
+    }
+
+    cells += `<div class="cal-cell${!inMonth?' other':''}${isToday?' today':''}${isSel?' selected':''}" onclick="selectDay('${ds}')">
+      <div class="cal-num">${day}</div>
+      <div class="cal-bars">${barsHtml}${evHtml}</div>
+    </div>`;
+  });
+
+  document.getElementById('cal-grid').innerHTML = cells;
 }
 function selectDay(ds) {
   selectedDay=ds;
@@ -2917,6 +3079,7 @@ async function gcalSync() {
           calColor: cal ? cal.color : '#7c6af7',
           title: ev.summary || '(sans titre)',
           date: dateStr,
+          endDate: end ? end.split('T')[0] : dateStr,
           time: ev.start.dateTime ? ev.start.dateTime.split('T')[1].substring(0,5) : '',
           allDay: !!ev.start.date,
           note: ev.description || '',
