@@ -788,6 +788,9 @@ body::before {
       <button class="sb-btn" onclick="sw('travel')" id="sb-travel">
         <span>✈</span><span class="tooltip">Voyages</span>
       </button>
+      <button class="sb-btn" onclick="sw('baby')" id="sb-baby">
+        <span>🍼</span><span class="tooltip">Bébé & Déménagement</span>
+      </button>
     </nav>
     <div class="sb-bottom">
       <button class="sb-btn" onclick="openExt('orlog')">
@@ -1015,11 +1018,88 @@ body::before {
         </div>
       </div>
 
+      <!-- ⑦ BÉBÉ & DÉMÉNAGEMENT -->
+      <div class="view" id="view-baby">
+        <div style="display:flex;height:100%;overflow:hidden;">
+          <div style="width:340px;min-width:300px;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;">
+            <div style="display:flex;gap:3px;padding:10px 12px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--glass);">
+              <button class="type-btn active" onclick="switchBabyTab('pregnancy',this)" style="flex:1;font-size:11px;">🤰 Grossesse</button>
+              <button class="type-btn" onclick="switchBabyTab('move',this)" style="flex:1;font-size:11px;">📦 Déménagement</button>
+            </div>
+            <div style="flex:1;overflow-y:auto;padding:16px;" id="baby-left-pane"></div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
+            <div style="padding:14px 20px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+              <div style="font-family:var(--ff-d);font-size:16px;font-weight:600;" id="baby-right-title">Checklist</div>
+              <div style="display:flex;gap:6px;" id="baby-right-actions"></div>
+            </div>
+            <div style="flex:1;overflow-y:auto;padding:16px;" id="baby-right-pane"></div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end views -->
+  </div><!-- end main -->
+</div><!-- end app -->
+
+<!-- Overlay visite appartement -->
+<div class="overlay" id="ov-flat">
+  <div class="sheet" style="max-width:480px;">
+    <button class="sheet-close" onclick="closeOv('ov-flat')">×</button>
+    <div class="sheet-title" id="flat-sheet-title">Ajouter une visite</div>
+    <div class="fg"><label>Adresse</label><input type="text" id="flat-addr" placeholder="ex. 12 rue Victor Hugo, Lille"></div>
+    <div class="form-row">
+      <div class="fg"><label>Loyer (€/mois)</label><input type="number" id="flat-rent" placeholder="1600" inputmode="numeric"></div>
+      <div class="fg"><label>Surface (m²)</label><input type="number" id="flat-surface" placeholder="65" inputmode="numeric"></div>
+    </div>
+    <div class="fg"><label>Statut</label>
+      <select id="flat-status">
+        <option value="à visiter">À visiter</option>
+        <option value="visité">Visité</option>
+        <option value="candidature">Candidature déposée</option>
+        <option value="retenu">Retenu ✓</option>
+        <option value="écarté">Écarté</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <div class="fg"><label>Date visite</label><input type="date" id="flat-date"></div>
+      <div class="fg"><label>Note /10</label><input type="number" id="flat-score" min="0" max="10" placeholder="7" inputmode="numeric"></div>
+    </div>
+    <div class="fg">
+      <label>Critères</label>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:6px;">
+        <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--t2);cursor:pointer;"><input type="checkbox" id="fc-parking" style="accent-color:var(--acc);"> Parking</label>
+        <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--t2);cursor:pointer;"><input type="checkbox" id="fc-ascenseur" style="accent-color:var(--acc);"> Ascenseur/RDC</label>
+        <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--t2);cursor:pointer;"><input type="checkbox" id="fc-exterieur" style="accent-color:var(--acc);"> Extérieur</label>
+        <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--t2);cursor:pointer;"><input type="checkbox" id="fc-lumineux" style="accent-color:var(--acc);"> Lumineux</label>
+      </div>
+    </div>
+    <div class="fg"><label>Notes</label><textarea id="flat-notes" placeholder="Impressions, points forts/faibles..."></textarea></div>
+    <div class="sheet-actions" id="flat-sheet-btns">
+      <button class="btn-secondary" onclick="closeOv('ov-flat')">Annuler</button>
+      <button class="btn-primary" style="flex:2;margin-top:0;" onclick="saveFlat()">Enregistrer</button>
     </div>
   </div>
 </div>
 
-<!-- ── OVERLAYS ── -->
+<!-- Overlay RDV médical grossesse -->
+<div class="overlay" id="ov-medappt">
+  <div class="sheet" style="max-width:480px;">
+    <button class="sheet-close" onclick="closeOv('ov-medappt')">×</button>
+    <div class="sheet-title" id="medappt-title">Rendez-vous médical</div>
+    <div class="fg"><label>Type</label><input type="text" id="ma-type" placeholder="ex. Échographie T2, Consultation obstétrique..."></div>
+    <div class="form-row">
+      <div class="fg"><label>Date</label><input type="date" id="ma-date"></div>
+      <div class="fg"><label>Heure</label><input type="time" id="ma-time"></div>
+    </div>
+    <div class="fg"><label>Praticien / lieu</label><input type="text" id="ma-lieu" placeholder="Dr ..., Maternité ..."></div>
+    <div class="fg"><label>Note</label><input type="text" id="ma-note" placeholder="Optionnel..."></div>
+    <div class="sheet-actions" id="medappt-btns">
+      <button class="btn-secondary" onclick="closeOv('ov-medappt')">Annuler</button>
+      <button class="btn-primary" style="flex:2;margin-top:0;" onclick="saveMedAppt()">Enregistrer</button>
+    </div>
+  </div>
+</div>
 
 <!-- Quick add event -->
 <div class="overlay" id="ov-event">
@@ -1330,7 +1410,7 @@ function diffDays(s) {
 // ═══════════════════════════════════════
 const PAGE_TITLES = {
   dash:'Dashboard', tasks:'Tâches', library:'Bibliothèque',
-  career:'Carrière', fininvest:'FinInvest', travel:'Voyages'
+  career:'Carrière', fininvest:'FinInvest', travel:'Voyages', baby:'Bébé & Déménagement'
 };
 function sw(v) {
   document.querySelectorAll('.view').forEach(e=>e.classList.remove('active'));
@@ -1349,6 +1429,7 @@ function sw(v) {
   if(v==='career')     renderCareerView();
   if(v==='fininvest')  renderFinInvest();
   if(v==='travel')     renderTravel();
+  if(v==='baby')       renderBaby();
 }
 function openExt(k) {
   const u=LINKS[k];
@@ -2290,7 +2371,8 @@ function renderWeeklySummary() {
     ${isDcaPending()?`<div style="margin-top:8px;padding:8px 12px;background:var(--acc-dim);border-radius:var(--r);border:1px solid rgba(124,106,247,0.2);display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;" onclick="sw('fininvest')">
       <span>💹</span><span style="color:var(--acc2);flex:1;font-weight:500;">DCA du mois à effectuer</span>
       <span style="color:var(--t3);font-size:10px;">→</span>
-    </div>`:''}`;
+    </div>`:''}
+    ${babyDashWidget()}`;
 }
 
 function weekMonday() {
@@ -3294,8 +3376,500 @@ function gcalToggleCal(id, enabled) {
 }
 
 // ═══════════════════════════════════════
-//  TOAST
+//  MODULE BÉBÉ & DÉMÉNAGEMENT
 // ═══════════════════════════════════════
+const TERME = '2026-11-25';
+const CONCEPTION = (() => { const d = parseLocal(TERME); d.setDate(d.getDate()-280); return localStr(d); })();
+let babyTab = 'pregnancy';
+let babyData = { medAppts:[], checkItems:{}, flats:[], moveChecks:{} };
+let editingFlat = -1, editingMedAppt = -1;
+
+function loadBaby() {
+  try { const d=localStorage.getItem('sos_baby'); if(d) babyData=JSON.parse(d); } catch(e){}
+  // Initialiser les checklists si vides
+  if(!Object.keys(babyData.checkItems).length) initBabyChecklist();
+  if(!Object.keys(babyData.moveChecks).length) initMoveChecklist();
+}
+function saveBaby() {
+  try { localStorage.setItem('sos_baby', JSON.stringify(babyData)); } catch(e){}
+}
+
+// ── Calculs grossesse ──
+function weeksFromConception() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const conc = parseLocal(CONCEPTION); conc.setHours(0,0,0,0);
+  return Math.floor((today - conc) / (7*86400000));
+}
+function daysToTerme() { return diffDays(TERME); }
+function trimestre() { const w=weeksFromConception(); return w<14?1:w<28?2:3; }
+function trimestreLabel(t) { return t===1?'1er trimestre':t===2?'2ème trimestre':'3ème trimestre'; }
+
+// ── Calendrier médical officiel FR (dates calculées depuis le terme) ──
+function officialMedEvents() {
+  const terme = parseLocal(TERME);
+  function wk(weeksBeforeTerme) {
+    const d = new Date(terme); d.setDate(d.getDate() - weeksBeforeTerme*7); return localStr(d);
+  }
+  return [
+    { type:'Déclaration grossesse', date: wk(29), desc:'Avant 15 SA — CPAM + CAF', mandatory:true },
+    { type:'Consultation T1', date: wk(28), desc:'1ère consultation obstétricale', mandatory:true },
+    { type:'Écho T1 + dépistage T21', date: wk(25), desc:'11-13 SA + prise de sang', mandatory:true },
+    { type:'Sérotonique & toxo', date: wk(24), desc:'Bilan sanguin T1', mandatory:true },
+    { type:'Consultation T2', date: wk(20), desc:'2ème consultation', mandatory:true },
+    { type:'Écho T2 morphologique', date: wk(18), desc:'22-24 SA — morphologie fœtale', mandatory:true },
+    { type:'Test O\'Sullivan', date: wk(16), desc:'24-28 SA — dépistage diabète gestationnel', mandatory:false },
+    { type:'Consultation T3', date: wk(12), desc:'3ème consultation', mandatory:true },
+    { type:'Écho T3', date: wk(8), desc:'31-35 SA — présentation, croissance', mandatory:true },
+    { type:'Consultation anesthésie', date: wk(7), desc:'Avant 34 SA — visite pré-anesthésique', mandatory:true },
+    { type:'Consultation pré-accouchement', date: wk(4), desc:'36-38 SA', mandatory:true },
+    { type:'Préparation à la naissance', date: wk(14), desc:'7 séances remboursées SS — à planifier', mandatory:false },
+  ].sort((a,b)=>a.date.localeCompare(b.date));
+}
+
+// ── Checklist bébé complète ──
+function initBabyChecklist() {
+  const items = {
+    // ADMINISTRATIF
+    'adm-1': { label:'Déclarer la grossesse (CPAM + CAF)', cat:'admin', tri:1, done:false },
+    'adm-2': { label:'Choisir la maternité', cat:'admin', tri:1, done:false },
+    'adm-3': { label:'Choisir le pédiatre', cat:'admin', tri:2, done:false },
+    'adm-4': { label:'Prévenir employeur (congé paternité)', cat:'admin', tri:2, done:false },
+    'adm-5': { label:'Déclarer naissance à la mairie (5j)', cat:'admin', tri:3, done:false },
+    'adm-6': { label:'Déclarer bébé à la CPAM', cat:'admin', tri:3, done:false },
+    'adm-7': { label:'Demander allocation naissance CAF', cat:'admin', tri:3, done:false },
+    'adm-8': { label:'Ajouter bébé sur mutuelle', cat:'admin', tri:3, done:false },
+    'adm-9': { label:'Prendre congé paternité (25 jours)', cat:'admin', tri:3, done:false },
+    // MÉDICAL
+    'med-1': { label:'Trouver sage-femme / obstétricien', cat:'medical', tri:1, done:false },
+    'med-2': { label:'S\'inscrire cours préparation naissance (7 séances)', cat:'medical', tri:2, done:false },
+    'med-3': { label:'Visite pré-anesthésique', cat:'medical', tri:3, done:false },
+    'med-4': { label:'Préparer valise maternité', cat:'medical', tri:3, done:false },
+    'med-5': { label:'Visiter la maternité', cat:'medical', tri:2, done:false },
+    'med-6': { label:'Décider allaitement/biberon', cat:'medical', tri:2, done:false },
+    // LOGEMENT
+    'log-1': { label:'Trouver et signer nouvel appartement', cat:'logement', tri:1, done:false },
+    'log-2': { label:'Donner préavis logement actuel', cat:'logement', tri:1, done:false },
+    'log-3': { label:'Aménager chambre bébé', cat:'logement', tri:2, done:false },
+    'log-4': { label:'Installer lit cododo / berceau', cat:'logement', tri:3, done:false },
+    'log-5': { label:'Sécuriser le logement (prises, coins...)', cat:'logement', tri:3, done:false },
+    // MATÉRIEL ESSENTIEL
+    'mat-1': { label:'Lit / berceau / cododo', cat:'materiel', tri:2, done:false },
+    'mat-2': { label:'Poussette / nacelle', cat:'materiel', tri:2, done:false },
+    'mat-3': { label:'Siège auto groupe 0+', cat:'materiel', tri:2, done:false },
+    'mat-4': { label:'Table à langer + matelas', cat:'materiel', tri:2, done:false },
+    'mat-5': { label:'Baignoire bébé', cat:'materiel', tri:2, done:false },
+    'mat-6': { label:'Tire-lait (si allaitement)', cat:'materiel', tri:2, done:false },
+    'mat-7': { label:'Thermomètre, mouche-bébé, coupe-ongles', cat:'materiel', tri:3, done:false },
+    'mat-8': { label:'Vêtements naissance (50/56) ×7 minimum', cat:'materiel', tri:2, done:false },
+    'mat-9': { label:'Couches nouveau-né', cat:'materiel', tri:3, done:false },
+    'mat-10':{ label:'Lingettes, crème de change', cat:'materiel', tri:3, done:false },
+    'mat-11':{ label:'Baby phone / moniteur', cat:'materiel', tri:3, done:false },
+    'mat-12':{ label:'Transat / hamac', cat:'materiel', tri:2, done:false },
+    // VALISE MATERNITÉ
+    'val-1': { label:'Valise maman : docs identité, carte vitale, ordonnances', cat:'valise', tri:3, done:false },
+    'val-2': { label:'Valise maman : affaires personnelles, pyjama', cat:'valise', tri:3, done:false },
+    'val-3': { label:'Valise bébé : body, pyjama, bonnet, chaussettes', cat:'valise', tri:3, done:false },
+    'val-4': { label:'Couches, lingettes pour la maternité', cat:'valise', tri:3, done:false },
+    'val-5': { label:'Siège auto installé dans la voiture', cat:'valise', tri:3, done:false },
+    // PERSO
+    'per-1': { label:'Choisir prénom(s)', cat:'perso', tri:2, done:false },
+    'per-2': { label:'Annoncer la nouvelle famille/amis', cat:'perso', tri:1, done:false },
+    'per-3': { label:'Prévenir assurance voiture (siège bébé)', cat:'perso', tri:3, done:false },
+    'per-4': { label:'Lire sur le sommeil du nourrisson', cat:'perso', tri:2, done:false },
+    'per-5': { label:'Préparer plan congé paternité avec le service', cat:'perso', tri:2, done:false },
+  };
+  babyData.checkItems = items;
+}
+
+// ── Checklist déménagement ──
+function initMoveChecklist() {
+  babyData.moveChecks = {
+    'mv-1': { label:'Donner préavis au propriétaire (1 mois zone tendue Lille)', done:false, cat:'avant' },
+    'mv-2': { label:'Trouver et signer le nouveau bail', done:false, cat:'avant' },
+    'mv-3': { label:'Réserver un déménageur ou camion', done:false, cat:'avant' },
+    'mv-4': { label:'Changement adresse CAF', done:false, cat:'admin' },
+    'mv-5': { label:'Changement adresse CPAM', done:false, cat:'admin' },
+    'mv-6': { label:'Changement adresse impôts (impots.gouv.fr)', done:false, cat:'admin' },
+    'mv-7': { label:'Changement adresse banque', done:false, cat:'admin' },
+    'mv-8': { label:'Changement adresse carte grise', done:false, cat:'admin' },
+    'mv-9': { label:'Changement adresse opérateur mobile/internet', done:false, cat:'admin' },
+    'mv-10':{ label:'Résiliation/transfert contrat EDF/Engie', done:false, cat:'admin' },
+    'mv-11':{ label:'Résiliation/souscription assurance habitation', done:false, cat:'admin' },
+    'mv-12':{ label:'Redirection courrier La Poste', done:false, cat:'admin' },
+    'mv-13':{ label:'État des lieux sortant + restitution clés', done:false, cat:'jour' },
+    'mv-14':{ label:'État des lieux entrant', done:false, cat:'jour' },
+    'mv-15':{ label:'Relevé compteurs eau/élec/gaz', done:false, cat:'jour' },
+    'mv-16':{ label:'Changement serrures', done:false, cat:'jour' },
+  };
+}
+
+// ── Render principal ──
+function renderBaby() {
+  loadBaby();
+  renderBabyLeft();
+  renderBabyRight();
+}
+function switchBabyTab(tab, btn) {
+  babyTab = tab;
+  document.querySelectorAll('#view-baby .type-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderBabyLeft();
+  renderBabyRight();
+}
+
+// ── Colonne gauche ──
+function renderBabyLeft() {
+  const el = document.getElementById('baby-left-pane');
+  if(babyTab === 'pregnancy') renderPregnancyLeft(el);
+  else renderMoveLeft(el);
+}
+
+function renderPregnancyLeft(el) {
+  const weeks = weeksFromConception();
+  const days  = daysToTerme();
+  const tri   = trimestre();
+  const pct   = Math.min(100, Math.round(weeks/40*100));
+
+  // Calcul avancée par trimestre
+  const triInfo = [
+    { t:1, label:'1er trimestre', start:0, end:14, emoji:'🌱' },
+    { t:2, label:'2ème trimestre', start:14, end:28, emoji:'🌿' },
+    { t:3, label:'3ème trimestre', start:28, end:40, emoji:'🌸' },
+  ];
+
+  let html = `
+    <!-- Hero countdown -->
+    <div style="background:linear-gradient(135deg,rgba(255,183,197,0.12),rgba(255,107,157,0.06));border:1px solid rgba(255,183,197,0.2);border-radius:var(--r-lg);padding:18px;margin-bottom:14px;text-align:center;">
+      <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:rgba(255,150,180,0.7);margin-bottom:6px;">Terme prévu</div>
+      <div style="font-family:var(--ff-d);font-size:32px;font-weight:600;color:#ffb3c6;letter-spacing:-1px;line-height:1;">${days > 0 ? 'J-'+days : days===0 ? "Aujourd'hui !" : 'Passé'}</div>
+      <div style="font-size:12px;color:rgba(255,183,197,0.6);margin-top:4px;">25 novembre 2026</div>
+      <div style="height:4px;background:rgba(255,255,255,0.08);border-radius:99px;margin:12px 0 6px;overflow:hidden;">
+        <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#ffb3c6,#ff6b9d);border-radius:99px;transition:width 0.5s;"></div>
+      </div>
+      <div style="font-size:11px;color:rgba(255,183,197,0.5);">${weeks > 0 ? weeks + ' semaines' : '—'} · ${pct}% du chemin</div>
+    </div>
+
+    <!-- Trimestres -->
+    ${triInfo.map(t => {
+      const active = tri === t.t;
+      const done = tri > t.t;
+      const wCurrent = Math.min(weeks, t.end) - t.start;
+      const wTotal = t.end - t.start;
+      const tPct = Math.max(0, Math.min(100, Math.round(wCurrent/wTotal*100)));
+      return `<div style="background:${active?'rgba(255,183,197,0.08)':'var(--glass)'};border:1px solid ${active?'rgba(255,183,197,0.2)':'var(--border)'};border-radius:var(--r);padding:10px 12px;margin-bottom:6px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span style="font-size:14px;">${t.emoji}</span>
+            <span style="font-size:12px;font-weight:${active?'600':'400'};color:${active?'var(--t1)':'var(--t2)'};">${t.label}</span>
+            ${active?`<span style="font-size:10px;background:rgba(255,183,197,0.15);color:#ffb3c6;padding:1px 7px;border-radius:99px;">En cours</span>`:''}
+            ${done?`<span style="font-size:10px;color:var(--green);">✓</span>`:''}
+          </div>
+          <span style="font-size:10px;color:var(--t3);">SA ${t.start}–${t.end}</span>
+        </div>
+        <div style="height:3px;background:var(--bg5);border-radius:99px;overflow:hidden;">
+          <div style="height:100%;width:${tPct}%;background:${active?'#ffb3c6':'var(--t3)'};border-radius:99px;"></div>
+        </div>
+      </div>`;
+    }).join('')}
+
+    <!-- Prochains RDV -->
+    <div style="margin-top:14px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--t3);">Prochains RDV</div>
+        <button onclick="openMedApptSheet()" style="background:rgba(255,183,197,0.12);border:1px solid rgba(255,183,197,0.2);color:#ffb3c6;padding:3px 10px;border-radius:99px;font-size:11px;cursor:pointer;font-family:var(--ff);">+ Ajouter</button>
+      </div>
+      ${renderUpcomingMedAppts()}
+    </div>`;
+
+  el.innerHTML = html;
+}
+
+function renderUpcomingMedAppts() {
+  const today = todayStr();
+  // Fusionner RDV officiels + RDV saisis
+  const official = officialMedEvents().filter(e => e.date >= today).slice(0, 4);
+  const custom = (babyData.medAppts || []).filter(e => e.date >= today).sort((a,b)=>a.date.localeCompare(b.date)).slice(0, 4);
+  const all = [...official, ...custom].sort((a,b)=>a.date.localeCompare(b.date)).slice(0, 6);
+
+  if(!all.length) return `<div style="font-size:12px;color:var(--t3);">Tous les RDV sont passés</div>`;
+
+  return all.map(e => {
+    const d = diffDays(e.date);
+    const urgent = d <= 14;
+    const isCustom = !e.mandatory && !e.desc;
+    return `<div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04);">
+      <div style="flex-shrink:0;width:38px;text-align:center;">
+        <div style="font-size:11px;font-weight:600;color:${urgent?'#ffb3c6':'var(--t2)'};">${d===0?"Auj.":d===1?'Dem.':'J-'+d}</div>
+        <div style="font-size:9px;color:var(--t3);">${fmtShort(e.date)}</div>
+      </div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:12px;font-weight:500;color:var(--t1);">${e.type}</div>
+        ${e.desc||e.lieu?`<div style="font-size:10px;color:var(--t3);">${e.desc||e.lieu||''}</div>`:''}
+      </div>
+      ${e.mandatory?`<span style="font-size:9px;color:#ffb3c6;background:rgba(255,183,197,0.1);padding:1px 5px;border-radius:3px;flex-shrink:0;">Oblig.</span>`:''}
+    </div>`;
+  }).join('');
+}
+
+function renderMoveLeft(el) {
+  const flats = babyData.flats || [];
+  const statusOrder = ['à visiter','visité','candidature','retenu','écarté'];
+  const counts = {};
+  statusOrder.forEach(s => counts[s] = flats.filter(f=>f.status===s).length);
+
+  const daysLeft = diffDays(TERME);
+  const urgency = daysLeft < 90 ? 'var(--rose)' : daysLeft < 150 ? 'var(--amber)' : 'var(--green)';
+
+  el.innerHTML = `
+    <!-- Timeline déménagement -->
+    <div style="background:var(--glass);border:1px solid var(--border);border-radius:var(--r-lg);padding:14px;margin-bottom:14px;">
+      <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--t3);margin-bottom:10px;">Timeline</div>
+      ${[
+        { label:'Trouver un appart', target:'2026-07-01', emoji:'🔍' },
+        { label:'Signer le bail', target:'2026-08-01', emoji:'✍️' },
+        { label:'Déménager', target:'2026-09-15', emoji:'📦' },
+        { label:'Installation bébé', target:'2026-11-01', emoji:'🍼' },
+      ].map(m => {
+        const d = diffDays(m.target);
+        const done = d < 0;
+        const urgent = d >= 0 && d <= 30;
+        return `<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04);">
+          <span style="font-size:14px;">${m.emoji}</span>
+          <div style="flex:1;font-size:12px;color:${done?'var(--t3)':'var(--t1)'};">${m.label}</div>
+          <span style="font-size:10px;font-weight:600;color:${done?'var(--green)':urgent?'var(--rose)':'var(--amber)'};">
+            ${done?'✓':d===0?"Auj.":'J-'+d}
+          </span>
+        </div>`;
+      }).join('')}
+    </div>
+
+    <!-- Critères de recherche -->
+    <div style="background:var(--glass);border:1px solid var(--border);border-radius:var(--r-lg);padding:14px;margin-bottom:14px;">
+      <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--t3);margin-bottom:8px;">Critères Lille</div>
+      <div style="font-size:12px;color:var(--t2);line-height:1.9;">
+        💰 Budget : 1 500 – 1 800 €/mois<br>
+        🅿️ Parking inclus si possible<br>
+        🛗 RDC ou ascenseur obligatoire<br>
+        🛏️ Minimum 2 chambres<br>
+        📐 Surface ≥ 55 m²<br>
+        🚗 Accessible hôpital
+      </div>
+    </div>
+
+    <!-- Pipeline visites -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+      <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--t3);">Pipeline (${flats.length})</div>
+      <button onclick="openFlatSheet()" style="background:rgba(124,106,247,0.12);border:1px solid rgba(124,106,247,0.2);color:var(--acc2);padding:3px 10px;border-radius:99px;font-size:11px;cursor:pointer;font-family:var(--ff);">+ Visite</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px;">
+      ${statusOrder.filter(s=>s!=='écarté').map(s => `
+        <div style="background:var(--glass);border:1px solid var(--border);border-radius:var(--r);padding:8px 10px;text-align:center;">
+          <div style="font-family:var(--ff-d);font-size:20px;font-weight:600;color:${s==='retenu'?'var(--green)':s==='candidature'?'var(--amber)':'var(--t2)'};">${counts[s]}</div>
+          <div style="font-size:10px;color:var(--t3);margin-top:2px;">${s}</div>
+        </div>`).join('')}
+    </div>
+    ${flats.filter(f=>f.status!=='écarté').slice(0,5).map((f,i) => {
+      const idx = flats.indexOf(f);
+      const sc = {'à visiter':'var(--t3)','visité':'var(--blue)','candidature':'var(--amber)','retenu':'var(--green)','écarté':'var(--t4)'}[f.status];
+      return `<div onclick="openFlatSheet(${idx})" style="display:flex;align-items:flex-start;gap:8px;padding:8px 10px;background:var(--glass);border:1px solid var(--border);border-radius:var(--r);margin-bottom:5px;cursor:pointer;">
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:12px;font-weight:500;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${f.addr||'—'}</div>
+          <div style="font-size:10px;color:var(--t3);">${f.rent?f.rent+'€':'—'}${f.surface?' · '+f.surface+'m²':''}${f.score?' · '+f.score+'/10':''}</div>
+        </div>
+        <span style="font-size:10px;color:${sc};white-space:nowrap;">${f.status}</span>
+      </div>`;
+    }).join('')}`;
+}
+
+// ── Colonne droite ──
+function renderBabyRight() {
+  const titleEl = document.getElementById('baby-right-title');
+  const actEl   = document.getElementById('baby-right-actions');
+  const el      = document.getElementById('baby-right-pane');
+  if(babyTab === 'pregnancy') {
+    titleEl.textContent = 'Checklist bébé';
+    actEl.innerHTML = `
+      <select onchange="filterBabyChecklist(this.value)" style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:5px 8px;font-size:11px;color:var(--t2);font-family:var(--ff);">
+        <option value="all">Tout</option>
+        <option value="1">T1</option>
+        <option value="2">T2</option>
+        <option value="3">T3</option>
+      </select>`;
+    renderBabyChecklist(el, 'all');
+  } else {
+    titleEl.textContent = 'Checklist déménagement';
+    actEl.innerHTML = '';
+    renderMoveChecklist(el);
+  }
+}
+
+let babyCheckFilter = 'all';
+function filterBabyChecklist(val) { babyCheckFilter = val; renderBabyChecklist(document.getElementById('baby-right-pane'), val); }
+
+function renderBabyChecklist(el, filter) {
+  const cats = [
+    { id:'admin',   label:'Administratif', emoji:'📋' },
+    { id:'medical', label:'Médical',        emoji:'🏥' },
+    { id:'logement',label:'Logement',       emoji:'🏠' },
+    { id:'materiel',label:'Matériel',       emoji:'🛒' },
+    { id:'valise',  label:'Valise maternité',emoji:'🧳' },
+    { id:'perso',   label:'Personnel',      emoji:'💬' },
+  ];
+  let html = '';
+  const items = babyData.checkItems;
+  cats.forEach(cat => {
+    let catItems = Object.entries(items).filter(([k,v]) => v.cat===cat.id);
+    if(filter !== 'all') catItems = catItems.filter(([k,v]) => v.tri === parseInt(filter));
+    if(!catItems.length) return;
+    const done = catItems.filter(([k,v])=>v.done).length;
+    const pct = Math.round(done/catItems.length*100);
+    html += `<div style="margin-bottom:16px;">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+        <span style="font-size:14px;">${cat.emoji}</span>
+        <span style="font-size:12px;font-weight:600;color:var(--t1);">${cat.label}</span>
+        <span style="font-size:10px;color:var(--t3);margin-left:auto;">${done}/${catItems.length}</span>
+        <div style="width:40px;height:3px;background:var(--bg5);border-radius:99px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:${pct===100?'var(--green)':'#ffb3c6'};border-radius:99px;"></div></div>
+      </div>
+      ${catItems.map(([key, item]) => `
+        <div onclick="toggleBabyCheck('${key}')" style="display:flex;align-items:flex-start;gap:10px;padding:8px 10px;border-radius:var(--r);margin-bottom:3px;cursor:pointer;background:${item.done?'rgba(77,187,122,0.06)':'var(--glass)'};border:1px solid ${item.done?'rgba(77,187,122,0.15)':'var(--border)'};">
+          <div style="width:16px;height:16px;border-radius:5px;border:1.5px solid ${item.done?'var(--green)':'var(--border2)'};background:${item.done?'var(--green)':'none'};display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">
+            ${item.done?'<span style="font-size:10px;color:white;font-weight:700;">✓</span>':''}
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:12px;color:${item.done?'var(--t3)':'var(--t1)'};${item.done?'text-decoration:line-through;':''}">${item.label}</div>
+            <div style="font-size:10px;color:var(--t4);margin-top:2px;">T${item.tri}</div>
+          </div>
+        </div>`).join('')}
+    </div>`;
+  });
+  el.innerHTML = html || `<div class="empty"><div class="empty-icon">✓</div><div>Tout est coché !</div></div>`;
+}
+
+function toggleBabyCheck(key) {
+  if(babyData.checkItems[key]) babyData.checkItems[key].done = !babyData.checkItems[key].done;
+  saveBaby();
+  renderBabyChecklist(document.getElementById('baby-right-pane'), babyCheckFilter);
+  renderBabyLeft(); // mettre à jour les compteurs
+}
+
+function renderMoveChecklist(el) {
+  const cats = [
+    { id:'avant', label:'Avant le déménagement', emoji:'📅' },
+    { id:'admin', label:'Changements administratifs', emoji:'📋' },
+    { id:'jour',  label:'Le jour J', emoji:'📦' },
+  ];
+  let html = '';
+  cats.forEach(cat => {
+    const items = Object.entries(babyData.moveChecks).filter(([k,v])=>v.cat===cat.id);
+    const done = items.filter(([k,v])=>v.done).length;
+    html += `<div style="margin-bottom:16px;">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+        <span>${cat.emoji}</span>
+        <span style="font-size:12px;font-weight:600;color:var(--t1);">${cat.label}</span>
+        <span style="font-size:10px;color:var(--t3);margin-left:auto;">${done}/${items.length}</span>
+      </div>
+      ${items.map(([key,item]) => `
+        <div onclick="toggleMoveCheck('${key}')" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--r);margin-bottom:3px;cursor:pointer;background:${item.done?'rgba(77,187,122,0.06)':'var(--glass)'};border:1px solid ${item.done?'rgba(77,187,122,0.15)':'var(--border)'};">
+          <div style="width:16px;height:16px;border-radius:5px;border:1.5px solid ${item.done?'var(--green)':'var(--border2)'};background:${item.done?'var(--green)':'none'};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            ${item.done?'<span style="font-size:10px;color:white;font-weight:700;">✓</span>':''}
+          </div>
+          <div style="font-size:12px;color:${item.done?'var(--t3)':'var(--t1)'};${item.done?'text-decoration:line-through;':''};flex:1;">${item.label}</div>
+        </div>`).join('')}
+    </div>`;
+  });
+  el.innerHTML = html;
+}
+function toggleMoveCheck(key) {
+  if(babyData.moveChecks[key]) babyData.moveChecks[key].done = !babyData.moveChecks[key].done;
+  saveBaby(); renderMoveChecklist(document.getElementById('baby-right-pane'));
+}
+
+// ── Appartements ──
+function openFlatSheet(idx) {
+  editingFlat = idx !== undefined ? idx : -1;
+  const f = idx !== undefined ? (babyData.flats||[])[idx] : null;
+  document.getElementById('flat-sheet-title').textContent = f ? 'Modifier la visite' : 'Ajouter une visite';
+  document.getElementById('flat-addr').value    = f ? f.addr||'' : '';
+  document.getElementById('flat-rent').value    = f ? f.rent||'' : '';
+  document.getElementById('flat-surface').value = f ? f.surface||'' : '';
+  document.getElementById('flat-status').value  = f ? f.status||'à visiter' : 'à visiter';
+  document.getElementById('flat-date').value    = f ? f.date||'' : todayStr();
+  document.getElementById('flat-score').value   = f ? f.score||'' : '';
+  document.getElementById('flat-notes').value   = f ? f.notes||'' : '';
+  document.getElementById('fc-parking').checked   = f ? !!f.parking : false;
+  document.getElementById('fc-ascenseur').checked = f ? !!f.ascenseur : false;
+  document.getElementById('fc-exterieur').checked = f ? !!f.exterieur : false;
+  document.getElementById('fc-lumineux').checked  = f ? !!f.lumineux : false;
+  const btns = document.getElementById('flat-sheet-btns');
+  btns.innerHTML = f
+    ? `<button class="btn-danger" onclick="deleteFlat(${idx})">Supprimer</button><button class="btn-secondary" onclick="closeOv('ov-flat')">Annuler</button><button class="btn-primary" style="flex:2;margin-top:0;" onclick="saveFlat()">Enregistrer</button>`
+    : `<button class="btn-secondary" onclick="closeOv('ov-flat')">Annuler</button><button class="btn-primary" style="flex:2;margin-top:0;" onclick="saveFlat()">Enregistrer</button>`;
+  openOv('ov-flat');
+}
+function saveFlat() {
+  const addr = document.getElementById('flat-addr').value.trim();
+  if(!addr) { showToast('Adresse requise'); return; }
+  if(!babyData.flats) babyData.flats = [];
+  const f = {
+    addr, rent: parseInt(document.getElementById('flat-rent').value)||null,
+    surface: parseInt(document.getElementById('flat-surface').value)||null,
+    status: document.getElementById('flat-status').value,
+    date: document.getElementById('flat-date').value,
+    score: parseFloat(document.getElementById('flat-score').value)||null,
+    notes: document.getElementById('flat-notes').value.trim(),
+    parking:   document.getElementById('fc-parking').checked,
+    ascenseur: document.getElementById('fc-ascenseur').checked,
+    exterieur: document.getElementById('fc-exterieur').checked,
+    lumineux:  document.getElementById('fc-lumineux').checked,
+  };
+  if(editingFlat>=0) babyData.flats[editingFlat]=f; else babyData.flats.push(f);
+  saveBaby(); closeOv('ov-flat'); renderBaby(); showToast(editingFlat>=0?'Mis à jour':'Visite ajoutée');
+}
+function deleteFlat(idx) {
+  if(!confirm('Supprimer ?')) return;
+  babyData.flats.splice(idx,1); saveBaby(); closeOv('ov-flat'); renderBaby(); showToast('Supprimé');
+}
+
+// ── RDV médicaux ──
+function openMedApptSheet(idx) {
+  editingMedAppt = idx !== undefined ? idx : -1;
+  const m = idx !== undefined ? (babyData.medAppts||[])[idx] : null;
+  document.getElementById('medappt-title').textContent = m ? 'Modifier le RDV' : 'Nouveau RDV';
+  document.getElementById('ma-type').value = m ? m.type||'' : '';
+  document.getElementById('ma-date').value = m ? m.date||'' : todayStr();
+  document.getElementById('ma-time').value = m ? m.time||'' : '';
+  document.getElementById('ma-lieu').value = m ? m.lieu||'' : '';
+  document.getElementById('ma-note').value = m ? m.note||'' : '';
+  const btns = document.getElementById('medappt-btns');
+  btns.innerHTML = m
+    ? `<button class="btn-danger" onclick="deleteMedAppt(${idx})">Supprimer</button><button class="btn-secondary" onclick="closeOv('ov-medappt')">Annuler</button><button class="btn-primary" style="flex:2;margin-top:0;" onclick="saveMedAppt()">Enregistrer</button>`
+    : `<button class="btn-secondary" onclick="closeOv('ov-medappt')">Annuler</button><button class="btn-primary" style="flex:2;margin-top:0;" onclick="saveMedAppt()">Enregistrer</button>`;
+  openOv('ov-medappt');
+}
+function saveMedAppt() {
+  const type = document.getElementById('ma-type').value.trim();
+  if(!type) { showToast('Type requis'); return; }
+  if(!babyData.medAppts) babyData.medAppts = [];
+  const m = { type, date:document.getElementById('ma-date').value, time:document.getElementById('ma-time').value, lieu:document.getElementById('ma-lieu').value.trim(), note:document.getElementById('ma-note').value.trim() };
+  if(editingMedAppt>=0) babyData.medAppts[editingMedAppt]=m; else babyData.medAppts.push(m);
+  saveBaby(); closeOv('ov-medappt'); renderBaby(); showToast('RDV enregistré');
+}
+function deleteMedAppt(idx) {
+  if(!confirm('Supprimer ?')) return;
+  babyData.medAppts.splice(idx,1); saveBaby(); closeOv('ov-medappt'); renderBaby(); showToast('Supprimé');
+}
+
+// ── Widget dashboard bébé (dans le bilan semaine) ──
+function babyDashWidget() {
+  const days = daysToTerme();
+  if(days < -30 || days > 400) return '';
+  const weeks = weeksFromConception();
+  return `<div style="margin-top:8px;padding:8px 12px;background:rgba(255,183,197,0.08);border-radius:var(--r);border:1px solid rgba(255,183,197,0.15);display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;" onclick="sw('baby')">
+    <span>🍼</span>
+    <span style="color:var(--t1);flex:1;">Terme dans <strong style="color:#ffb3c6;">${days > 0 ? days+' jours' : "Aujourd'hui !"}</strong> · SA ${weeks}</span>
+    <span style="color:var(--t3);font-size:10px;">→</span>
+  </div>`;
+}
 let toastT;
 function showToast(msg){const el=document.getElementById('toast');el.textContent=msg;el.style.display='block';clearTimeout(toastT);toastT=setTimeout(()=>{el.style.display='none';},2400);}
 
@@ -3305,6 +3879,7 @@ function showToast(msg){const el=document.getElementById('toast');el.textContent
 load();
 loadFi();
 loadTravels();
+loadBaby();
 loadSettings();
 gcalLoadState();
 calInit();
