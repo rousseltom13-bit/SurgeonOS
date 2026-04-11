@@ -791,6 +791,9 @@ body::before {
       <button class="sb-btn" onclick="sw('baby')" id="sb-baby">
         <span>🍼</span><span class="tooltip">Bébé & Déménagement</span>
       </button>
+      <button class="sb-btn" onclick="sw('sport')" id="sb-sport">
+        <span>🎾</span><span class="tooltip">Sport</span>
+      </button>
     </nav>
     <div class="sb-bottom">
       <button class="sb-btn" onclick="openExt('orlog')">
@@ -1038,6 +1041,28 @@ body::before {
         </div>
       </div>
 
+      <!-- ⑧ SPORT -->
+      <div class="view" id="view-sport">
+        <div style="display:flex;height:100%;overflow:hidden;">
+          <!-- Colonne gauche : routine + streak -->
+          <div style="width:360px;min-width:320px;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;">
+            <div style="display:flex;gap:3px;padding:10px 12px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--glass);">
+              <button class="type-btn active" onclick="switchSportTab('routine',this)" style="flex:1;font-size:11px;">💪 Routine</button>
+              <button class="type-btn" onclick="switchSportTab('racket',this)" style="flex:1;font-size:11px;">🎾 Raquette</button>
+            </div>
+            <div style="flex:1;overflow-y:auto;padding:16px;" id="sport-left-pane"></div>
+          </div>
+          <!-- Colonne droite : programme + historique -->
+          <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
+            <div style="padding:14px 20px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+              <div style="font-family:var(--ff-d);font-size:16px;font-weight:600;" id="sport-right-title">Programme</div>
+              <div id="sport-right-actions"></div>
+            </div>
+            <div style="flex:1;overflow-y:auto;padding:16px;" id="sport-right-pane"></div>
+          </div>
+        </div>
+      </div>
+
     </div><!-- end views -->
   </div><!-- end main -->
 </div><!-- end app -->
@@ -1097,6 +1122,38 @@ body::before {
     <div class="sheet-actions" id="medappt-btns">
       <button class="btn-secondary" onclick="closeOv('ov-medappt')">Annuler</button>
       <button class="btn-primary" style="flex:2;margin-top:0;" onclick="saveMedAppt()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Séance raquette -->
+<div class="overlay" id="ov-racket">
+  <div class="sheet" style="max-width:440px;">
+    <button class="sheet-close" onclick="closeOv('ov-racket')">×</button>
+    <div class="sheet-title" id="racket-title">Nouvelle séance</div>
+    <div class="fg">
+      <label>Sport</label>
+      <div class="type-row">
+        <button class="type-btn active" data-sport="tennis" onclick="selSportType(this)">🎾 Tennis</button>
+        <button class="type-btn" data-sport="padel" onclick="selSportType(this)">🏓 Padel</button>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="fg"><label>Date</label><input type="date" id="rk-date"></div>
+      <div class="fg"><label>Durée (min)</label><input type="number" id="rk-duration" placeholder="60" inputmode="numeric"></div>
+    </div>
+    <div class="fg"><label>Partenaire(s)</label><input type="text" id="rk-partner" placeholder="ex. Antoine, Sarah..."></div>
+    <div class="fg"><label>Ressenti</label>
+      <div class="type-row" id="rk-feeling-row">
+        <button class="type-btn" data-feel="1" onclick="selFeeling(this)">😴 Mou</button>
+        <button class="type-btn active" data-feel="2" onclick="selFeeling(this)">😊 Bien</button>
+        <button class="type-btn" data-feel="3" onclick="selFeeling(this)">🔥 En feu</button>
+      </div>
+    </div>
+    <div class="fg"><label>Note libre</label><input type="text" id="rk-note" placeholder="Optionnel..."></div>
+    <div class="sheet-actions" id="racket-btns">
+      <button class="btn-secondary" onclick="closeOv('ov-racket')">Annuler</button>
+      <button class="btn-primary" style="flex:2;margin-top:0;" onclick="saveRacket()">Enregistrer</button>
     </div>
   </div>
 </div>
@@ -1410,7 +1467,8 @@ function diffDays(s) {
 // ═══════════════════════════════════════
 const PAGE_TITLES = {
   dash:'Dashboard', tasks:'Tâches', library:'Bibliothèque',
-  career:'Carrière', fininvest:'FinInvest', travel:'Voyages', baby:'Bébé & Déménagement'
+  career:'Carrière', fininvest:'FinInvest', travel:'Voyages',
+  baby:'Bébé & Déménagement', sport:'Sport'
 };
 function sw(v) {
   document.querySelectorAll('.view').forEach(e=>e.classList.remove('active'));
@@ -1430,6 +1488,7 @@ function sw(v) {
   if(v==='fininvest')  renderFinInvest();
   if(v==='travel')     renderTravel();
   if(v==='baby')       renderBaby();
+  if(v==='sport')      renderSport();
 }
 function openExt(k) {
   const u=LINKS[k];
@@ -2372,7 +2431,8 @@ function renderWeeklySummary() {
       <span>💹</span><span style="color:var(--acc2);flex:1;font-weight:500;">DCA du mois à effectuer</span>
       <span style="color:var(--t3);font-size:10px;">→</span>
     </div>`:''}
-    ${babyDashWidget()}`;
+    ${babyDashWidget()}
+    ${sportDashWidget()}`;
 }
 
 function weekMonday() {
@@ -3870,6 +3930,403 @@ function babyDashWidget() {
     <span style="color:var(--t3);font-size:10px;">→</span>
   </div>`;
 }
+// ═══════════════════════════════════════
+//  MODULE SPORT
+// ═══════════════════════════════════════
+let sportTab = 'routine';
+let sportData = { routineLogs:[], racketSessions:[], routineStartDate:null };
+let editingRacket = -1;
+let curRacketSport = 'tennis';
+let curRacketFeeling = 2;
+
+const ROUTINE_PROGRAM = [
+  { weeks:[1,2], label:'Mise en route', color:'#4ecdc4', exercises:[
+    { name:'Pompes', sets:2, reps:8, rest:20, tip:'Mains écartées largeur épaules, dos droit' },
+    { name:'Crunch', sets:2, reps:12, rest:15, tip:'Expire en montant, nuque libre' },
+    { name:'Gainage', sets:2, duration:20, rest:10, tip:'Corps en ligne droite, respire normalement' },
+    { name:'Squats', sets:2, reps:10, rest:15, tip:'Genoux dans l\'axe des pieds, dos droit' },
+    { name:'Étirements', sets:1, duration:30, rest:0, tip:'Quadriceps, ischio, épaules — 30s chaque' },
+  ]},
+  { weeks:[3,4], label:'Progression', color:'#f0b050', exercises:[
+    { name:'Pompes', sets:3, reps:10, rest:15, tip:'Descends le buste à 2-3 cm du sol' },
+    { name:'Bicycle', sets:2, reps:16, rest:15, tip:'Coude vers genou opposé, lent et contrôlé' },
+    { name:'Gainage', sets:3, duration:25, rest:10, tip:'Tiens sans cambrer le dos' },
+    { name:'Fentes', sets:2, reps:8, rest:15, tip:'Genou arrière effleure le sol' },
+    { name:'Superman', sets:2, reps:10, rest:10, tip:'Bras et jambe opposés, contracte les fessiers' },
+  ]},
+  { weeks:[5,6], label:'Intensification', color:'#e08a50', exercises:[
+    { name:'Pompes déclinées', sets:3, reps:10, rest:15, tip:'Pieds surélevés sur une chaise' },
+    { name:'Abdos jambes tendues', sets:3, reps:12, rest:15, tip:'Dos collé au sol, monte les jambes à 90°' },
+    { name:'Gainage latéral', sets:2, duration:20, rest:10, tip:'Alterne gauche/droite — 20s chaque' },
+    { name:'Squat sauté', sets:2, reps:8, rest:20, tip:'Réception silencieuse, absorbe le choc' },
+    { name:'Dips sur chaise', sets:2, reps:10, rest:15, tip:'Coudes vers l\'arrière, pas sur les côtés' },
+  ]},
+  { weeks:[7,8], label:'Consolidation', color:'#e05a7a', exercises:[
+    { name:'Pompes pause basse', sets:3, reps:8, rest:15, tip:'Tiens 2 sec en bas à chaque rep' },
+    { name:'V-up', sets:3, reps:10, rest:15, tip:'Bras et jambes montent simultanément' },
+    { name:'Gainage dynamique', sets:3, duration:30, rest:10, tip:'Alterne extension bras/jambe opposés' },
+    { name:'Pistol squat assisté', sets:2, reps:6, rest:20, tip:'Tiens un support, descends lentement' },
+    { name:'Pompes diamant', sets:2, reps:8, rest:15, tip:'Mains en triangle sous la poitrine' },
+  ]},
+];
+
+function loadSport() {
+  try { const d=localStorage.getItem('sos_sport'); if(d) sportData=JSON.parse(d); } catch(e){}
+  if(!sportData.routineLogs)    sportData.routineLogs=[];
+  if(!sportData.racketSessions) sportData.racketSessions=[];
+  if(!sportData.routineStartDate) sportData.routineStartDate=todayStr();
+}
+function saveSport() { try{localStorage.setItem('sos_sport',JSON.stringify(sportData));}catch(e){} }
+
+function currentProgramWeek() {
+  const start=parseLocal(sportData.routineStartDate||todayStr());
+  const w=Math.floor((new Date()-start)/(7*86400000))+1;
+  return Math.min(Math.max(w,1),8);
+}
+function currentPhase() {
+  const w=currentProgramWeek();
+  return ROUTINE_PROGRAM.find(p=>p.weeks.includes(w))||ROUTINE_PROGRAM[0];
+}
+function routineDoneToday() { return sportData.routineLogs.some(l=>l.date===todayStr()); }
+function routineStreakDays() {
+  const logs=[...new Set(sportData.routineLogs.map(l=>l.date))].sort((a,b)=>b.localeCompare(a));
+  if(!logs.length) return 0;
+  const todayS=todayStr();
+  const yest=new Date();yest.setDate(yest.getDate()-1);const yestS=localStr(yest);
+  if(logs[0]!==todayS&&logs[0]!==yestS) return 0;
+  let streak=0;
+  for(let i=0;i<logs.length;i++){
+    const exp=new Date();exp.setDate(exp.getDate()-i);
+    if(logs[i]===localStr(exp)) streak++; else break;
+  }
+  return streak;
+}
+function racketStreakWeeks() {
+  const sessions=sportData.racketSessions||[];
+  if(!sessions.length) return 0;
+  let streak=0;
+  const now=new Date();now.setHours(0,0,0,0);
+  const dow=now.getDay()===0?6:now.getDay()-1;
+  const curMon=new Date(now);curMon.setDate(now.getDate()-dow);
+  for(let w=0;w<52;w++){
+    const wStart=localStr(new Date(curMon.getTime()-w*7*86400000));
+    const wEnd=localStr(new Date(curMon.getTime()-w*7*86400000+6*86400000));
+    const has=sessions.some(s=>s.date>=wStart&&s.date<=wEnd);
+    if(has) streak++;
+    else if(w===0) continue;
+    else break;
+  }
+  return streak;
+}
+
+function renderSport() {
+  loadSport(); renderSportLeft(); renderSportRight();
+}
+function switchSportTab(tab,btn) {
+  sportTab=tab;
+  document.querySelectorAll('#view-sport .type-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderSportLeft(); renderSportRight();
+}
+
+function renderSportLeft() {
+  const el=document.getElementById('sport-left-pane');
+  if(sportTab==='routine') renderRoutineLeft(el); else renderRacketLeft(el);
+}
+function renderSportRight() {
+  const titleEl=document.getElementById('sport-right-title');
+  const actEl=document.getElementById('sport-right-actions');
+  const el=document.getElementById('sport-right-pane');
+  if(sportTab==='routine'){
+    titleEl.textContent='Programme du jour';
+    actEl.innerHTML=`<button onclick="resetRoutineStart()" style="background:none;border:none;color:var(--t3);font-size:11px;cursor:pointer;font-family:var(--ff);">↺ Restart</button>`;
+    renderRoutineRight(el);
+  } else {
+    titleEl.textContent='Suivi raquette';
+    actEl.innerHTML='';
+    renderRacketRight(el);
+  }
+}
+
+function renderRoutineLeft(el) {
+  const week=currentProgramWeek(), phase=currentPhase();
+  const streak=routineStreakDays(), done=routineDoneToday();
+  const total=sportData.routineLogs.length;
+  const pct=Math.round((week-1)/8*100);
+  const heatmap=buildHeatmap(35);
+  el.innerHTML=`
+    <div style="background:linear-gradient(135deg,rgba(78,205,196,0.1),rgba(77,187,122,0.06));border:1px solid rgba(78,205,196,0.2);border-radius:var(--r-lg);padding:16px;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div>
+          <div style="font-family:var(--ff-d);font-size:22px;font-weight:600;color:#4ecdc4;">Semaine ${week}<span style="font-size:13px;font-weight:300;color:var(--t2);"> / 8</span></div>
+          <div style="font-size:11px;color:var(--t3);">${phase.label}</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-family:var(--ff-d);font-size:28px;font-weight:600;color:${streak>=7?'var(--amber)':streak>=3?'var(--green)':'var(--t2)'};">${streak}</div>
+          <div style="font-size:10px;color:var(--t3);">jours consécutifs</div>
+        </div>
+      </div>
+      <div style="height:4px;background:rgba(255,255,255,0.08);border-radius:99px;overflow:hidden;margin-bottom:6px;">
+        <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#4ecdc4,#4dbb7a);border-radius:99px;"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--t3);">${ROUTINE_PROGRAM.map(p=>`<span style="color:${week>=p.weeks[0]&&week<=p.weeks[1]?'#4ecdc4':'inherit'};">S${p.weeks[0]}</span>`).join('')}<span>Fin</span></div>
+    </div>
+    ${done
+      ?`<div style="background:rgba(77,187,122,0.1);border:1px solid rgba(77,187,122,0.2);border-radius:var(--r-lg);padding:14px;text-align:center;margin-bottom:14px;">
+          <div style="font-size:20px;margin-bottom:4px;">✅</div>
+          <div style="font-size:13px;font-weight:600;color:var(--green);">Routine validée aujourd'hui !</div>
+          <div style="font-size:11px;color:var(--t3);margin-top:3px;">${total} séance${total>1?'s':''} au total</div>
+        </div>`
+      :`<button onclick="logRoutineToday()" style="width:100%;padding:14px;background:linear-gradient(135deg,#4ecdc4,#4dbb7a);border:none;border-radius:var(--r-lg);font-size:14px;font-weight:600;color:#fff;cursor:pointer;font-family:var(--ff);margin-bottom:14px;box-shadow:0 4px 20px rgba(78,205,196,0.25);">
+          💪 Valider la routine du matin
+        </button>`}
+    <div style="margin-bottom:14px;">
+      <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--t3);margin-bottom:8px;">35 derniers jours</div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;">${heatmap}</div>
+      <div style="display:flex;gap:10px;margin-top:6px;font-size:10px;color:var(--t3);">
+        <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:var(--bg5);display:inline-block;"></span>Non fait</span>
+        <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#4ecdc4;display:inline-block;"></span>Fait</span>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+      ${[['Séances',total,'var(--t1)'],['Streak',streak+'j','var(--green)'],['Moy.',Math.round(total/Math.max(week,1)*7*10)/10+'/sem','var(--t2)']].map(([l,v,c])=>`
+        <div style="background:var(--glass);border:1px solid var(--border);border-radius:var(--r);padding:10px;text-align:center;">
+          <div style="font-family:var(--ff-d);font-size:18px;font-weight:600;color:${c};">${v}</div>
+          <div style="font-size:10px;color:var(--t3);">${l}</div>
+        </div>`).join('')}
+    </div>`;
+}
+
+function buildHeatmap(days) {
+  const logs=new Set(sportData.routineLogs.map(l=>l.date));
+  const today=new Date();today.setHours(0,0,0,0);
+  let html='';
+  for(let i=days-1;i>=0;i--){
+    const d=new Date(today);d.setDate(today.getDate()-i);
+    const ds=localStr(d);
+    html+=`<div title="${ds}" style="aspect-ratio:1;border-radius:3px;background:${logs.has(ds)?'#4ecdc4':'var(--bg4)'};opacity:${logs.has(ds)?1:0.35};${ds===todayStr()?'box-shadow:0 0 0 1.5px rgba(78,205,196,0.6);':''}"></div>`;
+  }
+  return html;
+}
+
+function logRoutineToday() {
+  if(routineDoneToday()){showToast('Déjà validé aujourd\'hui');return;}
+  sportData.routineLogs.push({date:todayStr(),week:currentProgramWeek()});
+  saveSport(); renderSport(); showToast('Routine validée 💪');
+}
+function resetRoutineStart() {
+  if(!confirm('Recommencer le programme depuis la semaine 1 ?')) return;
+  sportData.routineStartDate=todayStr(); saveSport(); renderSport(); showToast('Programme redémarré');
+}
+
+function renderRoutineRight(el) {
+  const phase=currentPhase(), week=currentProgramWeek();
+  const estMin=Math.round(phase.exercises.reduce((s,e)=>s+(e.sets*((e.duration||15)+e.rest)),0)/60*10)/10;
+  el.innerHTML=`
+    <div style="background:${phase.color}18;border:1px solid ${phase.color}30;border-radius:var(--r-lg);padding:14px;margin-bottom:16px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="width:10px;height:10px;border-radius:50%;background:${phase.color};box-shadow:0 0 8px ${phase.color}60;flex-shrink:0;"></div>
+        <div>
+          <div style="font-size:13px;font-weight:600;color:var(--t1);">Phase ${Math.ceil(week/2)} — ${phase.label}</div>
+          <div style="font-size:11px;color:var(--t3);">Semaine ${week}/8 · 5 exercices · ~${estMin} minutes</div>
+        </div>
+      </div>
+    </div>
+    ${phase.exercises.map((ex,i)=>{
+      const vol=ex.duration?ex.sets+'×'+ex.duration+'s':ex.sets+'×'+ex.reps+' reps';
+      return `<div style="background:var(--glass);border:1px solid var(--border);border-radius:var(--r-lg);padding:14px;margin-bottom:10px;">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
+              <div style="width:22px;height:22px;border-radius:50%;background:${phase.color}22;color:${phase.color};font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${i+1}</div>
+              <div style="font-size:14px;font-weight:600;color:var(--t1);">${ex.name}</div>
+            </div>
+            <div style="font-size:11px;color:var(--t3);line-height:1.5;margin-left:30px;">💡 ${ex.tip}</div>
+          </div>
+          <div style="background:${phase.color}18;border:1px solid ${phase.color}30;border-radius:var(--r);padding:6px 10px;text-align:center;flex-shrink:0;">
+            <div style="font-family:var(--ff-d);font-size:16px;font-weight:600;color:${phase.color};">${vol}</div>
+            ${ex.rest?`<div style="font-size:9px;color:var(--t3);">${ex.rest}s repos</div>`:''}
+          </div>
+        </div>
+      </div>`;
+    }).join('')}
+    <div style="background:var(--glass);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-top:4px;">
+      <div style="font-size:10px;font-weight:600;color:var(--t3);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.08em;">Enchaînement</div>
+      <div style="font-size:11px;color:var(--t2);line-height:1.7;">${phase.exercises.map((e,i)=>`${i+1}. ${e.name}`).join(' → ')}</div>
+    </div>
+    <div style="margin-top:16px;">
+      <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--t3);margin-bottom:10px;">Progression du programme</div>
+      ${ROUTINE_PROGRAM.map(p=>{
+        const active=week>=p.weeks[0]&&week<=p.weeks[1];
+        const done=week>p.weeks[1];
+        return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04);">
+          <div style="width:8px;height:8px;border-radius:50%;background:${done?'var(--green)':active?p.color:'var(--bg5)'};flex-shrink:0;"></div>
+          <div style="flex:1;font-size:12px;color:${active?'var(--t1)':done?'var(--t3)':'var(--t2)'};">${p.label}</div>
+          <div style="font-size:10px;color:var(--t3);">S${p.weeks[0]}–S${p.weeks[1]}</div>
+          ${done?`<span style="font-size:10px;color:var(--green);">✓</span>`:''}
+          ${active?`<span style="font-size:10px;color:${p.color};font-weight:600;">En cours</span>`:''}
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+function renderRacketLeft(el) {
+  const sessions=(sportData.racketSessions||[]).slice().sort((a,b)=>b.date.localeCompare(a.date));
+  const streakW=racketStreakWeeks(), total=sessions.length;
+  const weeklyData=buildRacketWeekly(1);
+  const thisWeekDone=weeklyData[0]?.count>0;
+  el.innerHTML=`
+    <div style="background:linear-gradient(135deg,rgba(124,106,247,0.1),rgba(224,90,122,0.06));border:1px solid rgba(124,106,247,0.2);border-radius:var(--r-lg);padding:16px;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div>
+          <div style="font-family:var(--ff-d);font-size:22px;font-weight:600;color:var(--acc2);">${streakW} <span style="font-size:13px;font-weight:300;color:var(--t2);">sem. consécutives</span></div>
+          <div style="font-size:11px;color:var(--t3);margin-top:2px;">${total} séance${total>1?'s':''} · ${sessions.filter(s=>s.sport==='tennis').length} tennis · ${sessions.filter(s=>s.sport==='padel').length} padel</div>
+        </div>
+        <span style="font-size:24px;">${streakW>=4?'🔥':streakW>=2?'⭐':'🎾'}</span>
+      </div>
+      ${thisWeekDone
+        ?`<div style="padding:7px 10px;background:rgba(77,187,122,0.1);border-radius:var(--r);font-size:11px;color:var(--green);">✓ Objectif de la semaine atteint</div>`
+        :`<div style="padding:7px 10px;background:rgba(224,90,122,0.1);border-radius:var(--r);font-size:11px;color:var(--rose);">⚠ Pas encore de séance cette semaine</div>`}
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <div style="font-size:12px;color:var(--t2);">🎯 Objectif : <strong style="color:var(--t1);">1 séance / semaine</strong></div>
+      <button onclick="openRacketSheet()" style="background:var(--acc-dim);border:1px solid rgba(124,106,247,0.2);color:var(--acc2);padding:5px 12px;border-radius:99px;font-size:11px;cursor:pointer;font-family:var(--ff);">+ Séance</button>
+    </div>
+    <div style="margin-bottom:14px;">
+      <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--t3);margin-bottom:8px;">8 dernières semaines</div>
+      <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:4px;align-items:end;height:50px;">
+        ${buildRacketWeekly(8).slice().reverse().map(w=>`<div title="${w.label}: ${w.count}" style="background:${w.count>0?'var(--acc)':'var(--bg4)'};height:${Math.max(w.count*18,4)}px;border-radius:3px 3px 0 0;max-height:50px;"></div>`).join('')}
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:4px;margin-top:2px;">
+        ${buildRacketWeekly(8).slice().reverse().map(w=>{const d=parseLocal(w.wStart);return`<div style="font-size:8px;color:var(--t4);text-align:center;">${d.getDate()}/${d.getMonth()+1}</div>`;}).join('')}
+      </div>
+    </div>
+    <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--t3);margin-bottom:8px;">Récentes</div>
+    ${sessions.slice(0,5).map((s,i)=>{
+      const fe=s.feeling===1?'😴':s.feeling===3?'🔥':'😊';
+      const idx=sportData.racketSessions.findIndex(r=>r===s||(r.date===s.date&&r.sport===s.sport&&r.partner===s.partner));
+      return`<div onclick="openRacketSheet(${idx})" style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--glass);border:1px solid var(--border);border-radius:var(--r);margin-bottom:5px;cursor:pointer;">
+        <span style="font-size:16px;">${s.sport==='padel'?'🏓':'🎾'}</span>
+        <div style="flex:1;">
+          <div style="font-size:12px;font-weight:500;color:var(--t1);">${s.sport==='padel'?'Padel':'Tennis'}${s.partner?' · '+s.partner:''}</div>
+          <div style="font-size:10px;color:var(--t3);">${fmtShort(s.date)}${s.duration?' · '+s.duration+' min':''}</div>
+        </div>
+        <span>${fe}</span>
+      </div>`;
+    }).join('')}
+    ${!sessions.length?`<div class="empty" style="padding:24px;"><div class="empty-icon">🎾</div><div>Aucune séance</div><button class="empty-add" onclick="openRacketSheet()">+ Première séance</button></div>`:''}`;
+}
+
+function renderRacketRight(el) {
+  const sessions=(sportData.racketSessions||[]).slice().sort((a,b)=>b.date.localeCompare(a.date));
+  const monthly=buildRacketMonthly(6);
+  const maxM=Math.max(...monthly.map(m=>m.tennis+m.padel),1);
+  el.innerHTML=`
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;">
+      ${[[sessions.length,'Séances totales','var(--acc2)'],[racketStreakWeeks()+'sem','Streak','#4ecdc4'],[sessions.reduce((s,r)=>s+(r.duration||0),0)+'min','Terrain total','var(--warm)']].map(([v,l,c])=>`
+        <div style="background:var(--glass);border:1px solid var(--border);border-radius:var(--r-lg);padding:12px;text-align:center;">
+          <div style="font-family:var(--ff-d);font-size:20px;font-weight:600;color:${c};">${v}</div>
+          <div style="font-size:10px;color:var(--t3);">${l}</div>
+        </div>`).join('')}
+    </div>
+    <div style="margin-bottom:16px;">
+      <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--t3);margin-bottom:10px;">Activité mensuelle</div>
+      ${monthly.map(m=>{
+        const tot=m.tennis+m.padel;
+        return`<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+          <div style="font-size:11px;color:var(--t2);width:30px;">${m.label}</div>
+          <div style="flex:1;height:12px;background:var(--bg4);border-radius:99px;overflow:hidden;display:flex;">
+            <div style="height:100%;width:${Math.round(m.tennis/maxM*100)}%;background:var(--acc);"></div>
+            <div style="height:100%;width:${Math.round(m.padel/maxM*100)}%;background:#4ecdc4;"></div>
+          </div>
+          <div style="font-size:11px;font-weight:600;color:${tot>=4?'var(--green)':'var(--t3)'};width:16px;">${tot}</div>
+        </div>`;
+      }).join('')}
+      <div style="display:flex;gap:12px;font-size:10px;color:var(--t3);margin-top:4px;">
+        <span><span style="width:8px;height:8px;border-radius:2px;background:var(--acc);display:inline-block;margin-right:4px;"></span>Tennis</span>
+        <span><span style="width:8px;height:8px;border-radius:2px;background:#4ecdc4;display:inline-block;margin-right:4px;"></span>Padel</span>
+      </div>
+    </div>
+    <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--t3);margin-bottom:8px;">Historique complet</div>
+    ${sessions.map((s,i)=>{
+      const fe=s.feeling===1?'😴':s.feeling===3?'🔥':'😊';
+      return`<div onclick="openRacketSheet(${i})" style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--glass);border:1px solid var(--border);border-radius:var(--r);margin-bottom:5px;cursor:pointer;">
+        <span style="font-size:16px;">${s.sport==='padel'?'🏓':'🎾'}</span>
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:500;color:var(--t1);">${s.sport==='padel'?'Padel':'Tennis'}${s.partner?` <span style="font-size:11px;color:var(--t3);">· ${s.partner}</span>`:''}</div>
+          <div style="font-size:11px;color:var(--t3);">${fmtShort(s.date)}${s.duration?' · '+s.duration+' min':''}${s.note?' · '+s.note:''}</div>
+        </div>
+        <span>${fe}</span>
+      </div>`;
+    }).join('')}
+    ${!sessions.length?`<div class="empty"><div class="empty-icon">🎾</div><div>Aucune séance</div><button class="empty-add" onclick="openRacketSheet()">+ Première séance</button></div>`:''}`;
+}
+
+function buildRacketWeekly(n) {
+  const result=[], now=new Date();now.setHours(0,0,0,0);
+  const dow=now.getDay()===0?6:now.getDay()-1;
+  const curMon=new Date(now);curMon.setDate(now.getDate()-dow);
+  for(let w=0;w<n;w++){
+    const wStart=localStr(new Date(curMon.getTime()-w*7*86400000));
+    const wEnd=localStr(new Date(curMon.getTime()-w*7*86400000+6*86400000));
+    const count=(sportData.racketSessions||[]).filter(s=>s.date>=wStart&&s.date<=wEnd).length;
+    result.push({wStart,wEnd,count,label:fmtShort(wStart)});
+  }
+  return result;
+}
+function buildRacketMonthly(n) {
+  const result=[], now=new Date();
+  for(let m=n-1;m>=0;m--){
+    const d=new Date(now.getFullYear(),now.getMonth()-m,1);
+    const key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+    const ms=(sportData.racketSessions||[]).filter(s=>s.date.startsWith(key));
+    result.push({label:d.toLocaleDateString('fr-FR',{month:'short'}),tennis:ms.filter(s=>s.sport==='tennis').length,padel:ms.filter(s=>s.sport==='padel').length});
+  }
+  return result;
+}
+
+function openRacketSheet(idx) {
+  editingRacket=idx!==undefined?idx:-1;
+  const s=idx!==undefined?(sportData.racketSessions||[])[idx]:null;
+  curRacketSport=s?s.sport:'tennis'; curRacketFeeling=s?s.feeling:2;
+  document.getElementById('racket-title').textContent=s?'Modifier la séance':'Nouvelle séance';
+  document.querySelectorAll('#ov-racket [data-sport]').forEach(b=>b.classList.toggle('active',b.dataset.sport===curRacketSport));
+  document.querySelectorAll('#ov-racket [data-feel]').forEach(b=>b.classList.toggle('active',parseInt(b.dataset.feel)===curRacketFeeling));
+  document.getElementById('rk-date').value=s?s.date:todayStr();
+  document.getElementById('rk-duration').value=s?s.duration||'':'';
+  document.getElementById('rk-partner').value=s?s.partner||'':'';
+  document.getElementById('rk-note').value=s?s.note||'':'';
+  const btns=document.getElementById('racket-btns');
+  btns.innerHTML=s
+    ?`<button class="btn-danger" onclick="deleteRacket(${idx})">Supprimer</button><button class="btn-secondary" onclick="closeOv('ov-racket')">Annuler</button><button class="btn-primary" style="flex:2;margin-top:0;" onclick="saveRacket()">Enregistrer</button>`
+    :`<button class="btn-secondary" onclick="closeOv('ov-racket')">Annuler</button><button class="btn-primary" style="flex:2;margin-top:0;" onclick="saveRacket()">Enregistrer</button>`;
+  openOv('ov-racket');
+}
+function selSportType(btn){document.querySelectorAll('#ov-racket [data-sport]').forEach(b=>b.classList.remove('active'));btn.classList.add('active');curRacketSport=btn.dataset.sport;}
+function selFeeling(btn){document.querySelectorAll('#ov-racket [data-feel]').forEach(b=>b.classList.remove('active'));btn.classList.add('active');curRacketFeeling=parseInt(btn.dataset.feel);}
+function saveRacket(){
+  const s={sport:curRacketSport,date:document.getElementById('rk-date').value,duration:parseInt(document.getElementById('rk-duration').value)||null,partner:document.getElementById('rk-partner').value.trim(),feeling:curRacketFeeling,note:document.getElementById('rk-note').value.trim()};
+  if(!s.date){showToast('Date requise');return;}
+  if(!sportData.racketSessions) sportData.racketSessions=[];
+  if(editingRacket>=0) sportData.racketSessions[editingRacket]=s; else sportData.racketSessions.push(s);
+  saveSport();closeOv('ov-racket');renderSport();showToast('Séance enregistrée 🎾');
+}
+function deleteRacket(idx){if(!confirm('Supprimer ?'))return;sportData.racketSessions.splice(idx,1);saveSport();closeOv('ov-racket');renderSport();showToast('Supprimé');}
+
+function sportDashWidget(){
+  loadSport();
+  const done=routineDoneToday();
+  const raqWeek=buildRacketWeekly(1)[0]?.count>0;
+  const streak=routineStreakDays();
+  if(done&&raqWeek) return '';
+  const parts=[];
+  if(!done) parts.push('💪 Routine du matin');
+  if(!raqWeek) parts.push('🎾 Pas de raquette cette semaine');
+  return`<div style="margin-top:8px;padding:8px 12px;background:rgba(78,205,196,0.08);border-radius:var(--r);border:1px solid rgba(78,205,196,0.15);display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;" onclick="sw('sport')">
+    <span>🏃</span><span style="flex:1;color:var(--t1);">${parts.join(' · ')}</span>
+    ${streak>0?`<span style="color:#4ecdc4;font-size:10px;font-weight:600;">${streak}j 🔥</span>`:''}
+  </div>`;
+}
 let toastT;
 function showToast(msg){const el=document.getElementById('toast');el.textContent=msg;el.style.display='block';clearTimeout(toastT);toastT=setTimeout(()=>{el.style.display='none';},2400);}
 
@@ -3880,6 +4337,7 @@ load();
 loadFi();
 loadTravels();
 loadBaby();
+loadSport();
 loadSettings();
 gcalLoadState();
 calInit();
