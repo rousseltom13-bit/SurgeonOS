@@ -193,6 +193,16 @@ body::before {
   overflow: hidden;
   flex-shrink: 0;
 }
+.cal-fixed {
+  flex-shrink: 0;
+}
+.cal-widgets {
+  flex: 1; overflow-y: auto;
+  padding: 14px 16px 20px;
+  border-top: 1px solid var(--border);
+}
+.cal-widgets::-webkit-scrollbar { width: 3px; }
+.cal-widgets::-webkit-scrollbar-thumb { background: var(--bg5); border-radius: 99px; }
 .dash-right {
   flex: 1; display: flex; flex-direction: column;
   overflow: hidden;
@@ -751,18 +761,22 @@ body::before {
 
         <!-- LEFT: calendar -->
         <div class="dash-left">
-          <div class="cal-header">
-            <div class="cal-month-name" id="cal-month-name">—</div>
-            <div class="cal-nav">
-              <button class="cal-today-btn" onclick="calGoToday()">Aujourd'hui</button>
-              <button class="cal-nav-btn" onclick="calNav(-1)">‹</button>
-              <button class="cal-nav-btn" onclick="calNav(1)">›</button>
+          <div class="cal-fixed">
+            <div class="cal-header">
+              <div class="cal-month-name" id="cal-month-name">—</div>
+              <div class="cal-nav">
+                <button class="cal-today-btn" onclick="calGoToday()">Aujourd'hui</button>
+                <button class="cal-nav-btn" onclick="calNav(-1)">‹</button>
+                <button class="cal-nav-btn" onclick="calNav(1)">›</button>
+              </div>
+            </div>
+            <div class="cal-grid-wrap">
+              <div class="cal-dow" id="cal-dow"></div>
+              <div class="cal-grid" id="cal-grid"></div>
             </div>
           </div>
-          <div class="cal-grid-wrap">
-            <div class="cal-dow" id="cal-dow"></div>
-            <div class="cal-grid" id="cal-grid"></div>
-          </div>
+          <!-- Widgets sous le calendrier -->
+          <div class="cal-widgets" id="cal-left-widgets"></div>
         </div>
 
         <!-- RIGHT: day + stats -->
@@ -1844,6 +1858,116 @@ function renderDash() {
   renderUrgentTasks();
   renderQuickNotes();
   renderUpcomingReminders();
+  renderLeftWidgets();
+}
+
+function renderLeftWidgets() {
+  const el = document.getElementById('cal-left-widgets');
+  if(!el) return;
+  const today = todayStr();
+  const orlog = loadOrLog();
+
+  // ── Mini-agenda : 10 prochains événements toutes sources ──
+  const upcoming = [];
+  // Orlog blocs prévus (non faits)
+  orlog.filter(b => b.date >= today && !b.done).forEach(b => {
+    upcoming.push({ date: b.date, type: 'bloc', title: b.interv || 'Bloc', sub: b.patient || '', src: 'OrLog' });
+  });
+  // Events manuels futurs
+  events.filter(e => e.date >= today).forEach(e => {
+    upcoming.push({ date: e.date, type: e.type, title: e.title, sub: e.time || '', src: '' });
+  });
+  // Rappels voyages (deadlines docs à réserver)
+  travels.forEach(t => {
+    if(t.end >= today) {
+      upcoming.push({ date: t.start, type: 'travel', title: '✈ ' + t.dest, sub: fmtShort(t.start) + ' → ' + fmtShort(t.end), src: '' });
+      (t.docs || []).filter(d => d.status === 'à faire' && d.deadline).forEach(d => {
+        upcoming.push({ date: d.deadline, type: 'rappel', title: d.title, sub: '⚠ Deadline réservation', src: t.dest });
+      });
+    }
+  });
+  upcoming.sort((a,b) => a.date.localeCompare(b.date));
+  const next = upcoming.slice(0, 8);
+
+  // ── Tâches urgentes ──
+  const urgent = tasks.filter(t => !t.done && t.priority === 'high').slice(0, 4);
+  const medPending = tasks.filter(t => !t.done && t.priority === 'med').length;
+
+  let html = '';
+
+  // Section mini-agenda
+  html += `<div style="font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--t3);margin-bottom:10px;">Prochains événements</div>`;
+
+  if(!next.length) {
+    html += `<div style="font-size:12px;color:var(--t4);padding:8px 0 14px;">Aucun événement à venir</div>`;
+  } else {
+    // Grouper par date
+    const byDate = {};
+    next.forEach(ev => {
+      if(!byDate[ev.date]) byDate[ev.date] = [];
+      byDate[ev.date].push(ev);
+    });
+    Object.entries(byDate).forEach(([ds, evts]) => {
+      const d = parseLocal(ds);
+      const diff = diffDays(ds);
+      const isToday = diff === 0;
+      const isTomorrow = diff === 1;
+      const dayLabel = isToday ? "Aujourd'hui" : isTomorrow ? 'Demain' :
+        d.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
+      const diffLabel = diff > 1 ? `J-${diff}` : '';
+      const labelColor = diff === 0 ? 'var(--acc2)' : diff <= 3 ? 'var(--amber)' : 'var(--t3)';
+
+      html += `<div style="margin-bottom:10px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+          <div style="font-size:11px;font-weight:600;color:${labelColor};">${dayLabel}</div>
+          ${diffLabel ? `<div style="font-size:10px;color:var(--t3);">${diffLabel}</div>` : ''}
+        </div>`;
+      evts.forEach(ev => {
+        const color = EV_COLOR[ev.type] || (ev.type==='travel' ? 'var(--cyan)' : 'var(--t3)');
+        html += `<div style="display:flex;align-items:flex-start;gap:8px;padding:6px 8px;border-radius:var(--r);margin-bottom:2px;background:var(--glass);border:1px solid var(--border);cursor:pointer;" onclick="selectDay('${ds}')">
+          <div style="width:3px;height:100%;min-height:20px;border-radius:99px;background:${color};flex-shrink:0;margin-top:1px;"></div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:12px;font-weight:500;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${ev.title}</div>
+            ${ev.sub||ev.src ? `<div style="font-size:10px;color:var(--t3);margin-top:1px;">${ev.sub||''}${ev.src?` · ${ev.src}`:''}</div>` : ''}
+          </div>
+        </div>`;
+      });
+      html += `</div>`;
+    });
+  }
+
+  // Séparateur
+  html += `<div style="height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.06),transparent);margin:12px 0;"></div>`;
+
+  // Section tâches urgentes
+  html += `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+    <div style="font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--t3);">Tâches urgentes</div>
+    ${medPending > 0 ? `<span style="font-size:10px;color:var(--t3);">+${medPending} normales</span>` : ''}
+  </div>`;
+
+  if(!urgent.length) {
+    html += `<div style="font-size:12px;color:var(--t4);padding:4px 0;">Aucune tâche urgente 🎉</div>`;
+  } else {
+    urgent.forEach(t => {
+      const idx = tasks.indexOf(t);
+      const colLabel = t.col === 'pro' ? 'Pro' : 'Perso';
+      const colColor = t.col === 'pro' ? 'var(--acc)' : 'var(--cyan)';
+      html += `<div style="display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:var(--r);margin-bottom:4px;background:var(--rose-dim);border:1px solid rgba(224,90,122,0.15);cursor:pointer;" onclick="openTaskSheet(null,${idx})">
+        <div onclick="event.stopPropagation();toggleTask(${idx})" style="width:14px;height:14px;border-radius:4px;border:1.5px solid rgba(224,90,122,0.4);flex-shrink:0;cursor:pointer;transition:all 0.15s;" onmouseenter="this.style.borderColor='var(--rose)'" onmouseleave="this.style.borderColor='rgba(224,90,122,0.4)'"></div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:12px;font-weight:500;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t.text}</div>
+        </div>
+        <span style="font-size:9px;font-weight:600;color:${colColor};background:rgba(255,255,255,0.05);padding:2px 6px;border-radius:99px;flex-shrink:0;">${colLabel}</span>
+      </div>`;
+    });
+  }
+
+  if(urgent.length >= 4) {
+    const more = tasks.filter(t=>!t.done&&t.priority==='high').length - 4;
+    if(more > 0) html += `<div style="font-size:11px;color:var(--t3);padding:4px 0;cursor:pointer;" onclick="sw('tasks')">+ ${more} autre(s) → Voir toutes</div>`;
+  }
+
+  el.innerHTML = html;
 }
 
 function renderWeeklySummary() {
