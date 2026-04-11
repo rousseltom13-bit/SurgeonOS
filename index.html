@@ -188,7 +188,7 @@ body::before {
   overflow: hidden;
 }
 .dash-left {
-  width: 420px; min-width: 380px; max-width: 460px;
+  width: 520px; min-width: 460px; max-width: 580px;
   border-right: 1px solid var(--border);
   display: flex; flex-direction: column;
   overflow: hidden;
@@ -3163,11 +3163,25 @@ async function gcalSync() {
         const dateStr = start ? start.split('T')[0] : null;
         if(!dateStr) return;
         const cal = gcalCalendars.find(c=>c.id===calId);
+        // Palette couleurs GCal (colorId 1-11)
+        const GCAL_COLORS = {
+          '1':'#ac725e','2':'#d06b64','3':'#f83a22','4':'#fa573c',
+          '5':'#ff7537','6':'#ffad46','7':'#42d692','8':'#16a765',
+          '9':'#7bd148','10':'#b3dc6c','11':'#fbe983','12':'#fad165',
+          '13':'#92e1c0','14':'#9fe1e7','15':'#9fc6e7','16':'#4986e7',
+          '17':'#9a9cff','18':'#b99aff','19':'#c2c2c2','20':'#cabdbf',
+          '21':'#cca6ac','22':'#f691b2','23':'#cd74e6','24':'#a47ae2'
+        };
+        // Priorité : couleur de l'événement > couleur du calendrier > défaut
+        const evColor = ev.color?.background
+          || (ev.colorId ? GCAL_COLORS[ev.colorId] : null)
+          || (cal ? cal.color : null)
+          || '#7c6af7';
         allEvents.push({
           gcalId: ev.id,
           calId,
           calName: cal ? cal.name : calId,
-          calColor: cal ? cal.color : '#7c6af7',
+          calColor: evColor,
           title: ev.summary || '(sans titre)',
           date: dateStr,
           endDate: end ? end.split('T')[0] : dateStr,
